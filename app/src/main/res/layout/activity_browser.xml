@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <LinearLayout
+        android:orientation="horizontal" android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <EditText
+            android:layout_width="339dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/website_name"
+            android:text="Type the web site..."
+            android:phoneNumber="true"
+            style="@style/Aware.Toolbar" />
+
+        <Button
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="41dp"
+            android:layout_height="wrap_content"
+            android:text="->"
+            android:id="@+id/search_button"
+            android:layout_gravity="right" />
+    </LinearLayout>
+
+
+
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:padding="0dp"
+        android:layout_margin="0dp">
+        <ScrollView
+            android:id="@+id/about_main"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:fillViewport="true"
+            android:padding="0dp"
+            android:layout_margin="0dp">
+            <WebView
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:id="@+id/webPageView"/>
+        </ScrollView>
+
+
+    </RelativeLayout>
+
+</LinearLayout>
