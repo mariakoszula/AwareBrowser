@@ -35,7 +35,8 @@ import java.util.Date;
 public class BrowserActivity extends MainActivity {
 
     private WebView webPage;
-    private String testURL = "http://www.onet.pl";
+    private boolean isActivityVisable;
+    private String defaultSite = "http://www.google.pl";
     private long LoadTime = 0;
     private long LoadTimeHttpURL = 0;
     private long LoadTimeSystem = 0;
@@ -49,7 +50,7 @@ public class BrowserActivity extends MainActivity {
     private long endTimeSystem = 0;
     private long endTimeNano = 0;
 
-
+/*@TODO set setters if applicationvisilbe or not for bothBrowsser and About*/
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,8 +60,9 @@ public class BrowserActivity extends MainActivity {
         Log.d(LOG_TAG, String.valueOf(Build.VERSION.SDK_INT));
 
 
+
         try {
-            URL pageToLoadURL = new URL(testURL);
+            URL pageToLoadURL = new URL(defaultSite);
             new PageStreamReader().execute(pageToLoadURL);
         } catch (MalformedURLException e) {
             e.printStackTrace();
@@ -90,7 +92,9 @@ public class BrowserActivity extends MainActivity {
 
         Log.d(LOG_TAG, String.valueOf(Accelerometer_Provider.Accelerometer_Data.CONTENT_URI));
     }
-
+    public  boolean getIsActivityVisable(){
+        return isActivityVisable;
+    }
 
 
     private class PageStreamReader extends AsyncTask<URL, Long, StringBuilder> {
@@ -142,7 +146,7 @@ public class BrowserActivity extends MainActivity {
         settings.setJavaScriptEnabled(true);
 
 
-        webPage.loadUrl(testURL);
+        webPage.loadUrl(defaultSite);
         webPage.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
@@ -171,6 +175,13 @@ public class BrowserActivity extends MainActivity {
     protected void onDestroy() {
         super.onDestroy();
         sendBroadcast(new Intent(Aware.ACTION_AWARE_CLEAR_DATA));
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(final Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_browser, menu);
+
+        return super.onCreateOptionsMenu(menu);
     }
 
 }

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">AwareBrowser</string>
+    <string name="action_about">O badaniu</string>
+    <string name="title_activity_browser">Browser</string>
+    <string name="title_activity_about">O badaniu</string>
+    <string name="action_search">Szukaj</string>
+</resources>
