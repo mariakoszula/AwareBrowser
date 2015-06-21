@@ -3,9 +3,12 @@ package com.monitoringtool.awarebrowser;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Handler;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,6 +18,8 @@ import android.webkit.WebViewClient;
 
 import com.aware.Aware;
 import com.aware.Aware_Preferences;
+import com.aware.providers.Accelerometer_Provider;
+import com.aware.providers.Aware_Provider;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -27,8 +32,8 @@ import java.net.URL;
 import java.util.Date;
 
 
-public class Browser extends ActionBarActivity {
-    public static final String AUTHORITY = "com.monitoringtool.awarebrowser";
+public class BrowserActivity extends MainActivity {
+
     private WebView webPage;
     private String testURL = "http://www.onet.pl";
     private long LoadTime = 0;
@@ -43,13 +48,16 @@ public class Browser extends ActionBarActivity {
     private long endTimeHttpURL = 0;
     private long endTimeSystem = 0;
     private long endTimeNano = 0;
-    private static final String LOG_TAG = "WebViewLoadingTime";
+
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_browser);
+        super.prepareToolbar();
+        Log.d(LOG_TAG, String.valueOf(Build.VERSION.SDK_INT));
+
 
         try {
             URL pageToLoadURL = new URL(testURL);
@@ -68,35 +76,22 @@ public class Browser extends ActionBarActivity {
         }, 20000);
 
 
+        Log.d(LOG_TAG, String.valueOf(Aware_Provider.Aware_Device.CONTENT_URI));
+        Log.d(LOG_TAG, String.valueOf(Aware_Provider.DATABASE_NAME));
+
         //Activate Accelerometer
         Aware.setSetting(this, Aware_Preferences.STATUS_ACCELEROMETER, true);
         //Set sampling frequency
         Aware.setSetting(this, Aware_Preferences.FREQUENCY_ACCELEROMETER, 200000);
         //Apply settings
         sendBroadcast(new Intent(Aware.ACTION_AWARE_REFRESH));
+        sendBroadcast(new Intent(Aware.ACTION_AWARE_CURRENT_CONTEXT));
+        sendBroadcast(new Intent(Aware.ACTION_AWARE_DEVICE_INFORMATION));
+
+        Log.d(LOG_TAG, String.valueOf(Accelerometer_Provider.Accelerometer_Data.CONTENT_URI));
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_browser, menu);
-        return true;
-    }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
 
     private class PageStreamReader extends AsyncTask<URL, Long, StringBuilder> {
 
@@ -171,4 +166,11 @@ public class Browser extends ActionBarActivity {
             }
         });
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        sendBroadcast(new Intent(Aware.ACTION_AWARE_CLEAR_DATA));
+    }
+
 }
