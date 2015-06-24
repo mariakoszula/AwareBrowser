@@ -44,7 +44,7 @@ public class BrowserActivity extends ActionBarActivity {
     private boolean isInstructionsActivityVisible=false;
 
 
-    private WebView webPage;
+    private WebView webPageView;
 
     private String defaultSite = "http://www.google.pl";
     private String webSiteToSearch=null;
@@ -64,6 +64,11 @@ public class BrowserActivity extends ActionBarActivity {
         setContentView(R.layout.activity_browser);
         Log.d(LOG_TAG, "On create called");
         setIsBrowserActivityVisible(true);
+        webPageView = (WebView) findViewById(R.id.webPageView);
+
+        //Enable Javascript, webView does not allow JS by default
+        WebSettings settings = webPageView.getSettings();
+        settings.setJavaScriptEnabled(true);
         prepareToolbar();
        // Log.d(LOG_TAG, String.valueOf(Build.VERSION.SDK_INT));
     }
@@ -74,9 +79,9 @@ public class BrowserActivity extends ActionBarActivity {
         Log.d(LOG_TAG, "On Start called");
 
         Intent intent = getIntent();
-        webSiteToSearch = intent.getStringExtra(MainActivity.EXTRA_WEB_SITE);
+        webSiteToSearch = intent.getStringExtra(BrowserActivity.EXTRA_WEB_SITE);
 
-        final String webSite;
+        String webSite;
         if (webSiteToSearch != null) webSite = webSiteToSearch;
         else webSite = defaultSite;
 
@@ -108,12 +113,16 @@ public class BrowserActivity extends ActionBarActivity {
                 String givenWebSite = null;
                 switch (item.getItemId()) {
                     case R.id.action_about:
+                        Log.d(LOG_TAG, "action_about");
                             givenWebSite = RESEARCH_WEBSITE;
-                            runSearch(givenWebSite);
+                            Log.d(LOG_TAG, givenWebSite);
+                            return runSearch(givenWebSite);
                     case R.id.action_search:
+                        Log.d(LOG_TAG, "action_search");
                         givenWebSite = getWebSiteFromEditText();
-                        runSearch(givenWebSite);
+                        return runSearch(givenWebSite);
                     case R.id.action_instruction:
+                        Log.d(LOG_TAG, "action_insturction");
                         if(!isInstructionsActivityVisible) {
                             Intent instructions = new Intent(getApplicationContext(), InstructionsActivity.class);
                             startActivity(instructions);
@@ -127,6 +136,7 @@ public class BrowserActivity extends ActionBarActivity {
     }
     private boolean runSearch(String webSite){
         if (!isBrowserActivityVisible) {
+            Log.d(LOG_TAG, String.valueOf(isBrowserActivityVisible));
             Intent browser = new Intent(getApplicationContext(), BrowserActivity.class);
             browser.putExtra(EXTRA_WEB_SITE, webSite);
             startActivity(browser);
@@ -140,7 +150,6 @@ public class BrowserActivity extends ActionBarActivity {
     @Override
     public boolean onPrepareOptionsMenu(final Menu menu) {
         getMenuInflater().inflate(R.menu.menu_browser, menu);
-
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -167,7 +176,7 @@ public class BrowserActivity extends ActionBarActivity {
         //Log.d(LOG_TAG, String.valueOf(Accelerometer_Provider.Accelerometer_Data.CONTENT_URI));
     }
 
-    public void searchForWebPage(final String webSite) {
+    public void searchForWebPage(String webSite) {
 
         try {
             URL pageToLoadURL = new URL(webSite);
@@ -223,15 +232,8 @@ public class BrowserActivity extends ActionBarActivity {
 
 
     private void webViewOnPageFinishOnPageStartMethod(String webSite) {
-        webPage = (WebView) findViewById(R.id.webPageView);
-
-        //Enable Javascript, webView does not allow JS by default
-        WebSettings settings = webPage.getSettings();
-        settings.setJavaScriptEnabled(true);
-
-
-        webPage.loadUrl(webSite);
-        webPage.setWebViewClient(new WebViewClient() {
+        BrowserActivity.this.webPageView.loadUrl(webSite);
+        webPageView.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
                 super.onPageStarted(view, url, favicon);
@@ -246,7 +248,7 @@ public class BrowserActivity extends ActionBarActivity {
                 endTimeSystem = System.currentTimeMillis();
                 LoadTime = endTime - startTime;
                 LoadTimeSystem = endTimeSystem - startTimeSystem;
-                Log.d(LOG_TAG, webPage.getUrl() + ": 1)Date " + Long.toString(LoadTime) + "ms 2)System "
+                Log.d(LOG_TAG, webPageView.getUrl() + ": 1)Date " + Long.toString(LoadTime) + "ms 2)System "
                         + LoadTimeSystem + "ms");
             }
         });
@@ -266,6 +268,7 @@ public class BrowserActivity extends ActionBarActivity {
     protected void onStop() {
         super.onStop();
         setIsBrowserActivityVisible(false);
+        //stopSensors()
         Log.d(LOG_TAG, "On Stop called");
     }
 
