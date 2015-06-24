@@ -4,4 +4,5 @@
     <string name="title_activity_browser">Browser</string>
     <string name="title_activity_about">About</string>
     <string name="action_search">Search</string>
+    <string name="action_instruction">Instructions</string>
 </resources>

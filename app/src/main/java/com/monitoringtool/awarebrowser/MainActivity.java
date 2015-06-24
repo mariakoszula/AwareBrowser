@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
@@ -14,6 +13,8 @@ import android.widget.EditText;
  */
 public class MainActivity extends ActionBarActivity {
     public static final String LOG_TAG = "WebViewLoadingTime";
+    public static final String EXTRA_WEB_SITE = "com.monitoringtool.awarebrowser.WEB_SITE";
+    public static final boolean MONITORING_DEBUG_FLAG = true;
     private EditText etgivenWebSite;
     public void setIsBrowserActivityVisible(boolean isBrowserActivityVisible) {
         this.isBrowserActivityVisible = isBrowserActivityVisible;
@@ -41,12 +42,11 @@ public class MainActivity extends ActionBarActivity {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
 
-                Log.d(LOG_TAG, String.valueOf(item.getItemId()));
-                Log.d(LOG_TAG, "action_about: " + R.string.action_about);
+
                 switch (item.getItemId()) {
                     case R.id.action_about:
                         if (!isAboutActctivityVisable) {
-                            Intent about = new Intent(MainActivity.this, AboutActivity.class);
+                            Intent about = new Intent(MainActivity.this, InstructionsActivity.class);
                             startActivity(about);
                             return true;
                         }
@@ -54,11 +54,11 @@ public class MainActivity extends ActionBarActivity {
                         String givenWebSite = getWebSiteFromEditText();
                         if (!isBrowserActivityVisible) {
                             Intent browser = new Intent(MainActivity.this, BrowserActivity.class);
-                            browser.putExtra("EXTRA_WEB_SITE", givenWebSite);
+                            browser.putExtra(EXTRA_WEB_SITE, givenWebSite);
                             startActivity(browser);
 
                         } else {
-                            Log.d(LOG_TAG, "refresh view" + givenWebSite);
+                          //  ApplicationCon.searchForWebPage(givenWebSite);
                         }
                         return true;
 

@@ -15,6 +15,7 @@ import android.view.MenuItem;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.EditText;
 
 import com.aware.Aware;
 import com.aware.Aware_Preferences;
@@ -32,68 +33,151 @@ import java.net.URL;
 import java.util.Date;
 
 
-public class BrowserActivity extends MainActivity {
+public class BrowserActivity extends ActionBarActivity {
+
+    public static final String LOG_TAG = "WebViewLoadingTime";
+    public static final String EXTRA_WEB_SITE = "com.monitoringtool.awarebrowser.WEB_SITE";
+    public static final String RESEARCH_WEBSITE = "http://www.mariak.webd.pl/study/";
+    public static final boolean MONITORING_DEBUG_FLAG = true;
+    private EditText etgivenWebSite;
+    private boolean isBrowserActivityVisible=false;
+    private boolean isInstructionsActivityVisible=false;
+
 
     private WebView webPage;
-    private boolean isActivityVisable;
+
     private String defaultSite = "http://www.google.pl";
+    private String webSiteToSearch=null;
     private long LoadTime = 0;
-    private long LoadTimeHttpURL = 0;
     private long LoadTimeSystem = 0;
-    private long LoadTimeNano = 0;
     private long startTime = 0;
     private long startTimeSystem = 0;
-    private long startTimeNano = 0;
     private long startTimeHttpURL = 0;
     private long endTime = 0;
     private long endTimeHttpURL = 0;
     private long endTimeSystem = 0;
-    private long endTimeNano = 0;
 
-/*@TODO set setters if applicationvisilbe or not for bothBrowsser and About*/
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_browser);
-        super.prepareToolbar();
-        Log.d(LOG_TAG, String.valueOf(Build.VERSION.SDK_INT));
+        Log.d(LOG_TAG, "On create called");
+        setIsBrowserActivityVisible(true);
+        prepareToolbar();
+       // Log.d(LOG_TAG, String.valueOf(Build.VERSION.SDK_INT));
+    }
+    @Override
+    protected void onStart() {
+        super.onStart();
+        setIsBrowserActivityVisible(true);
+        Log.d(LOG_TAG, "On Start called");
+
+        Intent intent = getIntent();
+        webSiteToSearch = intent.getStringExtra(MainActivity.EXTRA_WEB_SITE);
+
+        final String webSite;
+        if (webSiteToSearch != null) webSite = webSiteToSearch;
+        else webSite = defaultSite;
+
+        startSensors();
+
+        searchForWebPage(webSite);
+
+    }
+
+    public void setIsBrowserActivityVisible(boolean isBrowserActivityVisible) {
+        this.isBrowserActivityVisible = isBrowserActivityVisible;
+    }
+
+    public void setIsInstructionsActivityVisible(boolean isInstructionsActivityVisible) {
+        this.isInstructionsActivityVisible = isInstructionsActivityVisible;
+    }
+
+    public void prepareToolbar(){
+        final Toolbar toolbar = (Toolbar) findViewById(R.id.browser_toolbar);
+        setSupportActionBar(toolbar);
 
 
+        toolbar.inflateMenu(R.menu.menu_browser);
+        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+
+
+                String givenWebSite = null;
+                switch (item.getItemId()) {
+                    case R.id.action_about:
+                            givenWebSite = RESEARCH_WEBSITE;
+                            runSearch(givenWebSite);
+                    case R.id.action_search:
+                        givenWebSite = getWebSiteFromEditText();
+                        runSearch(givenWebSite);
+                    case R.id.action_instruction:
+                        if(!isInstructionsActivityVisible) {
+                            Intent instructions = new Intent(getApplicationContext(), InstructionsActivity.class);
+                            startActivity(instructions);
+                            return true;
+                        }
+                    default:
+                        return false;
+                }
+            }
+        });
+    }
+    private boolean runSearch(String webSite){
+        if (!isBrowserActivityVisible) {
+            Intent browser = new Intent(getApplicationContext(), BrowserActivity.class);
+            browser.putExtra(EXTRA_WEB_SITE, webSite);
+            startActivity(browser);
+        } else {
+            Log.d(LOG_TAG, "Search for website: " + webSite);
+            searchForWebPage(webSite);
+        }
+        return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(final Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_browser, menu);
+
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    private String getWebSiteFromEditText() {
+        //@TODO basic website address checking before run the search method; like dots or adding https or www (check if needed)
+        etgivenWebSite = (EditText) findViewById(R.id.website_name);
+        return etgivenWebSite.getText().toString();
+    }
+
+    private void startSensors() {
+
+        //Log.d(LOG_TAG, String.valueOf(Aware_Provider.Aware_Device.CONTENT_URI));
+        //Log.d(LOG_TAG, String.valueOf(Aware_Provider.DATABASE_NAME));
+
+        //Activate Accelerometer
+        //Aware.setSetting(this, Aware_Preferences.STATUS_ACCELEROMETER, true);
+        //Set sampling frequency
+        //Aware.setSetting(this, Aware_Preferences.FREQUENCY_ACCELEROMETER, 200000);
+        //Apply settings
+        //sendBroadcast(new Intent(Aware.ACTION_AWARE_REFRESH));
+        //sendBroadcast(new Intent(Aware.ACTION_AWARE_CURRENT_CONTEXT));
+        // sendBroadcast(new Intent(Aware.ACTION_AWARE_DEVICE_INFORMATION));
+
+        //Log.d(LOG_TAG, String.valueOf(Accelerometer_Provider.Accelerometer_Data.CONTENT_URI));
+    }
+
+    public void searchForWebPage(final String webSite) {
 
         try {
-            URL pageToLoadURL = new URL(defaultSite);
+            URL pageToLoadURL = new URL(webSite);
             new PageStreamReader().execute(pageToLoadURL);
+            webViewOnPageFinishOnPageStartMethod(webSite);
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
-        //test second method after 20s
-        final Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-
-            @Override
-            public void run() {
-                webViewOnPageFinishOnPageStartMethod();
-            }
-        }, 20000);
 
 
-        Log.d(LOG_TAG, String.valueOf(Aware_Provider.Aware_Device.CONTENT_URI));
-        Log.d(LOG_TAG, String.valueOf(Aware_Provider.DATABASE_NAME));
-
-        //Activate Accelerometer
-        Aware.setSetting(this, Aware_Preferences.STATUS_ACCELEROMETER, true);
-        //Set sampling frequency
-        Aware.setSetting(this, Aware_Preferences.FREQUENCY_ACCELEROMETER, 200000);
-        //Apply settings
-        sendBroadcast(new Intent(Aware.ACTION_AWARE_REFRESH));
-        sendBroadcast(new Intent(Aware.ACTION_AWARE_CURRENT_CONTEXT));
-        sendBroadcast(new Intent(Aware.ACTION_AWARE_DEVICE_INFORMATION));
-
-        Log.d(LOG_TAG, String.valueOf(Accelerometer_Provider.Accelerometer_Data.CONTENT_URI));
-    }
-    public  boolean getIsActivityVisable(){
-        return isActivityVisable;
     }
 
 
@@ -110,7 +194,7 @@ public class BrowserActivity extends MainActivity {
         }
 
         protected void onPostExecute(StringBuilder results) {
-            Log.d(LOG_TAG, String.valueOf(results));
+           // Log.d(LOG_TAG, String.valueOf(results));
         }
 
 
@@ -138,7 +222,7 @@ public class BrowserActivity extends MainActivity {
     }
 
 
-    private void webViewOnPageFinishOnPageStartMethod() {
+    private void webViewOnPageFinishOnPageStartMethod(String webSite) {
         webPage = (WebView) findViewById(R.id.webPageView);
 
         //Enable Javascript, webView does not allow JS by default
@@ -146,14 +230,13 @@ public class BrowserActivity extends MainActivity {
         settings.setJavaScriptEnabled(true);
 
 
-        webPage.loadUrl(defaultSite);
+        webPage.loadUrl(webSite);
         webPage.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
                 super.onPageStarted(view, url, favicon);
                 startTime = (new Date()).getTime();
                 startTimeSystem = System.currentTimeMillis();
-                startTimeNano = System.nanoTime();
             }
 
             @Override
@@ -161,27 +244,36 @@ public class BrowserActivity extends MainActivity {
                 super.onPageFinished(view, url);
                 endTime = (new Date()).getTime();
                 endTimeSystem = System.currentTimeMillis();
-                endTimeNano = System.nanoTime();
                 LoadTime = endTime - startTime;
                 LoadTimeSystem = endTimeSystem - startTimeSystem;
-                LoadTimeNano = endTimeNano - startTimeNano;
                 Log.d(LOG_TAG, webPage.getUrl() + ": 1)Date " + Long.toString(LoadTime) + "ms 2)System "
-                        + LoadTimeSystem + " ms 3)System nano " + LoadTimeNano / 1000000 + " ms");
+                        + LoadTimeSystem + "ms");
             }
         });
+    }
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        setIsBrowserActivityVisible(true);
+        Log.d(LOG_TAG, "On Resume called");
+    }
+
+
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        setIsBrowserActivityVisible(false);
+        Log.d(LOG_TAG, "On Stop called");
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        setIsBrowserActivityVisible(false);
         sendBroadcast(new Intent(Aware.ACTION_AWARE_CLEAR_DATA));
+        Log.d(LOG_TAG, "On Destroy called");
     }
-
-    @Override
-    public boolean onPrepareOptionsMenu(final Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_browser, menu);
-
-        return super.onCreateOptionsMenu(menu);
-    }
-
 }
