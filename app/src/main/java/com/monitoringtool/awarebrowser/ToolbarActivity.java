@@ -11,7 +11,7 @@ import android.widget.EditText;
 /**
  * Created by Maria on 2015-06-21.
  */
-public class MainActivity extends ActionBarActivity {
+public class ToolbarActivity extends ActionBarActivity {
     public static final String LOG_TAG = "WebViewLoadingTime";
     public static final String EXTRA_WEB_SITE = "com.monitoringtool.awarebrowser.WEB_SITE";
     public static final boolean MONITORING_DEBUG_FLAG = true;
@@ -46,14 +46,14 @@ public class MainActivity extends ActionBarActivity {
                 switch (item.getItemId()) {
                     case R.id.action_about:
                         if (!isAboutActctivityVisable) {
-                            Intent about = new Intent(MainActivity.this, InstructionsActivity.class);
+                            Intent about = new Intent(ToolbarActivity.this, InstructionsActivity.class);
                             startActivity(about);
                             return true;
                         }
                     case R.id.action_search:
                         String givenWebSite = getWebSiteFromEditText();
                         if (!isBrowserActivityVisible) {
-                            Intent browser = new Intent(MainActivity.this, BrowserActivity.class);
+                            Intent browser = new Intent(ToolbarActivity.this, BrowserActivity.class);
                             browser.putExtra(EXTRA_WEB_SITE, givenWebSite);
                             startActivity(browser);
 
