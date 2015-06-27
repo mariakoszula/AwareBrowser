@@ -24,6 +24,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import com.aware.Aware;
 import com.aware.Aware_Preferences;
@@ -62,6 +63,10 @@ public class BrowserActivity extends ToolbarActivity {
     private long startTimeHttpURL = 0;
     private long endTimeHttpURL = 0;
     private long endTimeSystem = 0;
+    private boolean javaScriptStatus = true;
+    private static final int timesToSearch = 1;
+    private int badURLtimes = 0;
+    private int pageError = 0;
 
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -71,15 +76,28 @@ public class BrowserActivity extends ToolbarActivity {
         setContentView(R.layout.activity_browser);
         if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "BrowserActivty On create called");
         setIsBrowserActivityVisible(true);
+
+
         webPageView = (WebView) findViewById(R.id.webPageView);
         browserLayout = (LinearLayout) findViewById(R.id.main_browser_layout);
         etgivenWebSite = (EditText) findViewById(R.id.website_name);
         super.prepareToolbar();
+
+        if(MONITORING_DEBUG_FLAG) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                WebView.setWebContentsDebuggingEnabled(true);
+            }
+        }
+
+
         //Enable Javascript, webView does not allow JS by default
         WebSettings settings = webPageView.getSettings();
-        settings.setJavaScriptEnabled(true);
+        /*@TODO button in setting to enable/disable javascript --sharedPreferneces*/
+        settings.setJavaScriptEnabled(javaScriptStatus);
 
        // Log.d(LOG_TAG, String.valueOf(Build.VERSION.SDK_INT));
+
+
     }
 
     @Override
@@ -106,6 +124,15 @@ public class BrowserActivity extends ToolbarActivity {
 
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        setIsBrowserActivityVisible(true);
+        if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "BrowserActivty On Resume called");
+
+
+
+    }
 
     private void startSensors() {
 
@@ -126,20 +153,21 @@ public class BrowserActivity extends ToolbarActivity {
 
     public void searchForWebPage(String webSite) {
         UrlValidator urlToValidate = new UrlValidator(webSite);
-            if(urlToValidate.checkUrl()) {
-                //@TODO check if it thoruwa onReceiveError??>
+        if(urlToValidate.checkUrl()) {
+
                 webViewOnPageFinishOnPageStartMethod(urlToValidate.getWebSite());
-                try {
-                    URL pageToLoadURL = new URL(urlToValidate.getWebSite());
-                    new PageStreamReader().execute(pageToLoadURL);
-                } catch (MalformedURLException e) {
-                        if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "Search in google: " + googlePageSearch+webSite);
-                        searchForWebPage(googlePageSearch+webSite);
-                }
+              /*@TODO StreamReadre only for comparison, better methos is with WebView*/
+
             }else{
-                if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "Search in google: " + googlePageSearch+webSite);
-                searchForWebPage(googlePageSearch+webSite);
+            if(badURLtimes < timesToSearch) {
+                if (MONITORING_DEBUG_FLAG)
+                    Log.d(LOG_TAG, "Search in google: " + googlePageSearch + webSite);
+                searchForWebPage(googlePageSearch + webSite);
+            }else{
+                Toast.makeText(getApplicationContext(), R.string.bad_url, Toast.LENGTH_LONG).show();
             }
+            badURLtimes++;
+                }
 
     }
 
@@ -175,49 +203,6 @@ public class BrowserActivity extends ToolbarActivity {
 
 
 
-    private class PageStreamReader extends AsyncTask<URL, Long, StringBuilder> {
-
-        @Override
-        protected StringBuilder doInBackground(URL... pageUrl) {
-            try {
-                return loadingPageMeasureURLConnection(pageUrl[0]);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return null;
-        }
-
-        protected void onPostExecute(StringBuilder results) {
-           // Log.d(LOG_TAG, String.valueOf(results));
-        }
-
-
-        //Using GET command - it will be most probably http.request - http.response time -- to check
-        private StringBuilder loadingPageMeasureURLConnection(URL pageToLoadURL) throws IOException {
-            startTimeHttpURL = System.currentTimeMillis();
-
-            HttpURLConnection urlConnection = null;
-            try {
-                urlConnection = (HttpURLConnection) pageToLoadURL.openConnection();
-                InputStream in = new BufferedInputStream(urlConnection.getInputStream());
-                BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-                StringBuilder pageContent = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    pageContent.append(line);
-                }
-                endTimeHttpURL = System.currentTimeMillis();
-                return pageContent;
-            }finally
-            {
-                if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "StreamReader solution: " + Long.toString((endTimeHttpURL - startTimeHttpURL)) + " ms");
-
-                if (urlConnection != null)
-                    urlConnection.disconnect();
-            }
-        }
-    }
-
 
     private void webViewOnPageFinishOnPageStartMethod(String webSite) {
 
@@ -225,10 +210,11 @@ public class BrowserActivity extends ToolbarActivity {
         webPageView.setWebViewClient(new WebViewClient() {
             boolean loadingFinished = true;
             boolean redirection = false;
+            int count = 0;
 
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                if(!loadingFinished)
+                if (!loadingFinished)
                     redirection = true;
                 loadingFinished = false;
                 webPageView.loadUrl(url);
@@ -240,6 +226,7 @@ public class BrowserActivity extends ToolbarActivity {
                 super.onPageStarted(view, url, favicon);
                 startTimeSystem = System.currentTimeMillis();
                 loadingFinished = false;
+
                 InputMethodManager keyboard = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                 keyboard.hideSoftInputFromWindow(browserLayout.getWindowToken(), 0);
                 etgivenWebSite.setText(R.string.info_loading);
@@ -250,17 +237,17 @@ public class BrowserActivity extends ToolbarActivity {
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
-                if(!redirection){
+                if (!redirection) {
                     loadingFinished = true;
                 }
-                if (loadingFinished && !redirection){
+                if (loadingFinished && !redirection) {
                     endTimeSystem = System.currentTimeMillis();
                     LoadTimeSystem = endTimeSystem - startTimeSystem;
-                    if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, webPageView.getUrl() + " PLT:"
+                    if (MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, webPageView.getUrl() + " PLT:"
                             + LoadTimeSystem + "ms");
                     etgivenWebSite.setText("");
-                }else{
-                    redirection=false;
+                } else {
+                    redirection = false;
                 }
 
 
@@ -269,20 +256,19 @@ public class BrowserActivity extends ToolbarActivity {
             @Override
             public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
                 super.onReceivedError(view, errorCode, description, failingUrl);
-                if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "Error loading page: " + failingUrl);
-                searchForWebPage(googlePageSearch + failingUrl);
+                if (MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "Error loading page: " + failingUrl);
+                if (pageError < timesToSearch) searchForWebPage(googlePageSearch + failingUrl);
+                else {
+                    Toast.makeText(getApplicationContext(), R.string.bad_connection, Toast.LENGTH_LONG).show();
+                }
+                pageError++;
             }
         });
 
     }
 
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        setIsBrowserActivityVisible(true);
-        if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "BrowserActivty On Resume called");
-    }
+
 
 
 

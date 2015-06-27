@@ -1,10 +1,12 @@
 <resources>
-    <string name="app_name">AwareBrowser</string>
+    <string name="app_name">Monitoring Tool AwareBrowser</string>
     <string name="action_about">About</string>
-    <string name="title_activity_browser">Browser</string>
+    <string name="title_activity_browser">AwareBro</string>
     <string name="title_activity_about">About</string>
     <string name="action_search">Search</string>
     <string name="action_instruction">Instructions</string>
     <string name="title_activity_instructions">Instructions</string>
     <string name="info_loading">Loading...</string>
+    <string name="bad_url">Bad URL</string>
+    <string name="bad_connection">Check if you have data transmision or WiFi enabled</string>
 </resources>

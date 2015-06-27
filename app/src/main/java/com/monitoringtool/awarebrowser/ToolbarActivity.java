@@ -12,13 +12,16 @@ import android.util.Log;
 import android.util.Patterns;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.URLUtil;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -45,6 +48,7 @@ public class ToolbarActivity extends ActionBarActivity {
 
 
     private EditText etgivenWebSite;
+    private ImageButton ibBack;
 
 
     @Override
@@ -73,6 +77,16 @@ public class ToolbarActivity extends ActionBarActivity {
 
     public void prepareToolbar() {
         final Toolbar toolbar = (Toolbar) findViewById(R.id.browser_toolbar);
+        ibBack = (ImageButton) findViewById(R.id.back);
+        ibBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(getApplicationContext(), "Back", Toast.LENGTH_LONG).show();
+            }
+        });
+
+
+
         setSupportActionBar(toolbar);
 
 
@@ -105,15 +119,15 @@ public class ToolbarActivity extends ActionBarActivity {
     }
 
     private boolean runSearch(String webSite) {
-        Intent browser = new Intent(getBaseContext(), BrowserActivity.class);
-/*            browser.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);*/
+        Intent browser = new Intent(getApplicationContext(), BrowserActivity.class);
+        /*browser.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);*/
         browser.putExtra(EXTRA_WEB_SITE, webSite);
         startActivity(browser);
+        finish();
         return true;
     }
 
     private String getWebSiteFromEditText() {
-        Log.d(LOG_TAG, etgivenWebSite.getText().toString());
         return etgivenWebSite.getText().toString();
     }
 

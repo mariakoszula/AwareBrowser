@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">AwareBrowser</string>
+    <string name="app_name">Narzędzie monitorujące AwareBrowser</string>
     <string name="title_activity_instructions">Instrukcje</string>
-    <string name="title_activity_browser">Browser</string>
+    <string name="title_activity_browser">AwareBro</string>
     <string name="action_search">Szukaj</string>
     <string name="action_instruction">Instrukcja</string>
     <string name="action_about">O badaniu</string>
     <string name="info_loading">Wczytywanie...</string>
+    <string name="bad_url">Błędny URL</string>
+    <string name="bad_connection">Sprawdź czy masz włączoną transmisje danych bądź WiFi</string>
 </resources>
