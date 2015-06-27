@@ -10,6 +10,7 @@ import android.os.Handler;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.internal.app.ToolbarActionBar;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.Patterns;
@@ -45,17 +46,10 @@ import java.util.Date;
 import java.lang.Object;
 
 
-public class BrowserActivity extends ActionBarActivity {
+public class BrowserActivity extends ToolbarActivity {
 
-    public static final String LOG_TAG = "WebViewLoadingTime";
-    public static final String EXTRA_WEB_SITE = "com.monitoringtool.awarebrowser.WEB_SITE";
-    public static final String RESEARCH_WEBSITE = "http://www.mariak.webd.pl/study/";
-    public static final boolean MONITORING_DEBUG_FLAG = true;
+
     public static final String googlePageSearch = "http://www.google.com/search?output=ie&q=";
-
-    private boolean isBrowserActivityVisible=false;
-    private boolean isInstructionsActivityVisible=false;
-
 
     private WebView webPageView;
     private LinearLayout browserLayout;
@@ -63,12 +57,9 @@ public class BrowserActivity extends ActionBarActivity {
 
     private String defaultSite = "http://www.google.com";
     private String webSiteToSearch=null;
-    private long LoadTime = 0;
     private long LoadTimeSystem = 0;
-    private long startTime = 0;
     private long startTimeSystem = 0;
     private long startTimeHttpURL = 0;
-    private long endTime = 0;
     private long endTimeHttpURL = 0;
     private long endTimeSystem = 0;
 
@@ -81,20 +72,26 @@ public class BrowserActivity extends ActionBarActivity {
         if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "BrowserActivty On create called");
         setIsBrowserActivityVisible(true);
         webPageView = (WebView) findViewById(R.id.webPageView);
-        etgivenWebSite = (EditText) findViewById(R.id.website_name);
         browserLayout = (LinearLayout) findViewById(R.id.main_browser_layout);
-
+        etgivenWebSite = (EditText) findViewById(R.id.website_name);
+        super.prepareToolbar();
         //Enable Javascript, webView does not allow JS by default
         WebSettings settings = webPageView.getSettings();
         settings.setJavaScriptEnabled(true);
-        prepareToolbar();
+
        // Log.d(LOG_TAG, String.valueOf(Build.VERSION.SDK_INT));
     }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        return super.onCreateOptionsMenu(menu);
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
         setIsBrowserActivityVisible(true);
-        if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "On Start called");
+        if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "BrowserActivity On Start called");
 
         Intent intent = getIntent();
         webSiteToSearch = intent.getStringExtra(BrowserActivity.EXTRA_WEB_SITE);
@@ -109,76 +106,6 @@ public class BrowserActivity extends ActionBarActivity {
 
     }
 
-    public void setIsBrowserActivityVisible(boolean isBrowserActivityVisible) {
-        this.isBrowserActivityVisible = isBrowserActivityVisible;
-    }
-
-    public void setIsInstructionsActivityVisible(boolean isInstructionsActivityVisible) {
-        this.isInstructionsActivityVisible = isInstructionsActivityVisible;
-    }
-
-    public void prepareToolbar(){
-        final Toolbar toolbar = (Toolbar) findViewById(R.id.browser_toolbar);
-        setSupportActionBar(toolbar);
-
-
-        toolbar.inflateMenu(R.menu.menu_browser);
-        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-
-
-                String givenWebSite = null;
-                switch (item.getItemId()) {
-                    case R.id.action_about:
-                        if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "action_about");
-                            givenWebSite = RESEARCH_WEBSITE;
-                            if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, givenWebSite);
-                            return runSearch(givenWebSite);
-                    case R.id.action_search:
-                        if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "action_search");
-                        givenWebSite = getWebSiteFromEditText();
-                        Log.d(LOG_TAG, givenWebSite);
-                        return runSearch(givenWebSite);
-                    case R.id.action_instruction:
-                        if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "action_insturction");
-                        if(!isInstructionsActivityVisible) {
-                            Intent instructions = new Intent(getApplicationContext(), InstructionsActivity.class);
-                            startActivity(instructions);
-                            return true;
-                        }
-                    default:
-                        return false;
-                }
-            }
-        });
-    }
-    private boolean runSearch(String webSite){
-        if (isInstructionsActivityVisible) {
-            Intent browser = new Intent(getBaseContext(), BrowserActivity.class);
-            browser.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            browser.putExtra(EXTRA_WEB_SITE, webSite);
-            Log.d(LOG_TAG, "run Search" + webSite);
-            startActivity(browser);
-        } else {
-            searchForWebPage(webSite);
-        }
-        return true;
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        menu.clear();
-        getMenuInflater().inflate(R.menu.menu_browser, menu);
-        if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "On Prepare Options Menu");
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    private String getWebSiteFromEditText() {
-        //@TODO basic website address checking before run the search method; like dots or adding https or www (check if needed)
-        Log.d(LOG_TAG, etgivenWebSite.getText().toString());
-        return etgivenWebSite.getText().toString();
-    }
 
     private void startSensors() {
 
@@ -267,7 +194,7 @@ public class BrowserActivity extends ActionBarActivity {
 
         //Using GET command - it will be most probably http.request - http.response time -- to check
         private StringBuilder loadingPageMeasureURLConnection(URL pageToLoadURL) throws IOException {
-            startTimeHttpURL = System.nanoTime();
+            startTimeHttpURL = System.currentTimeMillis();
 
             HttpURLConnection urlConnection = null;
             try {
@@ -279,11 +206,11 @@ public class BrowserActivity extends ActionBarActivity {
                 while ((line = reader.readLine()) != null) {
                     pageContent.append(line);
                 }
-                endTimeHttpURL = System.nanoTime();
+                endTimeHttpURL = System.currentTimeMillis();
                 return pageContent;
             }finally
             {
-                if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "StreamReader solution: " + Long.toString((endTimeHttpURL - startTimeHttpURL) / 1000000) + " ms");
+                if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "StreamReader solution: " + Long.toString((endTimeHttpURL - startTimeHttpURL)) + " ms");
 
                 if (urlConnection != null)
                     urlConnection.disconnect();
@@ -293,30 +220,50 @@ public class BrowserActivity extends ActionBarActivity {
 
 
     private void webViewOnPageFinishOnPageStartMethod(String webSite) {
+
         webPageView.loadUrl(webSite);
         webPageView.setWebViewClient(new WebViewClient() {
+            boolean loadingFinished = true;
+            boolean redirection = false;
+
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                if(!loadingFinished)
+                    redirection = true;
+                loadingFinished = false;
+                webPageView.loadUrl(url);
+                return true;
+            }
+
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
                 super.onPageStarted(view, url, favicon);
-                startTime = (new Date()).getTime();
                 startTimeSystem = System.currentTimeMillis();
-
+                loadingFinished = false;
                 InputMethodManager keyboard = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                 keyboard.hideSoftInputFromWindow(browserLayout.getWindowToken(), 0);
                 etgivenWebSite.setText(R.string.info_loading);
 
             }
 
+
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
-                endTime = (new Date()).getTime();
-                endTimeSystem = System.currentTimeMillis();
-                LoadTime = endTime - startTime;
-                LoadTimeSystem = endTimeSystem - startTimeSystem;
-                Log.d(LOG_TAG, webPageView.getUrl() + ": 1)Date " + Long.toString(LoadTime) + "ms 2)System "
-                        + LoadTimeSystem + "ms");
-                etgivenWebSite.setText("");
+                if(!redirection){
+                    loadingFinished = true;
+                }
+                if (loadingFinished && !redirection){
+                    endTimeSystem = System.currentTimeMillis();
+                    LoadTimeSystem = endTimeSystem - startTimeSystem;
+                    if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, webPageView.getUrl() + " PLT:"
+                            + LoadTimeSystem + "ms");
+                    etgivenWebSite.setText("");
+                }else{
+                    redirection=false;
+                }
+
+
             }
 
             @Override

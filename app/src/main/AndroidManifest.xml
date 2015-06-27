@@ -14,8 +14,10 @@
         <activity
             android:name=".BrowserActivity"
             android:label="@string/title_activity_browser"
-            android:launchMode="singleTop"
+            android:parentActivityName=".ToolbarActivity"
             android:windowSoftInputMode="stateHidden">
+            <!--android:launchMode="singleTop"-->
+
             <!--android:noHistory="true"-->
 
             <intent-filter>
@@ -23,11 +25,20 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+
+        <activity
+            android:name=".ToolbarActivity"
+            android:label="@string/title_activity_browser"
+            android:launchMode="singleTop"
+            android:windowSoftInputMode="stateHidden">
+            <!--android:noHistory="true"-->
+        </activity>
         <activity
             android:name=".InstructionsActivity"
             android:label="@string/title_activity_instructions"
             android:windowSoftInputMode="stateHidden"
-            android:parentActivityName=".BrowserActivity"
+            android:parentActivityName=".ToolbarActivity"
             android:noHistory="true">
         </activity>
 

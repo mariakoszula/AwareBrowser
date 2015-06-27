@@ -10,16 +10,14 @@ import android.widget.EditText;
 /**
  * Created by Maria on 2015-06-21.
  */
-public class InstructionsActivity extends BrowserActivity{
+public class InstructionsActivity extends ToolbarActivity{
 
-    private EditText etgivenWebSite;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "InstructionActivity Create");
         super.setIsInstructionsActivityVisible(true);
         setContentView(R.layout.activity_instructions);
-        etgivenWebSite = (EditText) findViewById(R.id.website_name);
 
         super.prepareToolbar();
 
