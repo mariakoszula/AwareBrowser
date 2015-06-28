@@ -15,8 +15,8 @@ public class InstructionsActivity extends ToolbarActivity{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "InstructionActivity Create");
         super.setIsInstructionsActivityVisible(true);
+        if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "InstructionActivity Create");
         setContentView(R.layout.activity_instructions);
 
         super.prepareToolbar();
@@ -31,8 +31,8 @@ public class InstructionsActivity extends ToolbarActivity{
     @Override
     protected void onResume() {
         super.onResume();
-        if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "InstructionActivity Resume");
         super.setIsInstructionsActivityVisible(true);
+        if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "InstructionActivity Resume");
     }
 
     @Override
@@ -53,6 +53,5 @@ public class InstructionsActivity extends ToolbarActivity{
     protected void onDestroy() {
         super.onDestroy();
         if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "InstructionActivity Destroy");
-        super.setIsInstructionsActivityVisible(false);
     }
 }

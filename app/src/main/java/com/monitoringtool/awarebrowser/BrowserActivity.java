@@ -3,15 +3,18 @@ package com.monitoringtool.awarebrowser;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
+import android.provider.Browser;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.internal.app.ToolbarActionBar;
 import android.support.v7.widget.Toolbar;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.Menu;
@@ -30,6 +33,7 @@ import com.aware.Aware;
 import com.aware.Aware_Preferences;
 import com.aware.providers.Accelerometer_Provider;
 import com.aware.providers.Aware_Provider;
+import com.aware.providers.Network_Provider;
 
 import junit.framework.Assert;
 
@@ -45,6 +49,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Date;
 import java.lang.Object;
+import java.util.concurrent.ExecutionException;
 
 
 public class BrowserActivity extends ToolbarActivity {
@@ -60,8 +65,6 @@ public class BrowserActivity extends ToolbarActivity {
     private String webSiteToSearch=null;
     private long LoadTimeSystem = 0;
     private long startTimeSystem = 0;
-    private long startTimeHttpURL = 0;
-    private long endTimeHttpURL = 0;
     private long endTimeSystem = 0;
     private boolean javaScriptStatus = true;
     private static final int timesToSearch = 1;
@@ -74,7 +77,6 @@ public class BrowserActivity extends ToolbarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_browser);
-        if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "BrowserActivty On create called");
         setIsBrowserActivityVisible(true);
 
 
@@ -90,12 +92,14 @@ public class BrowserActivity extends ToolbarActivity {
         }
 
 
+
         //Enable Javascript, webView does not allow JS by default
         WebSettings settings = webPageView.getSettings();
         /*@TODO button in setting to enable/disable javascript --sharedPreferneces*/
         settings.setJavaScriptEnabled(javaScriptStatus);
 
-       // Log.d(LOG_TAG, String.valueOf(Build.VERSION.SDK_INT));
+        if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "Phone SDK: " + String.valueOf(Build.VERSION.SDK_INT));
+
 
 
     }
@@ -108,47 +112,35 @@ public class BrowserActivity extends ToolbarActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        setIsBrowserActivityVisible(true);
         if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "BrowserActivity On Start called");
-
-        Intent intent = getIntent();
-        webSiteToSearch = intent.getStringExtra(BrowserActivity.EXTRA_WEB_SITE);
-
-        String webSite;
-        if (webSiteToSearch != null) webSite = webSiteToSearch;
-        else webSite = defaultSite;
-
-        startSensors();
-
-        searchForWebPage(webSite);
+        setIsBrowserActivityVisible(true);
+             /*   TelephonyManager telephonyManager = (TelephonyManager) this.getSystemService(Context.TELEPHONY_SERVICE );
+        boolean isLTEConnected = telephonyManager.getNetworkType() == TelephonyManager.NETWORK_TYPE_LTE;
+        if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "LTE: " + String.valueOf(isLTEConnected));*/
 
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        setIsBrowserActivityVisible(true);
         if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "BrowserActivty On Resume called");
+        Intent intent = getIntent();
+        webSiteToSearch = intent.getStringExtra(ToolbarActivity.EXTRA_WEB_SITE);
 
+        String webSite;
+        if (webSiteToSearch != null) webSite = webSiteToSearch;
+        else webSite = defaultSite;
 
-
+        pageError=0;
+        badURLtimes=0;
+        searchForWebPage(webSite);
     }
 
-    private void startSensors() {
-
-        //Log.d(LOG_TAG, String.valueOf(Aware_Provider.Aware_Device.CONTENT_URI));
-        //Log.d(LOG_TAG, String.valueOf(Aware_Provider.DATABASE_NAME));
-
-        //Activate Accelerometer
-        //Aware.setSetting(this, Aware_Preferences.STATUS_ACCELEROMETER, true);
-        //Set sampling frequency
-        //Aware.setSetting(this, Aware_Preferences.FREQUENCY_ACCELEROMETER, 200000);
-        //Apply settings
-        //sendBroadcast(new Intent(Aware.ACTION_AWARE_REFRESH));
-        //sendBroadcast(new Intent(Aware.ACTION_AWARE_CURRENT_CONTEXT));
-        // sendBroadcast(new Intent(Aware.ACTION_AWARE_DEVICE_INFORMATION));
-
-        //Log.d(LOG_TAG, String.valueOf(Accelerometer_Provider.Accelerometer_Data.CONTENT_URI));
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "On new Intent");
+        setIntent(intent);
     }
 
     public void searchForWebPage(String webSite) {
@@ -156,19 +148,23 @@ public class BrowserActivity extends ToolbarActivity {
         if(urlToValidate.checkUrl()) {
 
                 webViewOnPageFinishOnPageStartMethod(urlToValidate.getWebSite());
-              /*@TODO StreamReadre only for comparison, better methos is with WebView*/
 
-            }else{
+        }else{
             if(badURLtimes < timesToSearch) {
+                String webSiteNoSpaces =  repaceSpacesInString(webSite);
                 if (MONITORING_DEBUG_FLAG)
-                    Log.d(LOG_TAG, "Search in google: " + googlePageSearch + webSite);
-                searchForWebPage(googlePageSearch + webSite);
+                    Log.d(LOG_TAG, "Search in google: " + googlePageSearch + webSiteNoSpaces + " BarURL times: " + String.valueOf(badURLtimes));
+                searchForWebPage(googlePageSearch + webSiteNoSpaces);
             }else{
                 Toast.makeText(getApplicationContext(), R.string.bad_url, Toast.LENGTH_LONG).show();
             }
             badURLtimes++;
-                }
+        }
 
+    }
+
+    private String repaceSpacesInString(String webSite) {
+        return webSite.replaceAll(" ", "+");
     }
 
     private class UrlValidator{
@@ -205,12 +201,10 @@ public class BrowserActivity extends ToolbarActivity {
 
 
     private void webViewOnPageFinishOnPageStartMethod(String webSite) {
-
         webPageView.loadUrl(webSite);
         webPageView.setWebViewClient(new WebViewClient() {
             boolean loadingFinished = true;
             boolean redirection = false;
-            int count = 0;
 
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
@@ -246,10 +240,10 @@ public class BrowserActivity extends ToolbarActivity {
                     if (MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, webPageView.getUrl() + " PLT:"
                             + LoadTimeSystem + "ms");
                     etgivenWebSite.setText("");
+
                 } else {
                     redirection = false;
                 }
-
 
             }
 
@@ -257,18 +251,16 @@ public class BrowserActivity extends ToolbarActivity {
             public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
                 super.onReceivedError(view, errorCode, description, failingUrl);
                 if (MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "Error loading page: " + failingUrl);
-                if (pageError < timesToSearch) searchForWebPage(googlePageSearch + failingUrl);
+                if (pageError < timesToSearch) {
+                    searchForWebPage(googlePageSearch + failingUrl);
+                }
                 else {
                     Toast.makeText(getApplicationContext(), R.string.bad_connection, Toast.LENGTH_LONG).show();
                 }
                 pageError++;
             }
         });
-
     }
-
-
-
 
 
 
@@ -276,14 +268,16 @@ public class BrowserActivity extends ToolbarActivity {
     protected void onStop() {
         super.onStop();
         setIsBrowserActivityVisible(false);
-        //stopSensors()
+
         if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "BrowserActivty On Stop called");
+
     }
+
+
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        setIsBrowserActivityVisible(false);
         sendBroadcast(new Intent(Aware.ACTION_AWARE_CLEAR_DATA));
         if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "BrowserActivty On Destroy called");
     }
