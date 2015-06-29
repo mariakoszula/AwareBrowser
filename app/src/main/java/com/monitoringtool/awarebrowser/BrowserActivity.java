@@ -26,6 +26,7 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -60,6 +61,7 @@ public class BrowserActivity extends ToolbarActivity {
     private WebView webPageView;
     private LinearLayout browserLayout;
     private EditText etgivenWebSite;
+    private ImageButton ibBack;
 
     private String defaultSite = "http://www.google.com";
     private String webSiteToSearch=null;
@@ -83,6 +85,7 @@ public class BrowserActivity extends ToolbarActivity {
         webPageView = (WebView) findViewById(R.id.webPageView);
         browserLayout = (LinearLayout) findViewById(R.id.main_browser_layout);
         etgivenWebSite = (EditText) findViewById(R.id.website_name);
+        ibBack = (ImageButton) findViewById(R.id.back);
         super.prepareToolbar();
 
         if(MONITORING_DEBUG_FLAG) {
@@ -224,6 +227,8 @@ public class BrowserActivity extends ToolbarActivity {
                 InputMethodManager keyboard = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                 keyboard.hideSoftInputFromWindow(browserLayout.getWindowToken(), 0);
                 etgivenWebSite.setText(R.string.info_loading);
+               // etgivenWebSite.setFocusable(false);
+               // ibBack.setEnabled(false);
 
             }
 
@@ -240,7 +245,8 @@ public class BrowserActivity extends ToolbarActivity {
                     if (MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, webPageView.getUrl() + " PLT:"
                             + LoadTimeSystem + "ms");
                     etgivenWebSite.setText("");
-
+                    //etgivenWebSite.setClickable(true);
+                   // ibBack.setEnabled(true);
                 } else {
                     redirection = false;
                 }

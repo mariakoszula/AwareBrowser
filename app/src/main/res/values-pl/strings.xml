@@ -9,4 +9,6 @@
     <string name="info_loading">Wczytywanie...</string>
     <string name="bad_url">Błędny URL</string>
     <string name="bad_connection">Sprawdź czy masz włączoną transmisje danych bądź WiFi</string>
+    <string name="title_rating">Oceń sesje</string>
+    <string name="aware_esm_questions">Ankieta do wypełnienia czeka...</string>
 </resources>

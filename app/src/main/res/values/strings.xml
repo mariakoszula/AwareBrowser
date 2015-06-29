@@ -9,4 +9,12 @@
     <string name="info_loading">Loading...</string>
     <string name="bad_url">Bad URL</string>
     <string name="bad_connection">Check if you have data transmision or WiFi enabled</string>
+    <string name="title_rating">Rate the session</string>
+    <string name="esm_rating_instructions">How were you satisfied about the page loading times during your session? Rate from 1 (not satisfied) to 5 (very satisfied).</string>
+    <string name="esm_rating_max">very</string>
+    <string name="esm_rating_min">not at all</string>
+    <string name="title_activity_esm">ESM questionary</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
 </resources>

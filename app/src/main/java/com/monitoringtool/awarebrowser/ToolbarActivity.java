@@ -1,64 +1,46 @@
 package com.monitoringtool.awarebrowser;
 
-import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.app.ActivityManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.os.AsyncTask;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.util.Patterns;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
-import android.webkit.URLUtil;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.aware.Aware;
 import com.aware.Aware_Preferences;
+import com.aware.ESM;
 import com.aware.providers.Aware_Provider;
+import com.aware.providers.ESM_Provider;
 import com.aware.providers.Network_Provider;
-
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Date;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
+import com.aware.providers.Processor_Provider;
+import com.aware.providers.Telephony_Provider;
 
 /**
  * Created by Maria on 2015-06-21.
  */
 public class ToolbarActivity extends ActionBarActivity {
     public static final String LOG_TAG = "WebViewLoadingTime";
+    public static final String PACKAGE_NAME = "com.monitoringtool.awarebrowser";
     public static final String EXTRA_WEB_SITE = "com.monitoringtool.awarebrowser.WEB_SITE";
-    public static final String EXTRA_IS_BROWSER_RUNNING = "com.monitoringtool.awarebrowser.IS_BROWSER_RUNNING";
+    public static final String ACTION_CLOSE_BROWSER = "com.monitoringtool.awarebrowser.ACTION_CLOSE_BROWSER";
+
 
     public static final String RESEARCH_WEBSITE = "http://www.mariak.webd.pl/study/";
     public static final boolean MONITORING_DEBUG_FLAG = true;
     public static final String SHARED_PREF_FILE = "mySharedPref";
     public static final String KEY_IS_SENSOR_RUNNING = "KEY_ID_SENSOR_RUNNING";
     public static final String KEY_FIRST_INSTALL = "KEY_ID_STOP_SENSORS";
-
 
 
   //  private boolean isSensorRunning = false; //sharedPreferences or sth like that so it wanto be stoped and start every time webSite is searched and maybe the same value for applicatioIsRunning
@@ -93,6 +75,9 @@ public class ToolbarActivity extends ActionBarActivity {
         prepareToolbar();
 
 
+        if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, Aware.getSetting(this, Aware_Preferences.DEVICE_ID));
+
+
     }
 
     @Override
@@ -103,8 +88,9 @@ public class ToolbarActivity extends ActionBarActivity {
             if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "Start sensors");
             startSensors();
             editor.putBoolean(KEY_IS_SENSOR_RUNNING, true);
+            editor.commit();
         }
-        editor.commit();
+
 
 
     }
@@ -113,48 +99,71 @@ public class ToolbarActivity extends ActionBarActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        Log.d(LOG_TAG, "TOolbar on resume");
+
+
+
 
     }
 
     private void startSensors() {
-
+        if(MONITORING_DEBUG_FLAG) Aware.setSetting(this, Aware_Preferences.DEBUG_FLAG, true);
         //Activate Aware Sensors
         if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "Aware Content_URI Aware Device" + String.valueOf(Aware_Provider.Aware_Device.CONTENT_URI));
         if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "Aware Database Name" + String.valueOf(Aware_Provider.DATABASE_NAME));
 
-        //Activate Accelerometer
-        //Aware.setSetting(this, Aware_Preferences.STATUS_ACCELEROMETER, true);
-        //Set sampling frequency
-        //Aware.setSetting(this, Aware_Preferences.FREQUENCY_ACCELEROMETER, 200000);
-        //Apply settings
-        //sendBroadcast(new Intent(Aware.ACTION_AWARE_REFRESH));
-        //sendBroadcast(new Intent(Aware.ACTION_AWARE_CURRENT_CONTEXT));
-        // sendBroadcast(new Intent(Aware.ACTION_AWARE_DEVICE_INFORMATION));
 
-        //if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, String.valueOf(Accelerometer_Provider.Accelerometer_Data.CONTENT_URI));
-
-        //Network Sensors
-        Aware.setSetting(this, Aware_Preferences.STATUS_NETWORK_EVENTS, true);
-        Aware.setSetting(this, Aware_Preferences.STATUS_NETWORK_TRAFFIC, true);
-
-        if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, String.valueOf(Network_Provider.Network_Data.CONTENT_URI));
-
-        /*@TODO enable needed/chosen sensors and try to send message to the remote server
+        /*@TODO send message to the remote server
         * @TODO Preapre BrowserProvider
         * */
 
+        //Network Sensor
+        Aware.setSetting(this, Aware_Preferences.STATUS_NETWORK_EVENTS, true);
+        Aware.setSetting(this, Aware_Preferences.STATUS_NETWORK_TRAFFIC, true);
+        if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, String.valueOf(Network_Provider.Network_Data.CONTENT_URI));
 
+        //Telephony Sensor
         //Telephony Sensor (only when in Network sensor -- only if broadcast Mobile_ON and stop when Mobile_off)? will now from here the type of telephony
+        Aware.setSetting(this, Aware_Preferences.STATUS_TELEPHONY, true);
+        if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, String.valueOf(Telephony_Provider.Telephony_Data.CONTENT_URI));
+
+
+        //ESM Sensor
+        //Aware.setSetting(getApplicationContext(), Aware_Preferences.STATUS_ESM, true);
+
+       // getApplicationContext().startService(new Intent(this, BrowserClosedReceiver.class));
 
         //Procesor load problably only for tests if it is not taking too much processor
+        if(MONITORING_DEBUG_FLAG){
+            Aware.setSetting(this, Aware_Preferences.STATUS_PROCESSOR, false);
+            Log.d(LOG_TAG, String.valueOf(Processor_Provider.Processor_Data.CONTENT_URI));
 
-        sendBroadcast(new Intent(Aware.ACTION_AWARE_REFRESH));
+        }
+
+        //@TODO Google Activity Recognition plugin
+
+       sendBroadcast(new Intent(Aware.ACTION_AWARE_REFRESH));
 
 
     }
 
     private void stopSensors() {
-        Toast.makeText(getApplicationContext(), "Stop sensor after closing app!!", Toast.LENGTH_LONG).show();
+       // Toast.makeText(getApplicationContext(), "Stop sensor after closing app!!", Toast.LENGTH_LONG).show();
+        //Network Sensor
+        Aware.setSetting(this, Aware_Preferences.STATUS_NETWORK_EVENTS, false);
+        Aware.setSetting(this, Aware_Preferences.STATUS_NETWORK_TRAFFIC, false);
+
+        //Telephony Sensor
+        //Telephony Sensor (only when in Network sensor -- only if broadcast Mobile_ON and stop when Mobile_off)? will now from here the type of telephony
+        Aware.setSetting(this, Aware_Preferences.STATUS_TELEPHONY, false);
+
+        //Procesor load problably only for tests if it is not taking too much processor
+        if(MONITORING_DEBUG_FLAG){
+            Aware.setSetting(this, Aware_Preferences.STATUS_PROCESSOR, false);
+        }
+
+
+        sendBroadcast(new Intent(Aware.ACTION_AWARE_REFRESH));
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -225,11 +234,20 @@ public class ToolbarActivity extends ActionBarActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        Log.d(LOG_TAG, "toolbar on stop instrucions "+String.valueOf(isInstructionsActivityVisible) + "browser " +String.valueOf(isBrowserActivityVisible));
+        Log.d(LOG_TAG, "toolbar on stop instrucions " + String.valueOf(isInstructionsActivityVisible) + "browser " + String.valueOf(isBrowserActivityVisible));
         if(isBrowserActivityVisible)
             setIsBrowserActivityVisible(false);
         if(!isInstructionsActivityVisible && !isBrowserActivityVisible) {
-            sendESMquestionaries();
+          //  startESMActivity();
+
+            Intent esmService = new Intent(getApplicationContext(), ESMService.class);
+           // esmService.putExtra("TIME_OF_STOP_BROWSER", )
+            getApplicationContext().startService(esmService);
+            //Create Broadcast
+            //Intent browserClosed = new Intent();
+            //browserClosed.setAction(ToolbarActivity.ACTION_CLOSE_BROWSER);
+            //sendBroadcast(browserClosed);
+
             Log.d(LOG_TAG, "ESM started. Stop Toolbar KEY_IS_SENSOR_RUNNING " + String.valueOf(mySharedPref.getBoolean(KEY_IS_SENSOR_RUNNING, false)));
             if(mySharedPref.getBoolean(KEY_IS_SENSOR_RUNNING, false))
                 stopSensors();
@@ -237,10 +255,22 @@ public class ToolbarActivity extends ActionBarActivity {
         }
 
     }
-    private void sendESMquestionaries() {
-        /*@TODO preapre acctual questionaires */
-        Toast.makeText(getApplicationContext(), "ESM!!", Toast.LENGTH_LONG).show();
+
+    private void startESMActivity() {
+        if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "Esm startESMActivity");
+        Intent esm = new Intent(getApplicationContext(), ESMActivity.class);
+        startActivity(esm);
     }
+
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "Toolbar terminated");
+
+    }
+
+
 
 
 
