@@ -61,6 +61,7 @@ public class BrowserActivity extends ToolbarActivity {
     private WebView webPageView;
     private LinearLayout browserLayout;
     private EditText etgivenWebSite;
+    private MenuItem itemSearch;
     private ImageButton ibBack;
 
     private String defaultSite = "http://www.google.com";
@@ -72,6 +73,7 @@ public class BrowserActivity extends ToolbarActivity {
     private static final int timesToSearch = 1;
     private int badURLtimes = 0;
     private int pageError = 0;
+
 
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -98,7 +100,6 @@ public class BrowserActivity extends ToolbarActivity {
 
         //Enable Javascript, webView does not allow JS by default
         WebSettings settings = webPageView.getSettings();
-        /*@TODO button in setting to enable/disable javascript --sharedPreferneces*/
         settings.setJavaScriptEnabled(javaScriptStatus);
 
         if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "Phone SDK: " + String.valueOf(Build.VERSION.SDK_INT));
@@ -109,6 +110,7 @@ public class BrowserActivity extends ToolbarActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        itemSearch = menu.findItem(R.id.action_search);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -227,8 +229,9 @@ public class BrowserActivity extends ToolbarActivity {
                 InputMethodManager keyboard = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                 keyboard.hideSoftInputFromWindow(browserLayout.getWindowToken(), 0);
                 etgivenWebSite.setText(R.string.info_loading);
-               // etgivenWebSite.setFocusable(false);
-               // ibBack.setEnabled(false);
+                etgivenWebSite.setEnabled(false);
+                ibBack.setEnabled(false);
+                itemSearch.setEnabled(false);
 
             }
 
@@ -245,8 +248,9 @@ public class BrowserActivity extends ToolbarActivity {
                     if (MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, webPageView.getUrl() + " PLT:"
                             + LoadTimeSystem + "ms");
                     etgivenWebSite.setText("");
-                    //etgivenWebSite.setClickable(true);
-                   // ibBack.setEnabled(true);
+                    etgivenWebSite.setEnabled(true);
+                    ibBack.setEnabled(true);
+                    itemSearch.setEnabled(true);
                 } else {
                     redirection = false;
                 }

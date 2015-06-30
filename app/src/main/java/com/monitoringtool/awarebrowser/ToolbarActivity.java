@@ -49,13 +49,17 @@ public class ToolbarActivity extends ActionBarActivity {
     private boolean isInstructionsActivityVisible = false;
     private boolean isBrowserActivityVisible = false;
 
+    /*@TODO 1) prepare Content provider for Browser and check if it creates proper table
+      @TODO 2) check if data are saved properly with Device_ID
+      @TODO 3) try to synchronize this with server Aware Dashboard
+     */
 
     public void setIsBrowserActivityVisible(boolean isBrowserActivityVisible) {
         this.isBrowserActivityVisible = isBrowserActivityVisible;
     }
 
 
-
+    //@TODO delay starting application after service ends
     private EditText etgivenWebSite;
     private ImageButton ibBack;
 
@@ -75,7 +79,8 @@ public class ToolbarActivity extends ActionBarActivity {
         prepareToolbar();
 
 
-        if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, Aware.getSetting(this, Aware_Preferences.DEVICE_ID));
+        //@TODO idea: use aware_device id unique for each session, will be easier to recognize it later
+        if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "Aware device id: " + Aware.getSetting(this, Aware_Preferences.DEVICE_ID));
 
 
     }
@@ -117,6 +122,7 @@ public class ToolbarActivity extends ActionBarActivity {
         * @TODO Preapre BrowserProvider
         * */
 
+        //@TODO prepare aware in separate thread
         //Network Sensor
         Aware.setSetting(this, Aware_Preferences.STATUS_NETWORK_EVENTS, true);
         Aware.setSetting(this, Aware_Preferences.STATUS_NETWORK_TRAFFIC, true);
@@ -240,6 +246,7 @@ public class ToolbarActivity extends ActionBarActivity {
         if(!isInstructionsActivityVisible && !isBrowserActivityVisible) {
           //  startESMActivity();
 
+            if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "Starting service");
             Intent esmService = new Intent(getApplicationContext(), ESMService.class);
            // esmService.putExtra("TIME_OF_STOP_BROWSER", )
             getApplicationContext().startService(esmService);
@@ -253,13 +260,8 @@ public class ToolbarActivity extends ActionBarActivity {
                 stopSensors();
                 if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "Stop sensors");
         }
+        finish();
 
-    }
-
-    private void startESMActivity() {
-        if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "Esm startESMActivity");
-        Intent esm = new Intent(getApplicationContext(), ESMActivity.class);
-        startActivity(esm);
     }
 
 

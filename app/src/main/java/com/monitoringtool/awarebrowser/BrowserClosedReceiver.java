@@ -27,6 +27,8 @@ public class BrowserClosedReceiver extends BroadcastReceiver{
 
         @Override
         public void onReceive(Context context, Intent intent) {
+            if(ToolbarActivity.MONITORING_DEBUG_FLAG) Log.d(ToolbarActivity.LOG_TAG, "Receiver stop Browser Broadcast.");
+
             final String esmRating =
                     "[{'esm': {" +
                             "'esm_type': " + ESM.TYPE_ESM_LIKERT +"," +
@@ -37,7 +39,7 @@ public class BrowserClosedReceiver extends BroadcastReceiver{
                             "'esm_likert_min_label': '"+ context.getResources().getString(R.string.esm_rating_min) +"'," +
                             "'esm_likert_step': 1," +
                             "'esm_submit': 'OK'," +
-                            "'esm_expiration_threashold': 0," +
+                            "'esm_expiration_threashold': 60," +
                             "'esm_trigger': 'AwareBro answer'" + //maybe here some session ID which will be in browser provider and borwsers as well in shared prefrences
                             "}}]";
             final String esmContext =    "";
@@ -47,7 +49,7 @@ public class BrowserClosedReceiver extends BroadcastReceiver{
              /*@TODO preapre acctual questionaires */
             String action = intent.getAction();
             if(action.equals(ToolbarActivity.ACTION_CLOSE_BROWSER)) {
-                Toast.makeText(context, "Wait for questionary", Toast.LENGTH_LONG).show();
+                Toast.makeText(context, context.getResources().getString(R.string.info_loading), Toast.LENGTH_LONG).show();
 
                 Intent esm = new Intent(ESM.ACTION_AWARE_QUEUE_ESM);
                 esm.putExtra(ESM.EXTRA_ESM, esmRating);
