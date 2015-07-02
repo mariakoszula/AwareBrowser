@@ -23,7 +23,7 @@ import com.google.android.gms.maps.model.TileOverlay;
  * Created by Maria on 2015-06-29.
  */
 
-public class BrowserClosedReceiver extends BroadcastReceiver{
+public class BrowserClosed_Receiver extends BroadcastReceiver{
 
         @Override
         public void onReceive(Context context, Intent intent) {

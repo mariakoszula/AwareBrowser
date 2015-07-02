@@ -43,13 +43,20 @@
             android:windowSoftInputMode="stateHidden" >
         </activity>
 
-        <receiver android:name=".BrowserClosedReceiver" >
+        <receiver android:name=".BrowserClosed_Receiver" >
             <intent-filter>
                 <action android:name="com.monitoringtool.awarebrowser.ACTION_CLOSE_BROWSER" />
             </intent-filter>
         </receiver>
+    <!--    <receiver android:name=".ESM_Status_Receiver" >
+        </receiver>-->
         <service
             android:name=".Browser_Service"
+            android:enabled="true"
+            android:exported="true" >
+        </service>
+        <service
+            android:name=".ESM_Service"
             android:enabled="true"
             android:exported="true" >
         </service>

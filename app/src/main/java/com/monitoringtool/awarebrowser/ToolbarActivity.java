@@ -33,6 +33,7 @@ public class ToolbarActivity extends ActionBarActivity {
     public static final String PACKAGE_NAME = "com.monitoringtool.awarebrowser";
     public static final String EXTRA_WEB_SITE = "com.monitoringtool.awarebrowser.WEB_SITE";
     public static final String ACTION_CLOSE_BROWSER = "com.monitoringtool.awarebrowser.ACTION_CLOSE_BROWSER";
+    public static final String DASHBOARD_STUDY_URL = "https://api.awareframework.com/index.php/webservice/index/403/yqA2zgDrJOPl";
 
 
     public static final String RESEARCH_WEBSITE = "http://www.mariak.webd.pl/study/";
@@ -151,7 +152,8 @@ public class ToolbarActivity extends ActionBarActivity {
         //ESM Sensor
         //Aware.setSetting(getApplicationContext(), Aware_Preferences.STATUS_ESM, true);
 
-       // getApplicationContext().startService(new Intent(this, BrowserClosedReceiver.class));
+
+       // getApplicationContext().startService(new Intent(this, BrowserClosed_Receiver.class));
 
         //Procesor load problably only for tests if it is not taking too much processor
         if(MONITORING_DEBUG_FLAG){
@@ -160,7 +162,15 @@ public class ToolbarActivity extends ActionBarActivity {
 
         }
 
-        //@TODO Google Activity Recognition plugin
+        startService(new Intent(getApplicationContext(), Browser_Service.class));
+
+        //WebService
+        Aware.setSetting(this, STATUS_WEBSERVICE, true);
+        Aware.setSetting(this, WEBSERVICE_SERVER, DASHBOARD_STUDY_URL);
+       // Aware.setSetting(this, FREQUENCY_WEBSERVICE, 10);
+        //or in specified time Aware.Action_Aware_sync_data
+       //@TODO Google Activity Recognition plugin
+
 
         sendBroadcast(new Intent(Aware.ACTION_AWARE_REFRESH));
 
@@ -181,7 +191,7 @@ public class ToolbarActivity extends ActionBarActivity {
         if(MONITORING_DEBUG_FLAG){
             Aware.setSetting(this, STATUS_PROCESSOR, false);
         }
-
+        stopService(new Intent(getApplicationContext(), Browser_Service.class));
 
         sendBroadcast(new Intent(Aware.ACTION_AWARE_REFRESH));
     }
@@ -262,13 +272,10 @@ public class ToolbarActivity extends ActionBarActivity {
           //  startESMActivity();
 
             if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "Starting service");
-            Intent esmService = new Intent(getApplicationContext(), Browser_Service.class);
+            Intent esmService = new Intent(getApplicationContext(), ESM_Service.class);
            // esmService.putExtra("TIME_OF_STOP_BROWSER", )
             getApplicationContext().startService(esmService);
-            //Create Broadcast
-            //Intent browserClosed = new Intent();
-            //browserClosed.setAction(ToolbarActivity.ACTION_CLOSE_BROWSER);
-            //sendBroadcast(browserClosed);
+
 
             Log.d(LOG_TAG, "ESM started. Stop Toolbar KEY_IS_SENSOR_RUNNING " + String.valueOf(mySharedPref.getBoolean(KEY_IS_SENSOR_RUNNING, false)));
             if(mySharedPref.getBoolean(KEY_IS_SENSOR_RUNNING, false))

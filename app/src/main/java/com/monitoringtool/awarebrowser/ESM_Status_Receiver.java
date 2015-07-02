@@ -15,7 +15,7 @@ import com.aware.providers.ESM_Provider;
  */
 
   /*@TODO catch ACTION_ESM_ANSWER why this is not working?*/
-public class ESMStatusReceiver extends BroadcastReceiver{
+public class ESM_Status_Receiver extends BroadcastReceiver{
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.d("ESM", "Am I here at all?.");
