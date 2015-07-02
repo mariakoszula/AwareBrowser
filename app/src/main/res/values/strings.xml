@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Monitoring Tool AwareBrowser</string>
     <string name="action_about">About</string>
-    <string name="title_activity_browser">AwareBro</string>
+    <string name="title_activity_browser">AwareBrows</string>
     <string name="title_activity_about">About</string>
     <string name="action_search">Search</string>
     <string name="action_instruction">Instructions</string>

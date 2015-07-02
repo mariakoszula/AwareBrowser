@@ -1,11 +1,8 @@
 package com.monitoringtool.awarebrowser;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
@@ -19,9 +16,7 @@ import android.widget.Toast;
 
 import com.aware.Aware;
 import com.aware.Aware_Preferences;
-import com.aware.ESM;
 import com.aware.providers.Aware_Provider;
-import com.aware.providers.ESM_Provider;
 import com.aware.providers.Network_Provider;
 import com.aware.providers.Processor_Provider;
 import com.aware.providers.Telephony_Provider;
@@ -55,7 +50,7 @@ public class ToolbarActivity extends ActionBarActivity {
     private boolean isBrowserActivityVisible = false;
 
     /*@TODO 1) prepare Content provider for Browser and check if it creates proper table
-      @TODO 2) check if data are saved properly with Device_ID - unique for each session plus Device_unique_ID - device id the same between sessions in BrowserProvider
+      @TODO 2) check if data are saved properly with Device_ID - unique for each session plus Device_unique_ID - device id the same between sessions in Browser_Provider
       @TODO 3) try to synchronize this with server Aware Dashboard
       @TODO 4) after rotating screen make all saved // crashed otherwise
      */
@@ -81,7 +76,7 @@ public class ToolbarActivity extends ActionBarActivity {
         setContentView(R.layout.browser_toolbar);
         Log.d(LOG_TAG, "on create toolbar");
 
-        sendBroadcast(new Intent(Aware.ACTION_AWARE_DEVICE_INFORMATION));
+       // sendBroadcast(new Intent(Aware.ACTION_AWARE_DEVICE_INFORMATION));
 
         mySharedPref = getSharedPreferences(SHARED_PREF_FILE, Context.MODE_PRIVATE);
         editor = mySharedPref.edit();
@@ -138,7 +133,7 @@ public class ToolbarActivity extends ActionBarActivity {
 
 
         /*@TODO send message to the remote server
-        * @TODO Preapre BrowserProvider
+        * @TODO Preapre Browser_Provider
         * */
 
         //@TODO prepare aware in separate thread
@@ -190,10 +185,10 @@ public class ToolbarActivity extends ActionBarActivity {
 
         sendBroadcast(new Intent(Aware.ACTION_AWARE_REFRESH));
     }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         menu.clear();
-        getMenuInflater().inflate(R.menu.menu_browser, menu);
         getMenuInflater().inflate(R.menu.menu_browser, menu);
         etgivenWebSite = (EditText) findViewById(R.id.website_name);
         return super.onCreateOptionsMenu(menu);
@@ -267,7 +262,7 @@ public class ToolbarActivity extends ActionBarActivity {
           //  startESMActivity();
 
             if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "Starting service");
-            Intent esmService = new Intent(getApplicationContext(), ESMService.class);
+            Intent esmService = new Intent(getApplicationContext(), Browser_Service.class);
            // esmService.putExtra("TIME_OF_STOP_BROWSER", )
             getApplicationContext().startService(esmService);
             //Create Broadcast

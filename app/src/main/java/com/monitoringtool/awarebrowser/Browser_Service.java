@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
@@ -16,11 +17,12 @@ import com.aware.Aware;
 import com.aware.Aware_Preferences;
 import com.aware.ESM;
 import com.aware.providers.ESM_Provider;
+import com.aware.providers.Screen_Provider;
 import com.aware.utils.Aware_Plugin;
 
 import java.util.logging.LogRecord;
 
-public class ESMService extends Aware_Plugin {
+public class Browser_Service extends Aware_Plugin {
 
     private static final int WAIT_TIME = 2 * 60 * 1000;
 
@@ -28,6 +30,12 @@ public class ESMService extends Aware_Plugin {
     @Override
     public void onCreate() {
         super.onCreate();
+
+
+        DATABASE_TABLES = Browser_Provider.DATABASE_TABLES;
+        TABLES_FIELDS = Browser_Provider.TABLES_FIELDS;
+        CONTEXT_URIS = new Uri[]{ Browser_Provider.Browser_Data.CONTENT_URI };
+
         Aware.setSetting(getApplicationContext(), Aware_Preferences.STATUS_ESM, true);
         sendBroadcast(new Intent(Aware.ACTION_AWARE_REFRESH));
 

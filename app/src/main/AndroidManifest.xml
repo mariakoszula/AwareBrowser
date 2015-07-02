@@ -49,13 +49,13 @@
             </intent-filter>
         </receiver>
         <service
-            android:name=".ESMService"
+            android:name=".Browser_Service"
             android:enabled="true"
             android:exported="true" >
         </service>
         <provider
-            android:name="com.monitoringtool.awarebrowser.BrowserProvider"
-            android:authorities="${applicationId}.provider.plugin.browserplt"
+            android:name=".Browser_Provider"
+            android:authorities="${applicationId}.provider.browserplt"
             android:exported="true"
             android:readPermission="com.aware.READ_CONTEXT_DATA"
             android:writePermission="com.aware.WRITE_CONTEXT_DATA" />

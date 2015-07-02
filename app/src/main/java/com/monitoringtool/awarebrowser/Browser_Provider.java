@@ -10,7 +10,6 @@ import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.BaseColumns;
-import android.provider.Browser;
 import android.util.Log;
 
 import com.aware.utils.DatabaseHelper;
@@ -23,7 +22,7 @@ import java.util.HashMap;
 /**
  * Created by Maria on 2015-06-20.
  */
-public class BrowserProvider extends ContentProvider {
+public class Browser_Provider extends ContentProvider {
     public static String AUTHORITY = "com.monitoringtool.awarebrowser.provider.browserplt";
     public static final int DATABASE_VERSION = 1;
 
@@ -35,7 +34,7 @@ public class BrowserProvider extends ContentProvider {
         };
 
         public static final Uri CONTENT_URI = Uri.parse("content://"
-                + BrowserProvider.AUTHORITY + "/browserplt");
+                + Browser_Provider.AUTHORITY + "/browserplt");
         public static final String CONTENT_TYPE = "vnd.android.cursor.dir/vnd.aware.browserplt";
         public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd.aware.browserplt";
 
@@ -81,9 +80,9 @@ public class BrowserProvider extends ContentProvider {
         AUTHORITY = getContext().getPackageName() + ".provider.browserplt";
 
         sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
-        sUriMatcher.addURI(BrowserProvider.AUTHORITY, DATABASE_TABLES[0],
+        sUriMatcher.addURI(Browser_Provider.AUTHORITY, DATABASE_TABLES[0],
                 BROWSERPLT);
-        sUriMatcher.addURI(BrowserProvider.AUTHORITY,
+        sUriMatcher.addURI(Browser_Provider.AUTHORITY,
                 DATABASE_TABLES[0] + "/#", BROWSERPLT_ID);
 
         screenProjectionMap = new HashMap<String, String>();
@@ -208,7 +207,6 @@ public class BrowserProvider extends ContentProvider {
             Log.w(AUTHORITY,"Database unavailable...");
             return null;
         }
-
         ContentValues values = (initialValues != null) ? new ContentValues(
                 initialValues) : new ContentValues();
 

@@ -4,23 +4,14 @@ import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
+import android.database.sqlite.SQLiteException;
 import android.graphics.Bitmap;
-import android.os.AsyncTask;
 import android.os.Build;
-import android.os.Handler;
-import android.provider.Browser;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.internal.app.ToolbarActionBar;
-import android.support.v7.widget.Toolbar;
-import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.inputmethod.InputMethod;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.URLUtil;
 import android.webkit.WebSettings;
@@ -33,27 +24,6 @@ import android.widget.Toast;
 
 import com.aware.Aware;
 import com.aware.Aware_Preferences;
-import com.aware.providers.Accelerometer_Provider;
-import com.aware.providers.Aware_Provider;
-import com.aware.providers.Network_Provider;
-
-import junit.framework.Assert;
-
-import org.apache.http.client.utils.URIUtils;
-
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Date;
-import java.lang.Object;
-import java.util.concurrent.ExecutionException;
-
-import static com.monitoringtool.awarebrowser.ToolbarActivity.KEY_UNIQUE_DEVICE_ID;
 
 
 public class BrowserActivity extends ToolbarActivity {
@@ -254,14 +224,19 @@ public class BrowserActivity extends ToolbarActivity {
                     endTimeSystem = System.currentTimeMillis();
                     LoadTimeSystem = endTimeSystem - startTimeSystem;
 
-                 /*   ContentValues plt_data = new ContentValues();
-                    plt_data.put(BrowserProvider.Browser_Data.DEVICE_ID, Aware.getSetting(getApplicationContext(), Aware_Preferences.DEVICE_ID));
-                    plt_data.put(BrowserProvider.Browser_Data.TIMESTAMP, System.currentTimeMillis());
-                    plt_data.put(BrowserProvider.Browser_Data.UNIQUE_DEVICE_ID, ToolbarActivity.mySharedPref.getString(KEY_UNIQUE_DEVICE_ID, "no data"));
-                    plt_data.put(BrowserProvider.Browser_Data.WEB_PAGE, webPageView.getUrl());
-                    plt_data.put(BrowserProvider.Browser_Data.PAGE_LOAD_TIME, LoadTimeSystem);
+                    ContentValues plt_data = new ContentValues();
+                    plt_data.put(Browser_Provider.Browser_Data.DEVICE_ID, Aware.getSetting(getApplicationContext(), Aware_Preferences.DEVICE_ID));
+                    plt_data.put(Browser_Provider.Browser_Data.TIMESTAMP, System.currentTimeMillis());
+                    plt_data.put(Browser_Provider.Browser_Data.UNIQUE_DEVICE_ID, ToolbarActivity.mySharedPref.getString(KEY_UNIQUE_DEVICE_ID, "no data"));
+                    plt_data.put(Browser_Provider.Browser_Data.WEB_PAGE, webPageView.getUrl());
+                    plt_data.put(Browser_Provider.Browser_Data.PAGE_LOAD_TIME, LoadTimeSystem);
+                try{
+                    getBaseContext().getContentResolver().insert(Browser_Provider.Browser_Data.CONTENT_URI, plt_data);
 
-                    getContentResolver().insert(BrowserProvider.Browser_Data.CONTENT_URI, plt_data);*/
+                    }catch( SQLiteException e ) {
+                        if(Aware.DEBUG) Log.d(LOG_TAG,e.getMessage());
+                    }
+
                     sendBroadcast(new Intent(Aware.ACTION_AWARE_CURRENT_CONTEXT));
                     if (MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, webPageView.getUrl() + " PLT:"
                             + LoadTimeSystem + "ms");
