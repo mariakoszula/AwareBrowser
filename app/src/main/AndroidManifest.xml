@@ -48,17 +48,17 @@
                 <action android:name="com.monitoringtool.awarebrowser.ACTION_CLOSE_BROWSER" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".ESMStatusReceiver" >
-            <intent-filter>
-                <action android:name="com.aware.ESM.ACTION_AWARE_ESM_ANSWERED" />
-            </intent-filter>
-        </receiver>
         <service
             android:name=".ESMService"
             android:enabled="true"
             android:exported="true" >
         </service>
-
+        <provider
+            android:name="com.monitoringtool.awarebrowser.BrowserProvider"
+            android:authorities="${applicationId}.provider.plugin.browserplt"
+            android:exported="true"
+            android:readPermission="com.aware.READ_CONTEXT_DATA"
+            android:writePermission="com.aware.WRITE_CONTEXT_DATA" />
         <provider
             android:name="com.aware.providers.Bluetooth_Provider"
             android:authorities="${applicationId}.provider.bluetooth"

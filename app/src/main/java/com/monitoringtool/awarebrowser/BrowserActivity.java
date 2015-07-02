@@ -1,6 +1,7 @@
 package com.monitoringtool.awarebrowser;
 
 import android.annotation.SuppressLint;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -51,6 +52,8 @@ import java.net.URL;
 import java.util.Date;
 import java.lang.Object;
 import java.util.concurrent.ExecutionException;
+
+import static com.monitoringtool.awarebrowser.ToolbarActivity.KEY_UNIQUE_DEVICE_ID;
 
 
 public class BrowserActivity extends ToolbarActivity {
@@ -110,8 +113,13 @@ public class BrowserActivity extends ToolbarActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        itemSearch = menu.findItem(R.id.action_search);
         return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        itemSearch = menu.findItem(R.id.action_search);
+        return super.onPrepareOptionsMenu(menu);
     }
 
     @Override
@@ -245,6 +253,16 @@ public class BrowserActivity extends ToolbarActivity {
                 if (loadingFinished && !redirection) {
                     endTimeSystem = System.currentTimeMillis();
                     LoadTimeSystem = endTimeSystem - startTimeSystem;
+
+                 /*   ContentValues plt_data = new ContentValues();
+                    plt_data.put(BrowserProvider.Browser_Data.DEVICE_ID, Aware.getSetting(getApplicationContext(), Aware_Preferences.DEVICE_ID));
+                    plt_data.put(BrowserProvider.Browser_Data.TIMESTAMP, System.currentTimeMillis());
+                    plt_data.put(BrowserProvider.Browser_Data.UNIQUE_DEVICE_ID, ToolbarActivity.mySharedPref.getString(KEY_UNIQUE_DEVICE_ID, "no data"));
+                    plt_data.put(BrowserProvider.Browser_Data.WEB_PAGE, webPageView.getUrl());
+                    plt_data.put(BrowserProvider.Browser_Data.PAGE_LOAD_TIME, LoadTimeSystem);
+
+                    getContentResolver().insert(BrowserProvider.Browser_Data.CONTENT_URI, plt_data);*/
+                    sendBroadcast(new Intent(Aware.ACTION_AWARE_CURRENT_CONTEXT));
                     if (MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, webPageView.getUrl() + " PLT:"
                             + LoadTimeSystem + "ms");
                     etgivenWebSite.setText("");

@@ -16,14 +16,15 @@ import com.aware.Aware;
 import com.aware.Aware_Preferences;
 import com.aware.ESM;
 import com.aware.providers.ESM_Provider;
+import com.aware.utils.Aware_Plugin;
 
 import java.util.logging.LogRecord;
 
-public class ESMService extends Service {
+public class ESMService extends Aware_Plugin {
 
     private static final int WAIT_TIME = 2 * 60 * 1000;
 
-
+    private ESMStatusReceiver esm_statuses;
     @Override
     public void onCreate() {
         super.onCreate();
@@ -35,9 +36,15 @@ public class ESMService extends Service {
         sendBroadcast(browserClosed);
         Toast.makeText(getApplicationContext(), getResources().getString(R.string.esm_answer), Toast.LENGTH_SHORT).show();
 
+
         if (ToolbarActivity.MONITORING_DEBUG_FLAG)
             Log.d(ToolbarActivity.LOG_TAG, "Send broadcast about stopping");
 
+        IntentFilter esm_filter = new IntentFilter();
+        esm_filter.addAction(ESM.ACTION_AWARE_ESM_DISMISSED);
+        esm_filter.addAction(ESM.ACTION_AWARE_ESM_EXPIRED);
+        esm_filter.addAction(ESM.ACTION_AWARE_ESM_ANSWERED);
+        registerReceiver(esm_statuses, esm_filter);
     }
 
 
@@ -67,7 +74,7 @@ public class ESMService extends Service {
     public void onDestroy() {
         super.onDestroy();
         Aware.setSetting(getApplicationContext(), Aware_Preferences.STATUS_ESM, false);
-
+        if(esm_statuses != null)   unregisterReceiver(esm_statuses);
         sendBroadcast(new Intent(Aware.ACTION_AWARE_REFRESH));
 
     }

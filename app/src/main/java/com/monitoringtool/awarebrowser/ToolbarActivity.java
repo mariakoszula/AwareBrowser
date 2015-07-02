@@ -26,6 +26,10 @@ import com.aware.providers.Network_Provider;
 import com.aware.providers.Processor_Provider;
 import com.aware.providers.Telephony_Provider;
 
+import java.util.UUID;
+
+import static com.aware.Aware_Preferences.*;
+
 /**
  * Created by Maria on 2015-06-21.
  */
@@ -40,6 +44,7 @@ public class ToolbarActivity extends ActionBarActivity {
     public static final boolean MONITORING_DEBUG_FLAG = true;
     public static final String SHARED_PREF_FILE = "mySharedPref";
     public static final String KEY_IS_SENSOR_RUNNING = "KEY_ID_SENSOR_RUNNING";
+    public static final String KEY_UNIQUE_DEVICE_ID = "KEY_UNIQUE_DEVICE_ID";
     public static final String KEY_FIRST_INSTALL = "KEY_ID_STOP_SENSORS";
 
 
@@ -50,8 +55,9 @@ public class ToolbarActivity extends ActionBarActivity {
     private boolean isBrowserActivityVisible = false;
 
     /*@TODO 1) prepare Content provider for Browser and check if it creates proper table
-      @TODO 2) check if data are saved properly with Device_ID
+      @TODO 2) check if data are saved properly with Device_ID - unique for each session plus Device_unique_ID - device id the same between sessions in BrowserProvider
       @TODO 3) try to synchronize this with server Aware Dashboard
+      @TODO 4) after rotating screen make all saved // crashed otherwise
      */
 
     public void setIsBrowserActivityVisible(boolean isBrowserActivityVisible) {
@@ -74,13 +80,26 @@ public class ToolbarActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.browser_toolbar);
         Log.d(LOG_TAG, "on create toolbar");
+
+        sendBroadcast(new Intent(Aware.ACTION_AWARE_DEVICE_INFORMATION));
+
         mySharedPref = getSharedPreferences(SHARED_PREF_FILE, Context.MODE_PRIVATE);
         editor = mySharedPref.edit();
+
+        if( mySharedPref.getString(KEY_UNIQUE_DEVICE_ID, "").length() == 0 ) {
+            UUID uuid = UUID.randomUUID();
+            editor.putString(KEY_UNIQUE_DEVICE_ID, uuid.toString());
+            editor.commit();
+        }
+
+        UUID uuid_session_ID = UUID.randomUUID();
+        Aware.setSetting(this, Aware_Preferences.DEVICE_ID, uuid_session_ID.toString());
+
         prepareToolbar();
 
 
         //@TODO idea: use aware_device id unique for each session, will be easier to recognize it later
-        if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "Aware device id: " + Aware.getSetting(this, Aware_Preferences.DEVICE_ID));
+        if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "Aware device id: " + Aware.getSetting(this, DEVICE_ID));
 
 
     }
@@ -112,7 +131,7 @@ public class ToolbarActivity extends ActionBarActivity {
     }
 
     private void startSensors() {
-        if(MONITORING_DEBUG_FLAG) Aware.setSetting(this, Aware_Preferences.DEBUG_FLAG, true);
+        if(MONITORING_DEBUG_FLAG) Aware.setSetting(this, DEBUG_FLAG, true);
         //Activate Aware Sensors
         if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "Aware Content_URI Aware Device" + String.valueOf(Aware_Provider.Aware_Device.CONTENT_URI));
         if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "Aware Database Name" + String.valueOf(Aware_Provider.DATABASE_NAME));
@@ -124,13 +143,13 @@ public class ToolbarActivity extends ActionBarActivity {
 
         //@TODO prepare aware in separate thread
         //Network Sensor
-        Aware.setSetting(this, Aware_Preferences.STATUS_NETWORK_EVENTS, true);
-        Aware.setSetting(this, Aware_Preferences.STATUS_NETWORK_TRAFFIC, true);
+        Aware.setSetting(this, STATUS_NETWORK_EVENTS, true);
+        Aware.setSetting(this, STATUS_NETWORK_TRAFFIC, true);
         if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, String.valueOf(Network_Provider.Network_Data.CONTENT_URI));
 
         //Telephony Sensor
         //Telephony Sensor (only when in Network sensor -- only if broadcast Mobile_ON and stop when Mobile_off)? will now from here the type of telephony
-        Aware.setSetting(this, Aware_Preferences.STATUS_TELEPHONY, true);
+        Aware.setSetting(this, STATUS_TELEPHONY, true);
         if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, String.valueOf(Telephony_Provider.Telephony_Data.CONTENT_URI));
 
 
@@ -141,14 +160,14 @@ public class ToolbarActivity extends ActionBarActivity {
 
         //Procesor load problably only for tests if it is not taking too much processor
         if(MONITORING_DEBUG_FLAG){
-            Aware.setSetting(this, Aware_Preferences.STATUS_PROCESSOR, false);
+            Aware.setSetting(this, STATUS_PROCESSOR, false);
             Log.d(LOG_TAG, String.valueOf(Processor_Provider.Processor_Data.CONTENT_URI));
 
         }
 
         //@TODO Google Activity Recognition plugin
 
-       sendBroadcast(new Intent(Aware.ACTION_AWARE_REFRESH));
+        sendBroadcast(new Intent(Aware.ACTION_AWARE_REFRESH));
 
 
     }
@@ -156,16 +175,16 @@ public class ToolbarActivity extends ActionBarActivity {
     private void stopSensors() {
        // Toast.makeText(getApplicationContext(), "Stop sensor after closing app!!", Toast.LENGTH_LONG).show();
         //Network Sensor
-        Aware.setSetting(this, Aware_Preferences.STATUS_NETWORK_EVENTS, false);
-        Aware.setSetting(this, Aware_Preferences.STATUS_NETWORK_TRAFFIC, false);
+        Aware.setSetting(this, STATUS_NETWORK_EVENTS, false);
+        Aware.setSetting(this, STATUS_NETWORK_TRAFFIC, false);
 
         //Telephony Sensor
         //Telephony Sensor (only when in Network sensor -- only if broadcast Mobile_ON and stop when Mobile_off)? will now from here the type of telephony
-        Aware.setSetting(this, Aware_Preferences.STATUS_TELEPHONY, false);
+        Aware.setSetting(this, STATUS_TELEPHONY, false);
 
         //Procesor load problably only for tests if it is not taking too much processor
         if(MONITORING_DEBUG_FLAG){
-            Aware.setSetting(this, Aware_Preferences.STATUS_PROCESSOR, false);
+            Aware.setSetting(this, STATUS_PROCESSOR, false);
         }
 
 
@@ -174,6 +193,7 @@ public class ToolbarActivity extends ActionBarActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         menu.clear();
+        getMenuInflater().inflate(R.menu.menu_browser, menu);
         getMenuInflater().inflate(R.menu.menu_browser, menu);
         etgivenWebSite = (EditText) findViewById(R.id.website_name);
         return super.onCreateOptionsMenu(menu);
