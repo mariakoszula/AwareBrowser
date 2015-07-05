@@ -68,7 +68,9 @@ public class BrowserActivity extends ToolbarActivity {
                 WebView.setWebContentsDebuggingEnabled(true);
             }
         }
-
+        if(mySharedPref.getBoolean(KEY_FIRST_INSTALL, true)) {
+            Toast.makeText(getApplicationContext(), "Fist install, the next time you run the application the questionary after session will be triggered!", Toast.LENGTH_LONG).show();
+        }
         //Enable Javascript, webView does not allow JS by default
         WebSettings settings = webPageView.getSettings();
         settings.setJavaScriptEnabled(javaScriptStatus);
@@ -211,20 +213,23 @@ public class BrowserActivity extends ToolbarActivity {
                     endTimeSystem = System.currentTimeMillis();
                     LoadTimeSystem = endTimeSystem - startTimeSystem;
 
-                    ContentValues plt_data = new ContentValues();
-                    plt_data.put(Browser_Provider.Browser_Data.DEVICE_ID, Aware.getSetting(getApplicationContext(), Aware_Preferences.DEVICE_ID));
-                    plt_data.put(Browser_Provider.Browser_Data.TIMESTAMP, System.currentTimeMillis());
-                    plt_data.put(Browser_Provider.Browser_Data.SESSION_ID, ToolbarActivity.mySharedPref.getString(KEY_SESSION_ID, "no data"));
-                    plt_data.put(Browser_Provider.Browser_Data.WEB_PAGE, webPageView.getUrl());
-                    plt_data.put(Browser_Provider.Browser_Data.PAGE_LOAD_TIME, LoadTimeSystem);
-                try{
-                    getBaseContext().getContentResolver().insert(Browser_Provider.Browser_Data.CONTENT_URI, plt_data);
+                    if(!mySharedPref.getBoolean(KEY_FIRST_INSTALL, true)) {
+                        /*Send data to browser provider*/
+                        ContentValues plt_data = new ContentValues();
+                        plt_data.put(Browser_Provider.Browser_Data.DEVICE_ID, Aware.getSetting(getApplicationContext(), Aware_Preferences.DEVICE_ID));
+                        plt_data.put(Browser_Provider.Browser_Data.TIMESTAMP, System.currentTimeMillis());
+                        plt_data.put(Browser_Provider.Browser_Data.SESSION_ID, Aware.getSetting(getApplicationContext(), Aware_Preferences.SESSION_ID));
+                        plt_data.put(Browser_Provider.Browser_Data.WEB_PAGE, webPageView.getUrl());
+                        plt_data.put(Browser_Provider.Browser_Data.PAGE_LOAD_TIME, LoadTimeSystem);
+                        try {
+                            getBaseContext().getContentResolver().insert(Browser_Provider.Browser_Data.CONTENT_URI, plt_data);
 
-                    }catch( SQLiteException e ) {
-                        if(Aware.DEBUG) Log.d(LOG_TAG,e.getMessage());
+                        } catch (SQLiteException e) {
+                            if (Aware.DEBUG) Log.d(LOG_TAG, e.getMessage());
+                        }
+
+                        sendBroadcast(new Intent(Aware.ACTION_AWARE_CURRENT_CONTEXT));
                     }
-
-                    sendBroadcast(new Intent(Aware.ACTION_AWARE_CURRENT_CONTEXT));
                     if (MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, webPageView.getUrl() + " PLT:"
                             + LoadTimeSystem + "ms");
                     etgivenWebSite.setText("");

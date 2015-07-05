@@ -6,6 +6,8 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+    <uses-permission android:name="android.permission.VIBRATE"/>
 
     <application
         android:allowBackup="true"
@@ -48,6 +50,21 @@
                 <action android:name="com.monitoringtool.awarebrowser.ACTION_CLOSE_BROWSER" />
             </intent-filter>
         </receiver>
+        <receiver android:name=".ESMAnswer_Receiver" >
+            <intent-filter>
+                <action android:name="ACTION_AWARE_ESM_DISMISSED" />
+                <action android:name="ACTION_AWARE_ESM_ANSWERED" />
+
+            </intent-filter>
+        </receiver>
+        <receiver android:name=".AWAREStarted_Receiver" >
+            <intent-filter>
+                <action android:name="ACTION_AWARE_STARTED" />
+
+            </intent-filter>
+        </receiver>
+
+
         <service
             android:name=".Browser_Service"
             android:exported="true" >

@@ -443,7 +443,7 @@ public class ESM_UI extends DialogFragment {
         sContext.getContentResolver().update(ESM_Data.CONTENT_URI, rowData, ESM_Data._ID + "=" + esm_id, null);
         
         Intent answer = new Intent(ESM.ACTION_AWARE_ESM_DISMISSED);
-        sContext.sendBroadcast(answer);
+		sContext.sendBroadcast(answer);
 	}
 	
 	@Override
@@ -478,6 +478,7 @@ public class ESM_UI extends DialogFragment {
                 		switch(status) {
                 			case ESM.STATUS_ANSWERED:
                 				if( Aware.DEBUG ) Log.d(TAG,"ESM has been answered!");
+
                 			break;
                 			case ESM.STATUS_DISMISSED:
                 				if( Aware.DEBUG ) Log.d(TAG,"ESM has been dismissed!");

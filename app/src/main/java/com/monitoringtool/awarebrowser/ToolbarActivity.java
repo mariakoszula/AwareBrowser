@@ -1,7 +1,9 @@
 package com.monitoringtool.awarebrowser;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.provider.Browser;
@@ -46,8 +48,8 @@ public class ToolbarActivity extends ActionBarActivity {
     public static final boolean MONITORING_DEBUG_FLAG = true;
     public static final String SHARED_PREF_FILE = "mySharedPref";
     public static final String KEY_IS_BROWSER_SERVICE_RUNNING = "KEY_ID_BROWSER_SERVICE_RUNNING";
-    public static final String KEY_SESSION_ID = "KEY_SESSION_ID";
-    public static final String KEY_FIRST_INSTALL = "KEY_ID_STOP_SENSORS";
+
+    public static final String KEY_FIRST_INSTALL = "KEY_FIRST_INSTALL";
 
 
     public static SharedPreferences mySharedPref;
@@ -75,23 +77,22 @@ public class ToolbarActivity extends ActionBarActivity {
         setContentView(R.layout.browser_toolbar);
         Log.d(LOG_TAG, "on create toolbar");
 
-        /*Prepare new SESSION_ID*/
         mySharedPref = getSharedPreferences(SHARED_PREF_FILE, Context.MODE_PRIVATE);
         editor = mySharedPref.edit();
-        UUID uuid = UUID.randomUUID();
-        editor.putString(KEY_SESSION_ID, uuid.toString());
-        editor.putBoolean(KEY_IS_BROWSER_SERVICE_RUNNING, false);
-        editor.commit();
 
-        /*Check if aware sensors are already running e.g. if we reopen application to quick and aware service is not stopeed*/
-        Log.d(LOG_TAG, String.valueOf(mySharedPref.getBoolean(KEY_IS_BROWSER_SERVICE_RUNNING, false)));
-        if(!mySharedPref.getBoolean(KEY_IS_BROWSER_SERVICE_RUNNING, false)){
-            if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "RUN Browser_Service");
+
+
+        if(mySharedPref.getBoolean(KEY_FIRST_INSTALL, true)){
+            if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "First install do not run ESM yet");
+
+
+        }
+         /*Check if aware sensors are already running e.g. if we reopen application to quick and aware service is not stopped*/
+        if (!mySharedPref.getBoolean(KEY_IS_BROWSER_SERVICE_RUNNING, false)) {
+            if (MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "RUN Browser_Service");
             Intent browserService = new Intent(getApplicationContext(), Browser_Service.class);
             getApplicationContext().startService(browserService);
         }
-
-        prepareToolbar();
 
     }
     public void prepareToolbar() {
@@ -173,10 +174,15 @@ public class ToolbarActivity extends ActionBarActivity {
         if(isBrowserActivityVisible)
             setIsBrowserActivityVisible(false);
         if(!isInstructionsActivityVisible && !isBrowserActivityVisible) {
-            Intent browserClosed = new Intent();
-            browserClosed.setAction(ToolbarActivity.ACTION_CLOSE_BROWSER);
-            sendBroadcast(browserClosed);
-            //@TODO figure out if I should finish it or not
+            if(!mySharedPref.getBoolean(KEY_FIRST_INSTALL, true)) {
+                if(MONITORING_DEBUG_FLAG)Log.d(LOG_TAG, "Send ACTION_CLOSE_BROWSER");
+                Intent browserClosed = new Intent();
+                browserClosed.setAction(ToolbarActivity.ACTION_CLOSE_BROWSER);
+                sendBroadcast(browserClosed);
+                //@TODO figure out if I should finish it or not
+            }else{
+                if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "It is first install no ESM will be set");
+            }
             finish();
         }
     }
@@ -185,6 +191,11 @@ public class ToolbarActivity extends ActionBarActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "Toolbar terminated");
+        if (MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "Toolbar terminated");
+        if(mySharedPref.getBoolean(KEY_FIRST_INSTALL, true)) {
+            editor.putBoolean(KEY_FIRST_INSTALL, false);
+            editor.commit();
+            stopService(new Intent(getApplicationContext(), Browser_Service.class));
+        }
     }
 }

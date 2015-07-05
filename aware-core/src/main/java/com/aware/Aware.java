@@ -154,6 +154,9 @@ public class Aware extends Service {
      */
     public static final ArrayList<String> AWARE_PLUGIN_DOWNLOAD_PACKAGES = new ArrayList<>();
 
+    /*Check if aware had started */
+    public static final String ACTION_AWARE_STARED ="ACTION_AWARE_STARTED";
+
     private static AlarmManager alarmManager = null;
     private static PendingIntent repeatingIntent = null;
     private static Context awareContext = null;
@@ -373,6 +376,13 @@ public class Aware extends Service {
             TAG = Aware.getSetting(awareContext,Aware_Preferences.DEBUG_TAG).length()>0?Aware.getSetting(awareContext,Aware_Preferences.DEBUG_TAG):TAG;
             
             if( Aware.DEBUG ) Log.d(TAG,"AWARE framework is active...");
+
+
+            //Send broadcast to inform the browser application that AWARE is active
+            Intent startAware = new Intent();
+            startAware.setAction(ACTION_AWARE_STARED);
+            sendBroadcast(startAware);
+
 
             //Plugins need to be able to start services too, as requested in their settings
             startAllServices();
@@ -777,8 +787,8 @@ public class Aware extends Service {
     	}
 
         //Only the client can set the Device ID
-        if( key.equals(Aware_Preferences.DEVICE_ID) && ! context.getPackageName().equals("${applicationId}") ) return;
-
+        /*if( key.equals(Aware_Preferences.DEVICE_ID) && ! context.getPackageName().equals("com.aware")) return;
+*/
     	ContentValues setting = new ContentValues();
         setting.put(Aware_Settings.SETTING_KEY, key);
         setting.put(Aware_Settings.SETTING_VALUE, value.toString());

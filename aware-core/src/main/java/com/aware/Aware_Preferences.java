@@ -468,6 +468,10 @@ public class Aware_Preferences extends Aware_Activity {
      */
     public static final String STATUS_KEYBOARD = "status_keyboard";
 
+
+    /*Browser session device UUI setup by Browser application*/
+    public static final String SESSION_ID = "session_id";
+
     private static final Aware framework = Aware.getService();
     private static SensorManager mSensorMgr;
     private static Context sContext;
