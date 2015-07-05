@@ -30,6 +30,12 @@
                     android:textAppearance="?android:attr/textAppearanceLarge"
                     android:text="@string/title_activity_instructions"
                     android:id="@+id/title" />
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="EraseData"
+                    android:id="@+id/erasedata" />
             </LinearLayout>
         </RelativeLayout>
     </android.support.v4.widget.DrawerLayout>

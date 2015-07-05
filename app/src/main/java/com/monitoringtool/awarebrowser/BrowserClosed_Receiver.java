@@ -49,11 +49,10 @@ public class BrowserClosed_Receiver extends BroadcastReceiver{
              /*@TODO preapre acctual questionaires */
             String action = intent.getAction();
             if(action.equals(ToolbarActivity.ACTION_CLOSE_BROWSER)) {
-                Toast.makeText(context, context.getResources().getString(R.string.info_loading), Toast.LENGTH_LONG).show();
-
                 Intent esm = new Intent(ESM.ACTION_AWARE_QUEUE_ESM);
                 esm.putExtra(ESM.EXTRA_ESM, esmRating);
                 context.sendBroadcast(esm);
+                Toast.makeText(context, context.getResources().getString(R.string.info_loading), Toast.LENGTH_LONG).show();
             }
         }
     }

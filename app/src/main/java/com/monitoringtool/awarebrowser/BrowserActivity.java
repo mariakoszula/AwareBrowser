@@ -69,16 +69,9 @@ public class BrowserActivity extends ToolbarActivity {
             }
         }
 
-
-
         //Enable Javascript, webView does not allow JS by default
         WebSettings settings = webPageView.getSettings();
         settings.setJavaScriptEnabled(javaScriptStatus);
-
-        if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "Phone SDK: " + String.valueOf(Build.VERSION.SDK_INT));
-
-
-
     }
 
     @Override
@@ -97,16 +90,13 @@ public class BrowserActivity extends ToolbarActivity {
         super.onStart();
         if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "BrowserActivity On Start called");
         setIsBrowserActivityVisible(true);
-             /*   TelephonyManager telephonyManager = (TelephonyManager) this.getSystemService(Context.TELEPHONY_SERVICE );
-        boolean isLTEConnected = telephonyManager.getNetworkType() == TelephonyManager.NETWORK_TYPE_LTE;
-        if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "LTE: " + String.valueOf(isLTEConnected));*/
-
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "BrowserActivty On Resume called");
+
         Intent intent = getIntent();
         webSiteToSearch = intent.getStringExtra(ToolbarActivity.EXTRA_WEB_SITE);
 
@@ -129,7 +119,6 @@ public class BrowserActivity extends ToolbarActivity {
     public void searchForWebPage(String webSite) {
         UrlValidator urlToValidate = new UrlValidator(webSite);
         if(urlToValidate.checkUrl()) {
-
                 webViewOnPageFinishOnPageStartMethod(urlToValidate.getWebSite());
 
         }else{
@@ -181,8 +170,6 @@ public class BrowserActivity extends ToolbarActivity {
     }
 
 
-
-
     private void webViewOnPageFinishOnPageStartMethod(String webSite) {
         webPageView.loadUrl(webSite);
         webPageView.setWebViewClient(new WebViewClient() {
@@ -227,7 +214,7 @@ public class BrowserActivity extends ToolbarActivity {
                     ContentValues plt_data = new ContentValues();
                     plt_data.put(Browser_Provider.Browser_Data.DEVICE_ID, Aware.getSetting(getApplicationContext(), Aware_Preferences.DEVICE_ID));
                     plt_data.put(Browser_Provider.Browser_Data.TIMESTAMP, System.currentTimeMillis());
-                    plt_data.put(Browser_Provider.Browser_Data.UNIQUE_DEVICE_ID, ToolbarActivity.mySharedPref.getString(KEY_UNIQUE_DEVICE_ID, "no data"));
+                    plt_data.put(Browser_Provider.Browser_Data.SESSION_ID, ToolbarActivity.mySharedPref.getString(KEY_SESSION_ID, "no data"));
                     plt_data.put(Browser_Provider.Browser_Data.WEB_PAGE, webPageView.getUrl());
                     plt_data.put(Browser_Provider.Browser_Data.PAGE_LOAD_TIME, LoadTimeSystem);
                 try{
@@ -271,7 +258,6 @@ public class BrowserActivity extends ToolbarActivity {
     protected void onStop() {
         super.onStop();
         setIsBrowserActivityVisible(false);
-
         if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "BrowserActivty On Stop called");
 
     }
@@ -281,7 +267,6 @@ public class BrowserActivity extends ToolbarActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        sendBroadcast(new Intent(Aware.ACTION_AWARE_CLEAR_DATA));
         if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "BrowserActivty On Destroy called");
     }
 }

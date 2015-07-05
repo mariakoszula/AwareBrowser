@@ -24,7 +24,7 @@ import java.util.HashMap;
  */
 public class Browser_Provider extends ContentProvider {
     public static String AUTHORITY = "com.monitoringtool.awarebrowser.provider.browserplt";
-    public static final int DATABASE_VERSION = 1;
+    public static final int DATABASE_VERSION = 2;
 
     private static final int BROWSERPLT = 1;
     private static final int BROWSERPLT_ID = 2;
@@ -41,7 +41,7 @@ public class Browser_Provider extends ContentProvider {
         public static final String _ID = "_id";
         public static final String TIMESTAMP = "timestamp";
         public static final String DEVICE_ID = "device_id";
-        public static final String UNIQUE_DEVICE_ID = "unique_device_id";
+        public static final String SESSION_ID = "session_id";
         public static final String WEB_PAGE = "web_page";
         public static final String PAGE_LOAD_TIME = "page_load_time";
 
@@ -54,7 +54,7 @@ public class Browser_Provider extends ContentProvider {
             Browser_Data._ID + " integer primary key autoincrement,"
             + Browser_Data.TIMESTAMP + " real default 0,"
             + Browser_Data.DEVICE_ID + " text default '',"
-            + Browser_Data.UNIQUE_DEVICE_ID + " text default '',"
+            + Browser_Data.SESSION_ID + " text default '',"
             + Browser_Data.WEB_PAGE + " text default '',"
             + Browser_Data.PAGE_LOAD_TIME + " real default 0,"
             + "UNIQUE (" + Browser_Data.TIMESTAMP + "," + Browser_Data.DEVICE_ID + ")"
@@ -89,7 +89,7 @@ public class Browser_Provider extends ContentProvider {
         screenProjectionMap.put(Browser_Data._ID, Browser_Data._ID);
         screenProjectionMap.put(Browser_Data.TIMESTAMP, Browser_Data.TIMESTAMP);
         screenProjectionMap.put(Browser_Data.DEVICE_ID, Browser_Data.DEVICE_ID);
-        screenProjectionMap.put(Browser_Data.UNIQUE_DEVICE_ID, Browser_Data.UNIQUE_DEVICE_ID);
+        screenProjectionMap.put(Browser_Data.SESSION_ID, Browser_Data.SESSION_ID);
         screenProjectionMap.put(Browser_Data.WEB_PAGE, Browser_Data.WEB_PAGE);
         screenProjectionMap.put(Browser_Data.PAGE_LOAD_TIME, Browser_Data.PAGE_LOAD_TIME);
 
