@@ -5,7 +5,6 @@
       <module fileurl="file://$PROJECT_DIR$/AwareBrowser.iml" filepath="$PROJECT_DIR$/AwareBrowser.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/aware-core/aware-core.iml" filepath="$PROJECT_DIR$/aware-core/aware-core.iml" />
-      <module fileurl="file://$PROJECT_DIR$/com.aware.plugin.google.activity_recognition/com.aware.plugin.google.activity_recognition.iml" filepath="$PROJECT_DIR$/com.aware.plugin.google.activity_recognition/com.aware.plugin.google.activity_recognition.iml" />
     </modules>
   </component>
 </project>

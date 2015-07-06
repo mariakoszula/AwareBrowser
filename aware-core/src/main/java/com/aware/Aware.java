@@ -378,11 +378,6 @@ public class Aware extends Service {
             if( Aware.DEBUG ) Log.d(TAG,"AWARE framework is active...");
 
 
-            //Send broadcast to inform the browser application that AWARE is active
-            Intent startAware = new Intent();
-            startAware.setAction(ACTION_AWARE_STARED);
-            sendBroadcast(startAware);
-
 
             //Plugins need to be able to start services too, as requested in their settings
             startAllServices();

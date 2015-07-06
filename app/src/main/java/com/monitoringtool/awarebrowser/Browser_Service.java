@@ -1,5 +1,6 @@
 package com.monitoringtool.awarebrowser;
 
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -7,6 +8,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
@@ -39,11 +41,9 @@ public class Browser_Service extends Aware_Plugin {
 
     private static final String LOG_TAG_SERVICE = "WLT:Browser_Service";
     public static final String DASHBOARD_STUDY_URL = "https://api.awareframework.com/index.php/webservice/index/403/yqA2zgDrJOPl";
-    //private ESMStatusListener esm_statuses;
 
-    public static final String KEY_SESSION_ID = "KEY_SESSION_ID";
 
-    private static final int WAIT_TIME = 1 * 60 * 1000;
+    private static final int WAIT_TIME_FOR_AWARE = 10 * 1000;
 
     @Override
     public void onCreate() {
@@ -51,17 +51,8 @@ public class Browser_Service extends Aware_Plugin {
 
         if(ToolbarActivity.MONITORING_DEBUG_FLAG) Log.d(LOG_TAG_SERVICE, "Browser_service runnig");
 
+        new SetUpAware().execute();
 
-
-        startSensors();
-
-        /*Listen to ESM answers */
-       /* IntentFilter esm_filter = new IntentFilter();
-        esm_filter.addAction(ESM.ACTION_AWARE_ESM_DISMISSED);
-        esm_filter.addAction(ESM.ACTION_AWARE_ESM_EXPIRED);
-        esm_filter.addAction(ESM.ACTION_AWARE_ESM_ANSWERED);
-        esm_filter.addAction(ESM.ACTION_AWARE_ESM_QUEUE_COMPLETE);
-        registerReceiver(esm_statuses, esm_filter);*/
 
 
         /*To save datatabase in remote server*/
@@ -115,9 +106,9 @@ public class Browser_Service extends Aware_Plugin {
         //Install if aware first install
 
         //Start WebService - sync data with Server every  x minutes - default 30 -- run from second install when ESM is running
-   //     Aware.setSetting(getApplicationContext(), STATUS_WEBSERVICE, true);
-    //    Aware.setSetting(getApplicationContext(), WEBSERVICE_SERVER, DASHBOARD_STUDY_URL);
-     //   Aware.setSetting(getApplicationContext(), FREQUENCY_WEBSERVICE, 30);
+     /*   Aware.setSetting(getApplicationContext(), STATUS_WEBSERVICE, true);
+        Aware.setSetting(getApplicationContext(), WEBSERVICE_SERVER, DASHBOARD_STUDY_URL);
+        Aware.setSetting(getApplicationContext(), FREQUENCY_WEBSERVICE, 60);*/
 
         sendBroadcast(new Intent(Aware.ACTION_AWARE_REFRESH));
     }
@@ -142,11 +133,49 @@ public class Browser_Service extends Aware_Plugin {
         }
 
         //Stop WebServices
-     //   Aware.setSetting(getApplicationContext(), STATUS_WEBSERVICE, false);
-//
-
+      /*  Aware.setSetting(getApplicationContext(), STATUS_WEBSERVICE, false);*/
 
         sendBroadcast(new Intent(Aware.ACTION_AWARE_REFRESH));
+    }
+
+    private class SetUpAware extends AsyncTask<Void, Integer, Void>{
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+         /*   final Handler handler = new Handler();
+
+            final Runnable doWait = new Runnable() {
+                @Override
+                public void run() {
+                    if(ToolbarActivity.MONITORING_DEBUG_FLAG) Log.d(LOG_TAG_SERVICE, "Prepare some delay after sensors are started: " + WAIT_TIME_FOR_AWARE);
+                }
+            };
+            handler.postDelayed(doWait, WAIT_TIME_FOR_AWARE);
+*/
+            startSensors();
+            try {
+                Thread.sleep(WAIT_TIME_FOR_AWARE);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            super.onProgressUpdate(values);
+            if(ToolbarActivity.MONITORING_DEBUG_FLAG) Log.d(LOG_TAG_SERVICE, "Progress: " + values[0]);
+
+        }
+
+        @Override
+        protected void onPostExecute(Void aLong) {
+            if(ToolbarActivity.MONITORING_DEBUG_FLAG) Log.d(LOG_TAG_SERVICE, "On Post Exectue Aware started");
+            Toast.makeText(getApplicationContext(), "Aware prepared", Toast.LENGTH_LONG).show();
+            Intent sendAwareReady = new Intent();
+            sendAwareReady.setAction(ToolbarActivity.ACTION_AWARE_READY);
+            sendBroadcast(sendAwareReady);
+        }
     }
 
     @Override
@@ -171,7 +200,6 @@ public class Browser_Service extends Aware_Plugin {
     public void onDestroy() {
         super.onDestroy();
         if(ToolbarActivity.MONITORING_DEBUG_FLAG) Log.d(LOG_TAG_SERVICE, "Browser_service terminated");
-       // getApplicationContext().unregisterReceiver(esm_statuses);
         stopSensors();
 
 
@@ -181,51 +209,5 @@ public class Browser_Service extends Aware_Plugin {
         editor.commit();
     }
 
-/*    public class ESMStatusListener extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Log.d("ESM", "Am I here at all?.");
-
-            String trigger = null;
-            String ans = null;
-
-            Cursor esm_data = context.getContentResolver().query(ESM_Provider.ESM_Data.CONTENT_URI, null, null, null, null);
-
-            if (esm_data != null && esm_data.moveToLast()) {
-                ans = esm_data.getString(esm_data.getColumnIndex(ESM_Provider.ESM_Data.ANSWER));
-                trigger = esm_data.getString(esm_data.getColumnIndex(ESM_Provider.ESM_Data.TRIGGER));
-            }
-            if (esm_data != null) {
-                esm_data.close();
-            }
-            if (trigger != null && !trigger.contains("com.monitoringtool.awarebrowser")) {
-                Log.d("ESM", "Somebody else initiated the ESM, no need to react, returning.");
-                return;
-            }
-
-
-            if (intent.getAction().equals(ESM.ACTION_AWARE_ESM_EXPIRED)) {
-                Log.d(ToolbarActivity.LOG_TAG, "ESM expired could end service");
-
-                Toast.makeText(context, "ESM expired.", Toast.LENGTH_LONG).show();
-            } else if (intent.getAction().equals(ESM.ACTION_AWARE_ESM_DISMISSED)) {
-                Log.d(ToolbarActivity.LOG_TAG, "ESM dismissed could end service");
-
-                Toast.makeText(context, "ESM dismissed.", Toast.LENGTH_LONG).show();
-            } else if (intent.getAction().equals(ESM.ACTION_AWARE_ESM_ANSWERED)) {
-                Log.d(ToolbarActivity.LOG_TAG, "ESM answered could end service");
-                if(ToolbarActivity.MONITORING_DEBUG_FLAG) Log.d(ToolbarActivity.LOG_TAG, "Yeey, esm asnwered");
-                //AysncTask sendBroadcast
-                sendBroadcast(new Intent(Aware.ACTION_AWARE_SYNC_DATA));
-                //stopSelf();
-            } else if(intent.getAction().equals(ESM.ACTION_AWARE_ESM_QUEUE_COMPLETE)){
-                Log.d(ToolbarActivity.LOG_TAG, "ESM queue completa");
-
-                Toast.makeText(context, "ESM queueu complete.", Toast.LENGTH_LONG).show();
-                sendBroadcast(new Intent(Aware.ACTION_AWARE_SYNC_DATA));
-                //stopSelf();
-            }
-        }
-    }*/
 }
 

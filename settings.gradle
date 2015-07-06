@@ -1,1 +1,1 @@
-include ':app', ':aware-core', ':com.aware.plugin.google.activity_recognition'
+include ':app', ':aware-core'

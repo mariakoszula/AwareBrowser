@@ -14,30 +14,42 @@ import com.aware.providers.ESM_Provider;
 /**
  * Created by Maria on 2015-07-05.
  */
+/*After ESM is answered run WebService */
+
+
 public class ESMAnswer_Receiver extends BroadcastReceiver {
+
+    private static final String LOG_TAG_ESM = "WPL:ESM";
+
     @Override
     public void onReceive(Context context, Intent intent) {
 
         if (intent.getAction().equals(ESM.ACTION_AWARE_ESM_EXPIRED)) {
-            Log.d(ToolbarActivity.LOG_TAG, "ESM expired could end service");
+            if(ToolbarActivity.MONITORING_DEBUG_FLAG) Log.d(LOG_TAG_ESM, "ESM expired send BrowserClosed message again.");
 
-            Toast.makeText(context, "ESM expired.", Toast.LENGTH_LONG).show();
+            Toast.makeText(context, "ESM expired. Wait for re-run.", Toast.LENGTH_LONG).show();
+            Intent browserClosed = new Intent();
+            browserClosed.setAction(ToolbarActivity.ACTION_CLOSE_BROWSER);
+            context.sendBroadcast(browserClosed);
+
         } else if (intent.getAction().equals(ESM.ACTION_AWARE_ESM_DISMISSED)) {
-            Log.d(ToolbarActivity.LOG_TAG, "ESM dismissed could end service");
+            if(ToolbarActivity.MONITORING_DEBUG_FLAG) Log.d(LOG_TAG_ESM, "ESM dismissed. Call BrowserClosed intent agian.");
+            Toast.makeText(context, "ESM dismissed. Wait for re-run.", Toast.LENGTH_LONG).show();
 
-            Toast.makeText(context, "ESM dismissed.", Toast.LENGTH_LONG).show();
+            Intent browserClosed = new Intent();
+            browserClosed.setAction(ToolbarActivity.ACTION_CLOSE_BROWSER);
+            context.sendBroadcast(browserClosed);
+
         } else if (intent.getAction().equals(ESM.ACTION_AWARE_ESM_ANSWERED)) {
-            Log.d(ToolbarActivity.LOG_TAG, "ESM answered could end service");
-            if(ToolbarActivity.MONITORING_DEBUG_FLAG) Log.d(ToolbarActivity.LOG_TAG, "Yeey, esm asnwered");
-            //AysncTask sendBroadcast to synchronize with server and end Browser_service
-           // sendBroadcast(new Intent(Aware.ACTION_AWARE_SYNC_DATA));
-            //stopSelf();
-        } else if(intent.getAction().equals(ESM.ACTION_AWARE_ESM_QUEUE_COMPLETE)){
-            Log.d(ToolbarActivity.LOG_TAG, "ESM queue completa");
+            if(ToolbarActivity.MONITORING_DEBUG_FLAG) Log.d(LOG_TAG_ESM, "Yupi! ESM answered.");
 
-            Toast.makeText(context, "ESM queueu complete.", Toast.LENGTH_LONG).show();
-            //sendBroadcast(new Intent(Aware.ACTION_AWARE_SYNC_DATA));
-            //stopSelf();
+            //AysncTask sendBroadcast to synchronize with server and end Browser_service
+           // sendBroadcast(new Intent(Aware.ACTION_AWARE_SYNC_DATA)); and kill service after this
+            if(ToolbarActivity.MONITORING_DEBUG_FLAG) Log.d(LOG_TAG_ESM, "Send data to the server");
+
+            //stop BrowserService;
+            context.stopService(new Intent(context, Browser_Service.class));
+            if(ToolbarActivity.MONITORING_DEBUG_FLAG) Log.d(LOG_TAG_ESM, "Stop Browser_Service");
         }
     }
 }

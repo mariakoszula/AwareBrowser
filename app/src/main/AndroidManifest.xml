@@ -16,6 +16,14 @@
         android:theme="@style/Theme.Aware"
         tools:replace="android:icon, android:theme" >
         <activity
+            android:name=".ToolbarActivity"
+            android:label="@string/title_activity_browser"
+            android:launchMode="singleTop"
+            android:noHistory="true"
+            android:theme="@style/Theme.Browser"
+            android:windowSoftInputMode="stateHidden" >
+        </activity>
+        <activity
             android:name=".BrowserActivity"
             android:label="@string/title_activity_browser"
             android:launchMode="singleTop"
@@ -24,18 +32,10 @@
             android:windowSoftInputMode="stateHidden" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".ToolbarActivity"
-            android:label="@string/title_activity_browser"
-            android:launchMode="singleTop"
-            android:noHistory="true"
-            android:theme="@style/Theme.Browser"
-            android:windowSoftInputMode="stateHidden" >
-        </activity>
+
         <activity
             android:name=".InstructionsActivity"
             android:label="@string/title_activity_instructions"
@@ -54,13 +54,7 @@
             <intent-filter>
                 <action android:name="ACTION_AWARE_ESM_DISMISSED" />
                 <action android:name="ACTION_AWARE_ESM_ANSWERED" />
-
-            </intent-filter>
-        </receiver>
-        <receiver android:name=".AWAREStarted_Receiver" >
-            <intent-filter>
-                <action android:name="ACTION_AWARE_STARTED" />
-
+                <action android:name="ACTION_AWARE_ESM_EXPIRED" />
             </intent-filter>
         </receiver>
 

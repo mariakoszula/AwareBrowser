@@ -43,6 +43,7 @@ public class ToolbarActivity extends ActionBarActivity {
     public static final String PACKAGE_NAME = "com.monitoringtool.awarebrowser";
     public static final String EXTRA_WEB_SITE = "com.monitoringtool.awarebrowser.WEB_SITE";
     public static final String ACTION_CLOSE_BROWSER = "com.monitoringtool.awarebrowser.ACTION_CLOSE_BROWSER";
+    public static final String ACTION_AWARE_READY = "com.monitoringtool.awarebrowser.ACTION_AWARE_READY";
 
     public static final String RESEARCH_WEBSITE = "http://www.mariak.webd.pl/study/";
     public static final boolean MONITORING_DEBUG_FLAG = true;
@@ -154,7 +155,7 @@ public class ToolbarActivity extends ActionBarActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        Log.d(LOG_TAG, "TOolbar on resume");
+        if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "Toolbar on resume");
     }
 
 
