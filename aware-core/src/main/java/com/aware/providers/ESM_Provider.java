@@ -29,7 +29,7 @@ import java.util.HashMap;
  */
 public class ESM_Provider extends ContentProvider {
 
-	public static final int DATABASE_VERSION = 2;
+	public static final int DATABASE_VERSION = 3;
 
 	/**
 	 * Authority of content provider
@@ -58,6 +58,7 @@ public class ESM_Provider extends ContentProvider {
 		public static final String _ID = "_id";
 		public static final String TIMESTAMP = "timestamp";
 		public static final String DEVICE_ID = "device_id";
+		public static final String SESSION_ID = "session_id";
 		public static final String TYPE = "esm_type";
 		public static final String TITLE = "esm_title";
 		public static final String SUBMIT = "esm_submit";
@@ -82,8 +83,10 @@ public class ESM_Provider extends ContentProvider {
 	public static final String[] TABLES_FIELDS = { ESM_Data._ID
 			+ " integer primary key autoincrement," + ESM_Data.TIMESTAMP
 			+ " real default 0," + ESM_Data.DEVICE_ID + " text default '',"
-			+ ESM_Data.TYPE + " integer default 0," + ESM_Data.TITLE
-			+ " text default ''," + ESM_Data.SUBMIT + " text default '',"
+			+ ESM_Data.SESSION_ID + " text default '',"
+			+ ESM_Data.TYPE + " integer default 0,"
+
+			+ ESM_Data.TITLE + " text default ''," + ESM_Data.SUBMIT + " text default '',"
 			+ ESM_Data.INSTRUCTIONS + " text default ''," + ESM_Data.RADIOS
 			+ " text default ''," + ESM_Data.CHECKBOXES + " text default '',"
 			+ ESM_Data.LIKERT_MAX + " integer default 0,"
@@ -197,6 +200,7 @@ public class ESM_Provider extends ContentProvider {
         questionsMap.put(ESM_Data._ID, ESM_Data._ID);
         questionsMap.put(ESM_Data.TIMESTAMP, ESM_Data.TIMESTAMP);
         questionsMap.put(ESM_Data.DEVICE_ID, ESM_Data.DEVICE_ID);
+		questionsMap.put(ESM_Data.SESSION_ID, ESM_Data.SESSION_ID);
         questionsMap.put(ESM_Data.TYPE, ESM_Data.TYPE);
         questionsMap.put(ESM_Data.TITLE, ESM_Data.TITLE);
         questionsMap.put(ESM_Data.SUBMIT, ESM_Data.SUBMIT);

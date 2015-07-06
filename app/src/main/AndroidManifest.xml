@@ -6,8 +6,8 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
-    <uses-permission android:name="android.permission.VIBRATE"/>
+<!--    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+    <uses-permission android:name="android.permission.VIBRATE"/>-->
 
     <application
         android:allowBackup="true"
@@ -55,6 +55,7 @@
                 <action android:name="ACTION_AWARE_ESM_DISMISSED" />
                 <action android:name="ACTION_AWARE_ESM_ANSWERED" />
                 <action android:name="ACTION_AWARE_ESM_EXPIRED" />
+                <action android:name="ACTION_AWARE_ESM_QUEUE_COMPLETE" />
             </intent-filter>
         </receiver>
 
@@ -106,6 +107,9 @@
             android:exported="true"
             android:readPermission="com.aware.READ_CONTEXT_DATA"
             android:writePermission="com.aware.WRITE_CONTEXT_DATA" />
+
+
+
 
 
     </application>

@@ -12,6 +12,7 @@ import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.BaseColumns;
+import android.provider.Telephony;
 import android.util.Log;
 
 import com.aware.Aware;
@@ -30,7 +31,7 @@ import java.util.HashMap;
  */
 public class Telephony_Provider extends ContentProvider {
 
-	public static final int DATABASE_VERSION = 8;
+	public static final int DATABASE_VERSION = 9;
 
 	/**
 	 * Provider authority: com.aware.TelephonyProvider
@@ -64,6 +65,7 @@ public class Telephony_Provider extends ContentProvider {
 		public static final String _ID = "_id";
 		public static final String TIMESTAMP = "timestamp";
 		public static final String DEVICE_ID = "device_id";
+		public static final String SESSION_ID = "session_id";
 		public static final String DATA_ENABLED = "data_enabled";
 		public static final String IMEI_MEID_ESN = "imei_meid_esn";
 		public static final String SOFTWARE_VERSION = "software_version";
@@ -162,14 +164,41 @@ public class Telephony_Provider extends ContentProvider {
 	public static String DATABASE_NAME = Environment
 			.getExternalStorageDirectory() + "/AWARE/" + "telephony.db";
 
-	public static final String[] DATABASE_TABLES = { "telephony", "gsm",
-			"gsm_neighbor", "cdma" };
+	public static final String[] DATABASE_TABLES = { "telephony" };
+
+	//public static final String[] DATABASE_TABLES = { "telephony", "gsm", "gsm_neighbor", "cdma" };
 
 	public static final String[] TABLES_FIELDS = {
 			// telephony
 			Telephony_Data._ID + " integer primary key autoincrement,"
 					+ Telephony_Data.TIMESTAMP + " real default 0,"
 					+ Telephony_Data.DEVICE_ID + " text default '',"
+					+ Telephony_Data.SESSION_ID + " text default '',"
+					+ Telephony_Data.DATA_ENABLED + " integer default 0,"
+					+ Telephony_Data.IMEI_MEID_ESN + " text default '',"
+					+ Telephony_Data.SOFTWARE_VERSION + " text default '',"
+					+ Telephony_Data.LINE_NUMBER + " text default '',"
+					+ Telephony_Data.NETWORK_COUNTRY_ISO_MCC
+					+ " text default '',"
+					+ Telephony_Data.NETWORK_OPERATOR_CODE
+					+ " text default '',"
+					+ Telephony_Data.NETWORK_OPERATOR_NAME
+					+ " text default ''," + Telephony_Data.NETWORK_TYPE
+					+ " integer default 0," + Telephony_Data.PHONE_TYPE
+					+ " integer default 0," + Telephony_Data.SIM_STATE
+					+ " integer default 0," + Telephony_Data.SIM_OPERATOR_CODE
+					+ " text default ''," + Telephony_Data.SIM_OPERATOR_NAME
+					+ " text default ''," + Telephony_Data.SIM_SERIAL
+					+ " text default ''," + Telephony_Data.SUBSCRIBER_ID
+					+ " text default '',"
+					+ "UNIQUE(" + Telephony_Data.TIMESTAMP + "," + Telephony_Data.DEVICE_ID + ")"};
+
+	/*public static final String[] TABLES_FIELDS = {
+			// telephony
+			Telephony_Data._ID + " integer primary key autoincrement,"
+					+ Telephony_Data.TIMESTAMP + " real default 0,"
+					+ Telephony_Data.DEVICE_ID + " text default '',"
+					+ Telephony_Data.SESSION_ID + " text default '',"
 					+ Telephony_Data.DATA_ENABLED + " integer default 0,"
 					+ Telephony_Data.IMEI_MEID_ESN + " text default '',"
 					+ Telephony_Data.SOFTWARE_VERSION + " text default '',"
@@ -220,7 +249,7 @@ public class Telephony_Provider extends ContentProvider {
 					+ CDMA_Data.EVDO_DBM + " integer default -1,"
 					+ CDMA_Data.EVDO_ECIO + " integer default -1,"
 					+ CDMA_Data.EVDO_SNR + " integer default -1," + "UNIQUE("
-					+ CDMA_Data.TIMESTAMP + "," + CDMA_Data.DEVICE_ID + ")" };
+					+ CDMA_Data.TIMESTAMP + "," + CDMA_Data.DEVICE_ID + ")" };*/
 
 	private static UriMatcher sUriMatcher = null;
 	private static HashMap<String, String> telephonyMap = null;
@@ -259,7 +288,7 @@ public class Telephony_Provider extends ContentProvider {
             database.setTransactionSuccessful();
             database.endTransaction();
 			break;
-		case GSM:
+		/*case GSM:
             database.beginTransaction();
 			count = database.delete(DATABASE_TABLES[1], selection,
 					selectionArgs);
@@ -279,7 +308,7 @@ public class Telephony_Provider extends ContentProvider {
 					selectionArgs);
             database.setTransactionSuccessful();
             database.endTransaction();
-			break;
+			break;*/
 		default:
 
 			throw new IllegalArgumentException("Unknown URI " + uri);
@@ -340,7 +369,7 @@ public class Telephony_Provider extends ContentProvider {
 				return tele_uri;
 			}
 			throw new SQLException("Failed to insert row into " + uri);
-		case GSM:
+/*		case GSM:
             database.beginTransaction();
 			long gsm_id = database.insertWithOnConflict(DATABASE_TABLES[1],
 					GSM_Data.DEVICE_ID, values, SQLiteDatabase.CONFLICT_IGNORE);
@@ -379,7 +408,7 @@ public class Telephony_Provider extends ContentProvider {
 				getContext().getContentResolver().notifyChange(cdma_uri, null);
 				return cdma_uri;
 			}
-			throw new SQLException("Failed to insert row into " + uri);
+			throw new SQLException("Failed to insert row into " + uri);*/
 		default:
 
 			throw new IllegalArgumentException("Unknown URI " + uri);
@@ -396,7 +425,7 @@ public class Telephony_Provider extends ContentProvider {
         sUriMatcher.addURI(Telephony_Provider.AUTHORITY, DATABASE_TABLES[0]
                 + "/#", TELEPHONY_ID);
 
-        sUriMatcher.addURI(Telephony_Provider.AUTHORITY, DATABASE_TABLES[1],
+        /*sUriMatcher.addURI(Telephony_Provider.AUTHORITY, DATABASE_TABLES[1],
                 GSM);
         sUriMatcher.addURI(Telephony_Provider.AUTHORITY, DATABASE_TABLES[1]
                 + "/#", GSM_ID);
@@ -409,12 +438,13 @@ public class Telephony_Provider extends ContentProvider {
         sUriMatcher.addURI(Telephony_Provider.AUTHORITY, DATABASE_TABLES[3],
                 CDMA);
         sUriMatcher.addURI(Telephony_Provider.AUTHORITY, DATABASE_TABLES[3]
-                + "/#", CDMA_ID);
+                + "/#", CDMA_ID);*/
 
         telephonyMap = new HashMap<String, String>();
         telephonyMap.put(Telephony_Data._ID, Telephony_Data._ID);
         telephonyMap.put(Telephony_Data.TIMESTAMP, Telephony_Data.TIMESTAMP);
         telephonyMap.put(Telephony_Data.DEVICE_ID, Telephony_Data.DEVICE_ID);
+		telephonyMap.put(Telephony_Data.SESSION_ID, Telephony_Data.SESSION_ID);
         telephonyMap.put(Telephony_Data.DATA_ENABLED,
                 Telephony_Data.DATA_ENABLED);
         telephonyMap.put(Telephony_Data.IMEI_MEID_ESN,
@@ -500,7 +530,7 @@ public class Telephony_Provider extends ContentProvider {
 			qb.setTables(DATABASE_TABLES[0]);
 			qb.setProjectionMap(telephonyMap);
 			break;
-		case GSM:
+		/*case GSM:
 			qb.setTables(DATABASE_TABLES[1]);
 			qb.setProjectionMap(gsmMap);
 			break;
@@ -511,7 +541,7 @@ public class Telephony_Provider extends ContentProvider {
 		case CDMA:
 			qb.setTables(DATABASE_TABLES[3]);
 			qb.setProjectionMap(cdmaMap);
-			break;
+			break;*/
 		default:
 
 			throw new IllegalArgumentException("Unknown URI " + uri);
@@ -548,7 +578,7 @@ public class Telephony_Provider extends ContentProvider {
             database.setTransactionSuccessful();
             database.endTransaction();
 			break;
-		case GSM:
+		/*case GSM:
             database.beginTransaction();
 			count = database.update(DATABASE_TABLES[1], values, selection,
 					selectionArgs);
@@ -568,7 +598,7 @@ public class Telephony_Provider extends ContentProvider {
 					selectionArgs);
             database.setTransactionSuccessful();
             database.endTransaction();
-			break;
+			break;*/
 		default:
 
 			throw new IllegalArgumentException("Unknown URI " + uri);

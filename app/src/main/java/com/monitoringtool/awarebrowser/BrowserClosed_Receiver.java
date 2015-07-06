@@ -38,19 +38,52 @@ public class BrowserClosed_Receiver extends BroadcastReceiver{
                             "'esm_likert_max_label': '"+ context.getResources().getString(R.string.esm_rating_max) +"'," +
                             "'esm_likert_min_label': '"+ context.getResources().getString(R.string.esm_rating_min) +"'," +
                             "'esm_likert_step': 1," +
-                            "'esm_submit': 'OK'," +
+                            "'esm_submit': '" + context.getResources().getString(R.string.esm_button_next) + "'," +
                             "'esm_expiration_threashold': 60," +
-                            "'esm_trigger': 'AwareBro answer'" + //maybe here some session ID which will be in browser provider and borwsers as well in shared prefrences
-                            "}}]";
-            final String esmContext =    "";
-            final String esmPlace =    "";
-            final String esmQuestionnaire = "";
+                            "'esm_trigger': 'AwareBro answer'" +
+                            "}},";
 
-             /*@TODO preapre acctual questionaires */
+
+            final String esmContext =
+                    "{'esm': {" +
+                            "'esm_type': " + ESM.TYPE_ESM_CHECKBOX +"," +
+                            "'esm_title': '" + context.getResources().getString(R.string.title_context) + "'," +
+                            "'esm_instructions': '" + context.getResources().getString(R.string.esm_context_instructions) + "'," +
+                            "'esm_checkboxes':['"+ context.getResources().getString(R.string.esm_context_answer1) +"','"+context.getResources().getString(R.string.esm_context_answer2)+"','"+context.getResources().getString(R.string.esm_context_answer3)+"','"+context.getResources().getString(R.string.esm_context_answer4)+"', '"+context.getResources().getString(R.string.esm_context_answer5) +"']," +
+                            "'esm_submit': '" + context.getResources().getString(R.string.esm_button_next) + " '," +
+                            "'esm_expiration_threashold': 60," +
+                            "'esm_trigger': 'AwareBro answer'" +
+                            "}},";
+
+
+            //can be probably replaced by Google Recognition System -- or use for comapring the reuslts
+            final String esmMovement =
+                    "{'esm': {" +
+                    "'esm_type': " + ESM.TYPE_ESM_RADIO +"," +
+                    "'esm_title': '" + context.getResources().getString(R.string.title_movement) + "'," +
+                    "'esm_instructions': '" + context.getResources().getString(R.string.esm_movement_instructions) + "'," +
+                    "'esm_radios':['"+ context.getResources().getString(R.string.esm_movement_answer1) +"','"+context.getResources().getString(R.string.esm_movement_answer2)+"','"+context.getResources().getString(R.string.esm_movement_answer3)+"'],"+
+                    "'esm_submit': '" + context.getResources().getString(R.string.esm_button_next) + " '," +
+                    "'esm_expiration_threashold': 60," +
+                    "'esm_trigger': 'AwareBro answer'" +
+                    "}},";
+
+            final String esmDelaysAcceptance =
+                    "{'esm': {" +
+                    "'esm_type': " + ESM.TYPE_ESM_QUICK_ANSWERS +"," +
+                    "'esm_title': '" + context.getResources().getString(R.string.title_delays_accept) + "'," +
+                    "'esm_instructions': '" + context.getResources().getString(R.string.esm_delays_accept_instructions) + "'," +
+                    "'esm_quick_answers':['" + context.getResources().getString(R.string.esm_answer_yes) + "','" + context.getResources().getString(R.string.esm_answer_no) + "']," +
+                    "'esm_expiration_threashold': 60," +
+                    "'esm_trigger': 'AwareBro answer'" +
+                    "}}]";
+
+            final String esmQuestionnaire = esmRating + esmContext + esmMovement + esmDelaysAcceptance;
+
             String action = intent.getAction();
             if(action.equals(ToolbarActivity.ACTION_CLOSE_BROWSER)) {
                 Intent esm = new Intent(ESM.ACTION_AWARE_QUEUE_ESM);
-                esm.putExtra(ESM.EXTRA_ESM, esmRating);
+                esm.putExtra(ESM.EXTRA_ESM, esmQuestionnaire);
                 context.sendBroadcast(esm);
                 Toast.makeText(context, context.getResources().getString(R.string.info_loading), Toast.LENGTH_LONG).show();
             }

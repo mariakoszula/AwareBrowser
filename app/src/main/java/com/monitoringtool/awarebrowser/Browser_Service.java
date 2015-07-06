@@ -43,7 +43,7 @@ public class Browser_Service extends Aware_Plugin {
     public static final String DASHBOARD_STUDY_URL = "https://api.awareframework.com/index.php/webservice/index/403/yqA2zgDrJOPl";
 
 
-    private static final int WAIT_TIME_FOR_AWARE = 10 * 1000;
+    private static final int WAIT_TIME_FOR_AWARE = 2 * 1000;
 
     @Override
     public void onCreate() {
@@ -72,13 +72,8 @@ public class Browser_Service extends Aware_Plugin {
         SharedPreferences mySharedPref = getSharedPreferences(ToolbarActivity.SHARED_PREF_FILE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = mySharedPref.edit();
 
-        //Prepare DEVICE_ID - the same for the device -- probably aware will take it
-       // UUID uuid_ID = UUID.randomUUID();
 
-      //  Aware.setSetting(getApplicationContext(), Aware_Preferences.DEVICE_ID, uuid_ID.toString());
-
-
-        //Prepare SESSION_ID - unique for each session -- add to Aware
+        //Prepare SESSION_ID - unique for each session
         UUID uuid_session = UUID.randomUUID();
         Aware.setSetting(getApplicationContext(), Aware_Preferences.SESSION_ID, uuid_session);
         if(ToolbarActivity.MONITORING_DEBUG_FLAG) Log.d(LOG_TAG_SERVICE, "Session ID, unique for each session: "+ Aware.getSetting(getApplicationContext(), Aware_Preferences.SESSION_ID));
@@ -105,10 +100,10 @@ public class Browser_Service extends Aware_Plugin {
         //@TODO Google Activity Recognition plugin
         //Install if aware first install
 
-        //Start WebService - sync data with Server every  x minutes - default 30 -- run from second install when ESM is running
-     /*   Aware.setSetting(getApplicationContext(), STATUS_WEBSERVICE, true);
+        //Start WebService - sync data with Server every  x minutes - default 30 -- run from second install when ESM is running -- move t his two ESM answered?? let me think about it
+        Aware.setSetting(getApplicationContext(), STATUS_WEBSERVICE, true);
         Aware.setSetting(getApplicationContext(), WEBSERVICE_SERVER, DASHBOARD_STUDY_URL);
-        Aware.setSetting(getApplicationContext(), FREQUENCY_WEBSERVICE, 60);*/
+        Aware.setSetting(getApplicationContext(), FREQUENCY_WEBSERVICE, 60);
 
         sendBroadcast(new Intent(Aware.ACTION_AWARE_REFRESH));
     }
@@ -133,7 +128,7 @@ public class Browser_Service extends Aware_Plugin {
         }
 
         //Stop WebServices
-      /*  Aware.setSetting(getApplicationContext(), STATUS_WEBSERVICE, false);*/
+        Aware.setSetting(getApplicationContext(), STATUS_WEBSERVICE, false);
 
         sendBroadcast(new Intent(Aware.ACTION_AWARE_REFRESH));
     }
@@ -153,11 +148,11 @@ public class Browser_Service extends Aware_Plugin {
             handler.postDelayed(doWait, WAIT_TIME_FOR_AWARE);
 */
             startSensors();
-            try {
+           /* try {
                 Thread.sleep(WAIT_TIME_FOR_AWARE);
             } catch (InterruptedException e) {
                 e.printStackTrace();
-            }
+            }*/
             return null;
         }
 
@@ -171,7 +166,6 @@ public class Browser_Service extends Aware_Plugin {
         @Override
         protected void onPostExecute(Void aLong) {
             if(ToolbarActivity.MONITORING_DEBUG_FLAG) Log.d(LOG_TAG_SERVICE, "On Post Exectue Aware started");
-            Toast.makeText(getApplicationContext(), "Aware prepared", Toast.LENGTH_LONG).show();
             Intent sendAwareReady = new Intent();
             sendAwareReady.setAction(ToolbarActivity.ACTION_AWARE_READY);
             sendBroadcast(sendAwareReady);

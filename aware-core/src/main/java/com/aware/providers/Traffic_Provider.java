@@ -30,7 +30,8 @@ import java.util.HashMap;
  */
 public class Traffic_Provider extends ContentProvider {
 
-	public static final int DATABASE_VERSION = 4;
+	public static final int DATABASE_VERSION = 5;
+	/*Adding Session_ID*/
 
 	/**
 	 * Authority of Screen content provider
@@ -59,6 +60,7 @@ public class Traffic_Provider extends ContentProvider {
 		public static final String _ID = "_id";
 		public static final String TIMESTAMP = "timestamp";
 		public static final String DEVICE_ID = "device_id";
+		public static final String SESSION_ID = "session_id";
 		public static final String NETWORK_TYPE = "network_type";
 		public static final String RECEIVED_BYTES = "double_received_bytes";
 		public static final String SENT_BYTES = "double_sent_bytes";
@@ -74,6 +76,7 @@ public class Traffic_Provider extends ContentProvider {
 	public static final String[] TABLES_FIELDS = { Traffic_Data._ID
 			+ " integer primary key autoincrement," + Traffic_Data.TIMESTAMP
 			+ " real default 0," + Traffic_Data.DEVICE_ID + " text default '',"
+			+ Traffic_Data.SESSION_ID + " text default '',"
 			+ Traffic_Data.NETWORK_TYPE + " integer default 0,"
 			+ Traffic_Data.RECEIVED_BYTES + " real default 0,"
 			+ Traffic_Data.SENT_BYTES + " real default 0,"
@@ -188,7 +191,9 @@ public class Traffic_Provider extends ContentProvider {
                 .put(Traffic_Data.TIMESTAMP, Traffic_Data.TIMESTAMP);
         trafficProjectionMap
                 .put(Traffic_Data.DEVICE_ID, Traffic_Data.DEVICE_ID);
-        trafficProjectionMap.put(Traffic_Data.NETWORK_TYPE,
+		trafficProjectionMap.put(Traffic_Data.SESSION_ID, Traffic_Data.SESSION_ID);
+
+		trafficProjectionMap.put(Traffic_Data.NETWORK_TYPE,
                 Traffic_Data.NETWORK_TYPE);
         trafficProjectionMap.put(Traffic_Data.RECEIVED_BYTES,
                 Traffic_Data.RECEIVED_BYTES);

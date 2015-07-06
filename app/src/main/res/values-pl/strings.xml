@@ -1,14 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Narzędzie monitorujące AwareBrowser</string>
-    <string name="title_activity_instructions">Instrukcje</string>
-    <string name="title_activity_browser">AwareBrows</string>
-    <string name="action_search">Szukaj</string>
-    <string name="action_instruction">Instrukcja</string>
-    <string name="action_about">O badaniu</string>
-    <string name="info_loading">Wczytywanie...</string>
-    <string name="bad_url">Błędny URL</string>
-    <string name="bad_connection">Sprawdź czy masz włączoną transmisje danych bądź WiFi</string>
-    <string name="title_rating">Oceń sesje</string>
-    <string name="aware_esm_questions">Ankieta do wypełnienia czeka...</string>
+<string name="app_name">Narzędzie monitorujące AwareBrowser</string>
+<string name="action_about">O badaniu</string>
+<string name="title_activity_browser">AwareBrows</string>
+<string name="title_activity_about">O badaniu</string>
+<string name="action_search">Szukaj</string>
+<string name="action_instruction">Instrukcje</string>
+<string name="title_activity_instructions">Instrukcje</string>
+<string name="info_loading">Ładowanie...</string>
+<string name="bad_url">Błędny URL</string>
+<string name="bad_connection">Sprawdź czy masz włączoną transmisje danych bądź WiFi</string>
+<string name="title_rating">Oceń sesje</string>
+<string name="esm_rating_instructions">Jak oceniasz sesje biorąc pod uwagę czas ładowania się stron? Oceń od 1 (bardzo źle) do 5 (wyśmienicie).</string>
+<string name="esm_rating_max">wyśmienita</string>
+<string name="esm_rating_min">bardzo zła</string>
+<string name="title_activity_esm">Ankieta ESM</string>
+
+<string name="hello_world">Hello world!</string>
+<string name="action_settings">Ustawienia</string>
+<string name="esm_answer">Proszę wypełnij ankiete.</string>
+<string name="title_context">Co robiłeś?</string>
+<string name="esm_context_instructions">można wybrać więcej niż jedną odpowiedź</string>
+<string name="esm_button_next">Następne</string>
+<string name="esm_context_answer1">poszukiwania informacji</string>
+<string name="esm_context_answer2">sprawdzenie poczty</string>
+<string name="esm_context_answer3">odwiedzenie portalu społecznościowego</string>
+<string name="esm_context_answer4">rozrywka</string>
+<string name="title_delays_accept">Czy akceptujesz opóźnienia w tej sesji?</string>
+<string name="esm_delays_accept_instructions" />
+<string name="esm_answer_yes">tak</string>
+<string name="esm_answer_no">nie</string>
+<string name="esm_context_answer5">inne</string>
+<string name="title_movement">W jakim stanie używałeś przeglądarki?</string>
+<string name="esm_movement_instructions" />
+<string name="esm_movement_answer1">stacjonarnie</string>
+<string name="esm_movement_answer2">idąc</string>
+<string name="esm_movement_answer3">jadąc</string>
+    <string name="esm_rerun">Któraś z ankiet została pominięta, proszę wypełnić jeszcze raz.</string>
+    <string name="esm_thanks">Dzięki za odpowiedzi</string>
+    <string name="can_turn_off_data">Można wyłączyć przesyłanie danych.</string>
+
 </resources>

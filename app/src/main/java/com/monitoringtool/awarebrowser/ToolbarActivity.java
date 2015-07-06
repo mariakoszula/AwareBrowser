@@ -55,7 +55,17 @@ public class ToolbarActivity extends ActionBarActivity {
 
     public static SharedPreferences mySharedPref;
     public static SharedPreferences.Editor editor;
+
+    public boolean isInstructionsActivityVisible() {
+        return isInstructionsActivityVisible;
+    }
+
     private boolean isInstructionsActivityVisible = false;
+
+    public boolean isBrowserActivityVisible() {
+        return isBrowserActivityVisible;
+    }
+
     private boolean isBrowserActivityVisible = false;
 
 
@@ -136,7 +146,7 @@ public class ToolbarActivity extends ActionBarActivity {
         });
     }
 
-    private boolean runSearch(String webSite) {
+    public boolean runSearch(String webSite) {
         Intent browser = new Intent(getApplicationContext(), BrowserActivity.class);
         browser.putExtra(EXTRA_WEB_SITE, webSite);
         startActivity(browser);
@@ -181,8 +191,14 @@ public class ToolbarActivity extends ActionBarActivity {
                 browserClosed.setAction(ToolbarActivity.ACTION_CLOSE_BROWSER);
                 sendBroadcast(browserClosed);
                 //@TODO figure out if I should finish it or not
+
             }else{
                 if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "It is first install no ESM will be set");
+                if(mySharedPref.getBoolean(KEY_FIRST_INSTALL, true)) {
+                    editor.putBoolean(KEY_FIRST_INSTALL, false);
+                    editor.commit();
+                    stopService(new Intent(getApplicationContext(), Browser_Service.class));
+                }
             }
             finish();
         }
@@ -193,10 +209,6 @@ public class ToolbarActivity extends ActionBarActivity {
     protected void onDestroy() {
         super.onDestroy();
         if (MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "Toolbar terminated");
-        if(mySharedPref.getBoolean(KEY_FIRST_INSTALL, true)) {
-            editor.putBoolean(KEY_FIRST_INSTALL, false);
-            editor.commit();
-            stopService(new Intent(getApplicationContext(), Browser_Service.class));
-        }
+
     }
 }

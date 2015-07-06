@@ -29,7 +29,8 @@ import java.util.HashMap;
  */
 public class Network_Provider extends ContentProvider {
 
-	public static final int DATABASE_VERSION = 2;
+	public static final int DATABASE_VERSION = 4;
+	/*Adding Session_ID*/
 
 	/**
 	 * Authority of Screen content provider
@@ -58,6 +59,7 @@ public class Network_Provider extends ContentProvider {
 		public static final String _ID = "_id";
 		public static final String TIMESTAMP = "timestamp";
 		public static final String DEVICE_ID = "device_id";
+		public static final String SESSION_ID = "session_id";
 		public static final String TYPE = "network_type";
 		public static final String SUBTYPE = "network_subtype";
 		public static final String STATE = "network_state";
@@ -70,8 +72,9 @@ public class Network_Provider extends ContentProvider {
 	// network
 	Network_Data._ID + " integer primary key autoincrement,"
 			+ Network_Data.TIMESTAMP + " real default 0,"
-			+ Network_Data.DEVICE_ID + " text default ''," + Network_Data.TYPE
-			+ " integer default 0," + Network_Data.SUBTYPE
+			+ Network_Data.DEVICE_ID + " text default '',"
+			+ Network_Data.SESSION_ID + " text default '',"
+			+ Network_Data.TYPE + " integer default 0," + Network_Data.SUBTYPE
 			+ " text default ''," + Network_Data.STATE + " integer default 0,"
 			+ "UNIQUE(" + Network_Data.TIMESTAMP + "," + Network_Data.DEVICE_ID
 			+ ")" };
@@ -183,7 +186,9 @@ public class Network_Provider extends ContentProvider {
                 .put(Network_Data.TIMESTAMP, Network_Data.TIMESTAMP);
         networkProjectionMap
                 .put(Network_Data.DEVICE_ID, Network_Data.DEVICE_ID);
-        networkProjectionMap.put(Network_Data.TYPE, Network_Data.TYPE);
+		networkProjectionMap
+				.put(Network_Data.SESSION_ID, Network_Data.SESSION_ID);
+		networkProjectionMap.put(Network_Data.TYPE, Network_Data.TYPE);
         networkProjectionMap.put(Network_Data.SUBTYPE, Network_Data.SUBTYPE);
         networkProjectionMap.put(Network_Data.STATE, Network_Data.STATE);
 	    

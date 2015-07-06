@@ -263,6 +263,7 @@ public class ESM extends Aware_Sensor {
                         ContentValues rowData = new ContentValues();
                         rowData.put(ESM_Data.TIMESTAMP, esm_timestamp);
                         rowData.put(ESM_Data.DEVICE_ID, Aware.getSetting(getApplicationContext(), Aware_Preferences.DEVICE_ID));
+                        rowData.put(ESM_Data.SESSION_ID, Aware.getSetting(getApplicationContext(), Aware_Preferences.SESSION_ID));
                         rowData.put(ESM_Data.TYPE, esm.optInt(ESM_Data.TYPE));
                         rowData.put(ESM_Data.TITLE, esm.optString(ESM_Data.TITLE));
                         rowData.put(ESM_Data.SUBMIT, esm.optString(ESM_Data.SUBMIT));

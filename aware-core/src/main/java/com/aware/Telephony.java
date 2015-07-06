@@ -36,6 +36,9 @@ import com.aware.utils.Encrypter;
  * - Signal strength
  * @author denzil
  *
+ *
+ * Changes for tracking only telephony data, no gsm, cdma and gsm_neightbour needed for my application -- maybe work mensioning it should be separated or have additional flag
+ * @author koszucka
  */
 public class Telephony extends Aware_Sensor {
 
@@ -45,6 +48,9 @@ public class Telephony extends Aware_Sensor {
     private static TelephonyState telephonyState = new TelephonyState();
     private static Context mContext = null;
     private static SignalStrength lastSignalStrength = null;
+
+    /*Use only basic telephony information*/
+    public static final boolean DISABLE_ADDITIONAL_TELEPHONY_INFO = true;
     
     /**
      * Broadcasted event: new telephony information is available
@@ -105,8 +111,14 @@ public class Telephony extends Aware_Sensor {
         
         DATABASE_TABLES = Telephony_Provider.DATABASE_TABLES;
         TABLES_FIELDS = Telephony_Provider.TABLES_FIELDS;
-        CONTEXT_URIS = new Uri[] { Telephony_Data.CONTENT_URI, GSM_Data.CONTENT_URI, GSM_Neighbors_Data.CONTENT_URI, CDMA_Data.CONTENT_URI };
-        
+
+
+        if(DISABLE_ADDITIONAL_TELEPHONY_INFO)
+            CONTEXT_URIS = new Uri[] { Telephony_Data.CONTENT_URI};
+        else
+            CONTEXT_URIS = new Uri[] { Telephony_Data.CONTENT_URI, GSM_Data.CONTENT_URI, GSM_Neighbors_Data.CONTENT_URI, CDMA_Data.CONTENT_URI };
+
+
         telephonyManager.listen(telephonyState, PhoneStateListener.LISTEN_CELL_LOCATION | PhoneStateListener.LISTEN_SIGNAL_STRENGTHS);
         
         if(Aware.DEBUG) Log.d(TAG,"Telephony service created!");
@@ -140,7 +152,9 @@ public class Telephony extends Aware_Sensor {
      *
      */
     public static class TelephonyState extends PhoneStateListener {
-        
+
+
+
         @Override
         public void onSignalStrengthsChanged(SignalStrength signalStrength) {
             super.onSignalStrengthsChanged(signalStrength);
@@ -154,7 +168,8 @@ public class Telephony extends Aware_Sensor {
             if ( lastSignalStrength == null ) return;
             
             String device_id = Aware.getSetting(mContext,Aware_Preferences.DEVICE_ID);
-            
+            String session_id = Aware.getSetting(mContext,Aware_Preferences.SESSION_ID);
+        if(!DISABLE_ADDITIONAL_TELEPHONY_INFO){
             if( location instanceof GsmCellLocation ) {
                 GsmCellLocation loc = (GsmCellLocation) location;
                 
@@ -240,12 +255,13 @@ public class Telephony extends Aware_Sensor {
                     if(Aware.DEBUG) Log.d(TAG,e.getMessage());
                 }
             }
-            
+            }
             long timestamp = System.currentTimeMillis();
             
             ContentValues rowData = new ContentValues();
             rowData.put(Telephony_Data.TIMESTAMP, timestamp);
             rowData.put(Telephony_Data.DEVICE_ID, device_id);
+            rowData.put(Telephony_Data.SESSION_ID, session_id);
             rowData.put(Telephony_Data.DATA_ENABLED, telephonyManager.getDataState());
             rowData.put(Telephony_Data.IMEI_MEID_ESN, Encrypter.hashSHA1(telephonyManager.getDeviceId()));
             rowData.put(Telephony_Data.SOFTWARE_VERSION, telephonyManager.getDeviceSoftwareVersion());

@@ -66,6 +66,11 @@ public class InstructionsActivity extends ToolbarActivity{
         super.onStop();
         if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "InstructionActivity Stop");
         super.setIsInstructionsActivityVisible(false);
+
+        if(!isInstructionsActivityVisible() && !isBrowserActivityVisible()) {
+            if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "Instructions finish() when InstructionsActivityNotVisible and browserActivity not visible");
+            finish();
+        }
     }
 
     @Override

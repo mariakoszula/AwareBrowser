@@ -1,2 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<merger version="3"><dataSet config="main"><source path="D:\library\aware-client\aware-core\src\main\assets"/></dataSet><dataSet config="phone"><source path="D:\library\aware-client\aware-core\src\phone\assets"/></dataSet><dataSet config="debug"><source path="D:\library\aware-client\aware-core\src\debug\assets"/></dataSet><dataSet config="phoneDebug"><source path="D:\library\aware-client\aware-core\src\phoneDebug\assets"/></dataSet></merger>

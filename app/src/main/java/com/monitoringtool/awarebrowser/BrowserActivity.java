@@ -53,20 +53,21 @@ public class BrowserActivity extends ToolbarActivity {
     private long startTimeSystem = 0;
     private long endTimeSystem = 0;
     private boolean javaScriptStatus = true;
-    private static final int timesToSearch = 1;
-    private int badURLtimes = 0;
-    private int pageError = 0;
+   // private static final int timesToSearch = 1;
+    //private int badURLtimes = 0;
+   // private int pageError = 0;
 
     private boolean isAwareReady = false;
     private ProgressDialog progressDialog;
     private final BroadcastReceiver awareReadyListener = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if(ToolbarActivity.MONITORING_DEBUG_FLAG) Log.d(ToolbarActivity.LOG_TAG, "Received awareReady broadcast");
+            if(MONITORING_DEBUG_FLAG) Log.d(ToolbarActivity.LOG_TAG, "Received awareReady broadcast");
             isAwareReady = true;
             if(progressDialog.isShowing()){
                 progressDialog.dismiss();
             }
+
         }
     };
 
@@ -82,19 +83,20 @@ public class BrowserActivity extends ToolbarActivity {
         etgivenWebSite = (EditText) findViewById(R.id.website_name);
         ibBack = (ImageButton) findViewById(R.id.back);
         webPageView = (WebView) findViewById(R.id.webPageView);
+
         //Enable Javascript, webView does not allow JS by default
         WebSettings settings = webPageView.getSettings();
         settings.setJavaScriptEnabled(javaScriptStatus);
 
         super.prepareToolbar();
 
-        if(MONITORING_DEBUG_FLAG) {
+        /*if(MONITORING_DEBUG_FLAG) {*/
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                 WebView.setWebContentsDebuggingEnabled(true);
             }
-        }
+/*        }*/
         if(mySharedPref.getBoolean(KEY_FIRST_INSTALL, true)) {
-            Toast.makeText(getApplicationContext(), "Fist install, the next time you run the application the questionary after session will be triggered!", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), getApplicationContext().getResources().getString(R.string.firt_intsll), Toast.LENGTH_LONG).show();
         }
 
 
@@ -137,8 +139,8 @@ public class BrowserActivity extends ToolbarActivity {
         if (webSiteToSearch != null) webSite = webSiteToSearch;
         else webSite = defaultSite;
 
-        pageError=0;
-        badURLtimes=0;
+       // pageError=0;
+      //  badURLtimes=0;
 
         searchForWebPage(webSite);
 
@@ -165,15 +167,12 @@ public class BrowserActivity extends ToolbarActivity {
                // new LoadingWebViewTask().execute(urlToValidate.getWebSite());
 
         }else{
-            if(badURLtimes < timesToSearch) {
                 String webSiteNoSpaces =  repaceSpacesInString(webSite);
                 if (MONITORING_DEBUG_FLAG)
-                    Log.d(LOG_TAG, "Search in google: " + googlePageSearch + webSiteNoSpaces + " BarURL times: " + String.valueOf(badURLtimes));
-                searchForWebPage(googlePageSearch + webSiteNoSpaces);
-            }else{
-                Toast.makeText(getApplicationContext(), R.string.bad_url, Toast.LENGTH_LONG).show();
-            }
-            badURLtimes++;
+                 //   Log.d(LOG_TAG, "Search in google: " + googlePageSearch + webSiteNoSpaces + " BadURL times: " + String.valueOf(badURLtimes));
+                //searchForWebPage(googlePageSearch + webSiteNoSpaces);
+                webViewOnPageFinishOnPageStartMethod(googlePageSearch + webSiteNoSpaces);
+
         }
 
     }
@@ -210,109 +209,6 @@ public class BrowserActivity extends ToolbarActivity {
             return false;
         }
 
-    }
-
-
-    //Sth not working with this task !! Leave it for now figure it out later
-    private class LoadingWebViewTask extends AsyncTask<String, Void, Void> {
-
-        @Override
-        protected Void doInBackground(String... webSites) {
-            webPageView = (WebView) findViewById(R.id.webPageView);
-            //Enable Javascript, webView does not allow JS by default
-            WebSettings settings = webPageView.getSettings();
-            settings.setJavaScriptEnabled(javaScriptStatus);
-
-            webPageView.loadUrl(webSites[0]);
-            webPageView.setWebViewClient(new WebViewClient() {
-                boolean loadingFinished = true;
-                boolean redirection = false;
-
-                @Override
-                public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                    if (!loadingFinished)
-                        redirection = true;
-                    loadingFinished = false;
-                    webPageView.loadUrl(url);
-                    return true;
-                }
-
-                @Override
-                public void onPageStarted(WebView view, String url, Bitmap favicon) {
-                    super.onPageStarted(view, url, favicon);
-                    startTimeSystem = System.currentTimeMillis();
-                    loadingFinished = false;
-
-                    InputMethodManager keyboard = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                    keyboard.hideSoftInputFromWindow(browserLayout.getWindowToken(), 0);
-                    etgivenWebSite.setText(R.string.info_loading);
-                    etgivenWebSite.setEnabled(false);
-                    ibBack.setEnabled(false);
-                    itemSearch.setEnabled(false);
-
-                }
-
-
-                @Override
-                public void onPageFinished(WebView view, String url) {
-                    super.onPageFinished(view, url);
-                    if (!redirection) {
-                        loadingFinished = true;
-                    }
-                    if (loadingFinished && !redirection) {
-                        endTimeSystem = System.currentTimeMillis();
-                        LoadTimeSystem = endTimeSystem - startTimeSystem;
-
-                        if(!mySharedPref.getBoolean(KEY_FIRST_INSTALL, true)) {
-                        /*Send data to browser provider*/
-                            ContentValues plt_data = new ContentValues();
-                            plt_data.put(Browser_Provider.Browser_Data.DEVICE_ID, Aware.getSetting(getApplicationContext(), Aware_Preferences.DEVICE_ID));
-                            plt_data.put(Browser_Provider.Browser_Data.TIMESTAMP, System.currentTimeMillis());
-                            plt_data.put(Browser_Provider.Browser_Data.SESSION_ID, Aware.getSetting(getApplicationContext(), Aware_Preferences.SESSION_ID));
-                            plt_data.put(Browser_Provider.Browser_Data.WEB_PAGE, webPageView.getUrl());
-                            plt_data.put(Browser_Provider.Browser_Data.PAGE_LOAD_TIME, LoadTimeSystem);
-                            try {
-                                getBaseContext().getContentResolver().insert(Browser_Provider.Browser_Data.CONTENT_URI, plt_data);
-
-                            } catch (SQLiteException e) {
-                                if (Aware.DEBUG) Log.d(LOG_TAG, e.getMessage());
-                            }
-
-                            sendBroadcast(new Intent(Aware.ACTION_AWARE_CURRENT_CONTEXT));
-                        }
-                        if (MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, webPageView.getUrl() + " PLT:"
-                                + LoadTimeSystem + "ms");
-                        etgivenWebSite.setText("");
-                        etgivenWebSite.setEnabled(true);
-                        ibBack.setEnabled(true);
-                        itemSearch.setEnabled(true);
-                    } else {
-                        redirection = false;
-                    }
-
-                }
-
-                @Override
-                public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
-                    super.onReceivedError(view, errorCode, description, failingUrl);
-                    if (MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "Error loading page: " + failingUrl);
-                    if (pageError < timesToSearch) {
-                        searchForWebPage(googlePageSearch + failingUrl);
-                    }
-                    else {
-                        Toast.makeText(getApplicationContext(), R.string.bad_connection, Toast.LENGTH_LONG).show();
-                    }
-                    pageError++;
-                }
-            });
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            Toast.makeText(getApplicationContext(), "Page Loading Finished", Toast.LENGTH_LONG).show();
-        }
     }
 
     private void webViewOnPageFinishOnPageStartMethod(String webSite) {
@@ -389,13 +285,8 @@ public class BrowserActivity extends ToolbarActivity {
             public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
                 super.onReceivedError(view, errorCode, description, failingUrl);
                 if (MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "Error loading page: " + failingUrl);
-                if (pageError < timesToSearch) {
-                    searchForWebPage(googlePageSearch + failingUrl);
-                }
-                else {
-                    Toast.makeText(getApplicationContext(), R.string.bad_connection, Toast.LENGTH_LONG).show();
-                }
-                pageError++;
+                Toast.makeText(getApplicationContext(), R.string.bad_connection, Toast.LENGTH_LONG).show();
+
             }
         });
     }
@@ -408,6 +299,10 @@ public class BrowserActivity extends ToolbarActivity {
         setIsBrowserActivityVisible(false);
         if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "BrowserActivty On Stop called");
 
+        if(!isInstructionsActivityVisible() && !isBrowserActivityVisible()) {
+            if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "Browser finish() when InstructionsActivityNotVisible and browserActivity not visible");
+            finish();
+        }
     }
 
 
