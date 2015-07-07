@@ -73,7 +73,7 @@ public class BrowserClosed_Receiver extends BroadcastReceiver{
                     "'esm_type': " + ESM.TYPE_ESM_QUICK_ANSWERS +"," +
                     "'esm_title': '" + context.getResources().getString(R.string.title_delays_accept) + "'," +
                     "'esm_instructions': '" + context.getResources().getString(R.string.esm_delays_accept_instructions) + "'," +
-                    "'esm_quick_answers':['" + context.getResources().getString(R.string.esm_answer_yes) + "','" + context.getResources().getString(R.string.esm_answer_no) + "']," +
+                    "'esm_quick_answers':['" + context.getResources().getString(R.string.esm_answer_no) + "','" + context.getResources().getString(R.string.esm_answer_yes) + "']," +
                     "'esm_expiration_threashold': 60," +
                     "'esm_trigger': 'AwareBro answer'" +
                     "}}]";
@@ -85,7 +85,7 @@ public class BrowserClosed_Receiver extends BroadcastReceiver{
                 Intent esm = new Intent(ESM.ACTION_AWARE_QUEUE_ESM);
                 esm.putExtra(ESM.EXTRA_ESM, esmQuestionnaire);
                 context.sendBroadcast(esm);
-                Toast.makeText(context, context.getResources().getString(R.string.info_loading), Toast.LENGTH_LONG).show();
+                Toast.makeText(context, context.getResources().getString(R.string.info_loading_esm), Toast.LENGTH_SHORT).show();
             }
         }
     }

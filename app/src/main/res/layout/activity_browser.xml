@@ -12,18 +12,18 @@
         android:layout_height="fill_parent"
         android:padding="0dp"
         android:layout_margin="0dp">
-        <ScrollView
-            android:id="@+id/about_main"
+        <!--<ScrollView
+            android:id="@+id/scroll_web_main"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:fillViewport="true"
             android:padding="0dp"
-            android:layout_margin="0dp">
+            android:layout_margin="0dp">-->
             <WebView
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
                 android:id="@+id/webPageView"/>
-        </ScrollView>
+     <!--   </ScrollView>-->
 
 
     </RelativeLayout>

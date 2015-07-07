@@ -7,6 +7,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Configuration;
 import android.database.sqlite.SQLiteException;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
@@ -16,8 +17,10 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import android.util.Patterns;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.view.inputmethod.InputMethodManager;
@@ -28,24 +31,27 @@ import android.webkit.WebViewClient;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.Toast;
 
 import com.aware.Aware;
 import com.aware.Aware_Preferences;
 
+import static android.view.KeyEvent.keyCodeToString;
 import static android.view.WindowManager.LayoutParams.*;
 
 
 public class BrowserActivity extends ToolbarActivity {
 
 
-    public static final String googlePageSearch = "http://www.google.com/search?output=ie&q=";
+    private static final String googlePageSearch = "http://www.google.com/search?output=ie&q=";
 
     private WebView webPageView;
     private LinearLayout browserLayout;
     private EditText etgivenWebSite;
     private MenuItem itemSearch;
     private ImageButton ibBack;
+    private ScrollView scrollView;
 
     private String defaultSite = "http://www.google.com";
     private String webSiteToSearch=null;
@@ -71,6 +77,7 @@ public class BrowserActivity extends ToolbarActivity {
         }
     };
 
+
     @SuppressLint("SetJavaScriptEnabled")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,12 +90,20 @@ public class BrowserActivity extends ToolbarActivity {
         etgivenWebSite = (EditText) findViewById(R.id.website_name);
         ibBack = (ImageButton) findViewById(R.id.back);
         webPageView = (WebView) findViewById(R.id.webPageView);
+        /*scrollView = (ScrollView) findViewById(R.id.scroll_web_main);*/
+
 
         //Enable Javascript, webView does not allow JS by default
         WebSettings settings = webPageView.getSettings();
         settings.setJavaScriptEnabled(javaScriptStatus);
 
+        //Zoom enable
+        settings.setBuiltInZoomControls(true);
+        settings.setSupportZoom(true);
+
         super.prepareToolbar();
+
+
 
         /*if(MONITORING_DEBUG_FLAG) {*/
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
@@ -96,8 +111,9 @@ public class BrowserActivity extends ToolbarActivity {
             }
 /*        }*/
         if(mySharedPref.getBoolean(KEY_FIRST_INSTALL, true)) {
-            Toast.makeText(getApplicationContext(), getApplicationContext().getResources().getString(R.string.firt_intsll), Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), getApplicationContext().getResources().getString(R.string.first_install), Toast.LENGTH_LONG).show();
         }
+
 
 
         IntentFilter filterSetAware = new IntentFilter();
@@ -106,6 +122,14 @@ public class BrowserActivity extends ToolbarActivity {
         registerReceiver(awareReadyListener, filterSetAware);
     }
 
+    @Override
+    public void onBackPressed() {
+        if (webPageView.canGoBack()) {
+            webPageView.goBack();
+        } else {
+            super.onBackPressed();
+        }
+    }
 
 
 
@@ -139,15 +163,11 @@ public class BrowserActivity extends ToolbarActivity {
         if (webSiteToSearch != null) webSite = webSiteToSearch;
         else webSite = defaultSite;
 
-       // pageError=0;
-      //  badURLtimes=0;
-
         searchForWebPage(webSite);
 
         if(!isAwareReady){
             progressDialog = ProgressDialog.show(this, "Aware", "Loading. Please wait...", true, false);
         }
-
 
     }
 
@@ -164,13 +184,9 @@ public class BrowserActivity extends ToolbarActivity {
         UrlValidator urlToValidate = new UrlValidator(webSite);
         if(urlToValidate.checkUrl()) {
                  webViewOnPageFinishOnPageStartMethod(urlToValidate.getWebSite());
-               // new LoadingWebViewTask().execute(urlToValidate.getWebSite());
 
         }else{
                 String webSiteNoSpaces =  repaceSpacesInString(webSite);
-                if (MONITORING_DEBUG_FLAG)
-                 //   Log.d(LOG_TAG, "Search in google: " + googlePageSearch + webSiteNoSpaces + " BadURL times: " + String.valueOf(badURLtimes));
-                //searchForWebPage(googlePageSearch + webSiteNoSpaces);
                 webViewOnPageFinishOnPageStartMethod(googlePageSearch + webSiteNoSpaces);
 
         }
@@ -291,7 +307,10 @@ public class BrowserActivity extends ToolbarActivity {
         });
     }
 
-
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+    }
 
     @Override
     protected void onStop() {
@@ -299,7 +318,7 @@ public class BrowserActivity extends ToolbarActivity {
         setIsBrowserActivityVisible(false);
         if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "BrowserActivty On Stop called");
 
-        if(!isInstructionsActivityVisible() && !isBrowserActivityVisible()) {
+        if(!isBrowserActivityVisible()) {
             if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "Browser finish() when InstructionsActivityNotVisible and browserActivity not visible");
             finish();
         }

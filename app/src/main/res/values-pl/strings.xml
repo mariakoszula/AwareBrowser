@@ -8,6 +8,7 @@
 <string name="action_instruction">Instrukcje</string>
 <string name="title_activity_instructions">Instrukcje</string>
 <string name="info_loading">Ładowanie...</string>
+    <string name="info_loading_esm">Ładowanie ankiety</string>
 <string name="bad_url">Błędny URL</string>
 <string name="bad_connection">Sprawdź czy masz włączoną transmisje danych bądź WiFi</string>
 <string name="title_rating">Oceń sesje</string>
@@ -26,7 +27,7 @@
 <string name="esm_context_answer2">sprawdzenie poczty</string>
 <string name="esm_context_answer3">odwiedzenie portalu społecznościowego</string>
 <string name="esm_context_answer4">rozrywka</string>
-<string name="title_delays_accept">Czy akceptujesz opóźnienia w tej sesji?</string>
+<string name="title_delays_accept">Czy czas ładowania stron popsuł komfort użytkowania?</string>
 <string name="esm_delays_accept_instructions" />
 <string name="esm_answer_yes">tak</string>
 <string name="esm_answer_no">nie</string>
@@ -36,8 +37,9 @@
 <string name="esm_movement_answer1">stacjonarnie</string>
 <string name="esm_movement_answer2">idąc</string>
 <string name="esm_movement_answer3">jadąc</string>
-    <string name="esm_rerun">Któraś z ankiet została pominięta, proszę wypełnić jeszcze raz.</string>
+    <string name="esm_rerun">Pominięto pytanie. Ankieta zostanie uruchomiona ponownie tylko raz.</string>
     <string name="esm_thanks">Dzięki za odpowiedzi</string>
     <string name="can_turn_off_data">Można wyłączyć przesyłanie danych.</string>
-
+    <string name="first_install">To twój pierwszy raz! Po tej sesji nie pojawi się ankieta.</string>
+    <string name="esm_never_answered">Ankiety nie zostały wypełnione</string>
 </resources>

@@ -71,7 +71,11 @@ public class ESM extends Aware_Sensor {
      * Broadcasted event: the user has started answering the ESM queue
      */
     public static final String ACTION_AWARE_ESM_QUEUE_STARTED = "ACTION_AWARE_ESM_QUEUE_STARTED";
-    
+    /**
+     * Received broadcast: to clean ESM queue
+     */
+    public static final String ACTION_AWARE_ESM_CLEAN_QUEUE = "ACTION_AWARE_ESM_CLEAN_QUEUE";
+
     /**
      * ESM status: new on the queue, but not displayed yet
      */

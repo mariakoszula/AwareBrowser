@@ -7,6 +7,7 @@
     <string name="action_instruction">Instructions</string>
     <string name="title_activity_instructions">Instructions</string>
     <string name="info_loading">Loading...</string>
+    <string name="info_loading_esm">Loading ESM questionnaires</string>
     <string name="bad_url">Bad URL</string>
     <string name="bad_connection">Check if you have data transmission or WiFi enabled</string>
     <string name="title_rating">Rate the session</string>
@@ -25,7 +26,7 @@
     <string name="esm_context_answer2">checking email</string>
     <string name="esm_context_answer3">checking social services</string>
     <string name="esm_context_answer4">entertainment</string>
-    <string name="title_delays_accept">Do you accept the delays in this session in general?</string>
+    <string name="title_delays_accept">Did the loading time of pages made worse experience?</string>
     <string name="esm_delays_accept_instructions" />
     <string name="esm_answer_yes">yes</string>
     <string name="esm_answer_no">no</string>
@@ -35,8 +36,9 @@
     <string name="esm_movement_answer1">walking</string>
     <string name="esm_movement_answer2">riding</string>
     <string name="esm_movement_answer3">stationary</string>
-    <string name="esm_rerun">Some of ESM was not answered will be rerun one more time.</string>
+    <string name="esm_rerun">ESM was dismissed, will be rerun ONE more time.</string>
     <string name="esm_thanks">Thank you for the answers. Please do not turn the Data connection after you will receive a message.</string>
     <string name="can_turn_off_data">You can now turn off the data connection.</string>
-    <string name="firt_intsll">Fist install, no ESM questionnaires will be triggered.</string>
+    <string name="first_install">First time: no ESM questionnaires will be triggered.</string>
+    <string name="esm_never_answered">ESM questionnaires never answered</string>
 </resources>

@@ -40,10 +40,8 @@ import static com.aware.Aware_Preferences.WEBSERVICE_SERVER;
 public class Browser_Service extends Aware_Plugin {
 
     private static final String LOG_TAG_SERVICE = "WLT:Browser_Service";
-    public static final String DASHBOARD_STUDY_URL = "https://api.awareframework.com/index.php/webservice/index/403/yqA2zgDrJOPl";
+    public static final String DASHBOARD_STUDY_URL = "https://api.awareframework.com/index.php/webservice/index/407/ADKuMzjP3L3C";
 
-
-    private static final int WAIT_TIME_FOR_AWARE = 2 * 1000;
 
     @Override
     public void onCreate() {
@@ -99,12 +97,17 @@ public class Browser_Service extends Aware_Plugin {
 
         //@TODO Google Activity Recognition plugin
         //Install if aware first install
+        mySharedPref = getSharedPreferences(ToolbarActivity.SHARED_PREF_FILE, Context.MODE_PRIVATE);
+        editor = mySharedPref.edit();
 
-        //Start WebService - sync data with Server every  x minutes - default 30 -- run from second install when ESM is running -- move t his two ESM answered?? let me think about it
+
+
+        if(mySharedPref.getBoolean(ToolbarActivity.KEY_FIRST_INSTALL, true)) {
+            //Start WebService - sync data with Server every  x minutes - default 30 -- run from second install when ESM is running -- move t his two ESM answered?? let me think about it probably better to avoid to much work @TODO move to the ESMAnswer??
         Aware.setSetting(getApplicationContext(), STATUS_WEBSERVICE, true);
         Aware.setSetting(getApplicationContext(), WEBSERVICE_SERVER, DASHBOARD_STUDY_URL);
-        Aware.setSetting(getApplicationContext(), FREQUENCY_WEBSERVICE, 60);
-
+        Aware.setSetting(getApplicationContext(), FREQUENCY_WEBSERVICE, 0);
+        }
         sendBroadcast(new Intent(Aware.ACTION_AWARE_REFRESH));
     }
 
@@ -128,7 +131,7 @@ public class Browser_Service extends Aware_Plugin {
         }
 
         //Stop WebServices
-        Aware.setSetting(getApplicationContext(), STATUS_WEBSERVICE, false);
+        /*Aware.setSetting(getApplicationContext(), STATUS_WEBSERVICE, false);*/
 
         sendBroadcast(new Intent(Aware.ACTION_AWARE_REFRESH));
     }

@@ -18,14 +18,20 @@ import android.view.WindowManager;
 import com.aware.Aware;
 import com.aware.Aware_Preferences;
 import com.aware.ESM;
+import com.aware.providers.Aware_Provider;
 import com.aware.providers.ESM_Provider.ESM_Data;
 
 /**
  * Processes an  ESM queue until it's over.
  * @author denzilferreira
  */
+
+
 public class ESM_Queue extends FragmentActivity {
-    
+
+
+
+
     private static String TAG = "AWARE::ESM Queue";
     private final ESM_QueueManager queue_manager = new ESM_QueueManager();
 
@@ -53,6 +59,7 @@ public class ESM_Queue extends FragmentActivity {
         filter.addAction(ESM.ACTION_AWARE_ESM_ANSWERED);
         filter.addAction(ESM.ACTION_AWARE_ESM_DISMISSED);
         filter.addAction(ESM.ACTION_AWARE_ESM_EXPIRED);
+        filter.addAction(ESM.ACTION_AWARE_ESM_CLEAN_QUEUE);
         registerReceiver(queue_manager, filter);
         
         Intent queue_started = new Intent(ESM.ACTION_AWARE_ESM_QUEUE_STARTED);
@@ -83,7 +90,13 @@ public class ESM_Queue extends FragmentActivity {
     	            context.sendBroadcast(esm_done);
     	            queue.finish();
     			}
-    		}
+    		}else if( intent.getAction().equals(ESM.ACTION_AWARE_ESM_CLEAN_QUEUE) && Aware.getSetting(context, Aware_Preferences.STATUS_ESM).equals("true") ) {
+                //Remove all queued ESMs
+                if(getQueueSize(context) > 0){
+                    context.getContentResolver().delete(ESM_Data.CONTENT_URI, ESM_Data.STATUS + "=" + ESM.STATUS_NEW, null);
+
+                    if(Aware.DEBUG) Log.d(TAG, "ESM queue cleared");                }
+            }
     	}
     }
     
