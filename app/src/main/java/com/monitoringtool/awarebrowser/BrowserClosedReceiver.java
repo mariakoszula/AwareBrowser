@@ -23,11 +23,14 @@ import com.google.android.gms.maps.model.TileOverlay;
  * Created by Maria on 2015-06-29.
  */
 
-public class BrowserClosed_Receiver extends BroadcastReceiver{
+public class BrowserClosedReceiver extends BroadcastReceiver{
 
-        @Override
+    private static final boolean MONITORING_DEBUG_FLAG = BrowserActivity.MONITORING_DEBUG_FLAG;
+    private static final String LOG_TAG_ESM_CREATE = "AB:ESM_CREATE";
+    private static final String ACTION_AWARE_CLOSE_BROWSER = BrowserActivity.ACTION_AWARE_CLOSE_BROWSER;
+    @Override
         public void onReceive(Context context, Intent intent) {
-            if(ToolbarActivity.MONITORING_DEBUG_FLAG) Log.d(ToolbarActivity.LOG_TAG, "Receiver stop Browser Broadcast.");
+            if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG_ESM_CREATE, "Receiver stop Browser Broadcast.");
 
             final String esmRating =
                     "[{'esm': {" +
@@ -81,7 +84,7 @@ public class BrowserClosed_Receiver extends BroadcastReceiver{
             final String esmQuestionnaire = esmRating + esmContext + esmMovement + esmDelaysAcceptance;
 
             String action = intent.getAction();
-            if(action.equals(ToolbarActivity.ACTION_CLOSE_BROWSER)) {
+            if(action.equals(ACTION_AWARE_CLOSE_BROWSER)) {
                 Intent esm = new Intent(ESM.ACTION_AWARE_QUEUE_ESM);
                 esm.putExtra(ESM.EXTRA_ESM, esmQuestionnaire);
                 context.sendBroadcast(esm);

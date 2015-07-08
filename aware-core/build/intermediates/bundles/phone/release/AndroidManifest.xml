@@ -7,7 +7,8 @@
     <uses-feature android:name="android.hardware.camera" />
     <uses-feature android:name="android.hardware.camera.autofocus" />
     <!-- FOR PLUGINS/APPS COMMENT STARTS HERE -->
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <!--
+<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
@@ -24,7 +25,7 @@
     <uses-permission android:name="android.permission.READ_CALL_LOG" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
-
+    -->
     <permission
         android:name="com.aware.READ_CONTEXT_DATA"
         android:description="@string/read_permission"
@@ -39,13 +40,6 @@
         android:label="Write to AWARE&apos;s Context data"
         android:protectionLevel="normal" >
     </permission>
- <!-- FOR PLUGINS/APPS COMMENT ENDS HERE, BUT CONTINUES AGAIN BELOW -->
-    <uses-permission android:name="com.aware.READ_CONTEXT_DATA" />
-    <uses-permission android:name="com.aware.WRITE_CONTEXT_DATA" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
         android:icon="@drawable/ic_launcher"

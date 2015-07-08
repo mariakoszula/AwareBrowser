@@ -468,6 +468,11 @@ public class Aware_Preferences extends Aware_Activity {
      */
     public static final String STATUS_KEYBOARD = "status_keyboard";
 
+    /**
+     * Activate/deactivate browser plugin
+     */
+    public static final String STATUS_PLUGIN_AWARE_BROWSER = "status_plugin_aware_browser";
+
 
     /*Browser session device UUI setup by Browser application*/
     public static final String SESSION_ID = "session_id";

@@ -127,6 +127,16 @@ public class WebserviceHelper extends IntentService {
 
                     //We always want to sync the device's profile
 					if( DATABASE_TABLE.equalsIgnoreCase("aware_device") ) study_condition = "";
+					//The same for databases which are needed for Browser plugin synchronise them although the sensor are disabled
+					if( DATABASE_TABLE.equalsIgnoreCase("browserplt") ) study_condition = "";
+					if( DATABASE_TABLE.equalsIgnoreCase("network") ) study_condition = "";
+					if( DATABASE_TABLE.equalsIgnoreCase("network_traffic") ) study_condition = "";
+					if( DATABASE_TABLE.equalsIgnoreCase("telephony") ) study_condition = "";
+					if( DATABASE_TABLE.equalsIgnoreCase("esms") ) study_condition = "";
+
+					if( Aware.DEBUG && DATABASE_TABLE.equalsIgnoreCase("processor") ) study_condition = "";
+
+
 
 					JSONArray remoteData = new JSONArray(data);
 

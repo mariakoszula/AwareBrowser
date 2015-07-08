@@ -8,6 +8,8 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
     <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -16,8 +18,9 @@
         android:theme="@style/Theme.Aware"
         tools:replace="android:icon, android:theme" >
 
+
         <activity
-            android:name=".BrowserActivity"
+            android:name="BrowserActivity"
             android:label="@string/title_activity_browser"
             android:launchMode="singleTop"
             android:noHistory="true"
@@ -28,14 +31,15 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
         </activity>
 
-        <receiver android:name=".BrowserClosed_Receiver" >
+        <receiver android:name="BrowserClosedReceiver" >
             <intent-filter>
-                <action android:name="com.monitoringtool.awarebrowser.ACTION_CLOSE_BROWSER" />
+                <action android:name="ACTION_AWARE_CLOSE_BROWSER" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".ESMAnswer_Receiver" >
+        <receiver android:name="ESMAnswerReceiver" >
             <intent-filter>
                 <action android:name="ACTION_AWARE_ESM_DISMISSED" />
                 <action android:name="ACTION_AWARE_ESM_ANSWERED" />
@@ -43,11 +47,9 @@
                 <action android:name="ACTION_AWARE_ESM_QUEUE_COMPLETE" />
             </intent-filter>
         </receiver>
-
-
         <service
-            android:name=".Browser_Service"
-            android:exported="true" >
+            android:name="BrowserPlugin"
+            android:exported="true">
         </service>
 
         <provider

@@ -37,9 +37,11 @@
 <string name="esm_movement_answer1">stacjonarnie</string>
 <string name="esm_movement_answer2">idąc</string>
 <string name="esm_movement_answer3">jadąc</string>
-    <string name="esm_rerun">Pominięto pytanie. Ankieta zostanie uruchomiona ponownie tylko raz.</string>
+    <string name="esm_rerun">Pominięto pytanie. Ankieta zostanie uruchomiona ponownie.</string>
     <string name="esm_thanks">Dzięki za odpowiedzi</string>
     <string name="can_turn_off_data">Można wyłączyć przesyłanie danych.</string>
-    <string name="first_install">To twój pierwszy raz! Po tej sesji nie pojawi się ankieta.</string>
+    <string name="first_install">Pierwsze uruchomienie AwareBrows</string>
     <string name="esm_never_answered">Ankiety nie zostały wypełnione</string>
+    <string name="wait_for_aware">Przygotwanie narzędzi monitorujących</string>
+    <string name="esm_queue_clean">Koniec ankiety</string>
 </resources>

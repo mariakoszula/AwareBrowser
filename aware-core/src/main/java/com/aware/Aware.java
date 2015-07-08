@@ -46,6 +46,7 @@ import com.aware.providers.Aware_Provider;
 import com.aware.providers.Aware_Provider.Aware_Device;
 import com.aware.providers.Aware_Provider.Aware_Plugins;
 import com.aware.providers.Aware_Provider.Aware_Settings;
+import com.aware.providers.Network_Provider;
 import com.aware.ui.Plugins_Manager;
 import com.aware.ui.Stream_UI;
 import com.aware.utils.Aware_Plugin;
@@ -197,6 +198,7 @@ public class Aware extends Service {
     private final int CONST_FREQUENCY_WATCHDOG = 5 * 60; //5 minutes check
     
     private SharedPreferences aware_preferences;
+
     
     /**
      * Singleton instance of the framework
@@ -1270,10 +1272,11 @@ public class Aware extends Service {
         public void onReceive(Context context, Intent intent) {
 
             //We are only synching the device information, not aware's settings and active plugins.
+
         	String[] DATABASE_TABLES = Aware_Provider.DATABASE_TABLES;
         	String[] TABLES_FIELDS = Aware_Provider.TABLES_FIELDS;
         	Uri[] CONTEXT_URIS = new Uri[]{ Aware_Device.CONTENT_URI };
-        	
+
         	if( intent.getAction().equals(Aware.ACTION_AWARE_SYNC_DATA) && Aware.getSetting(context, Aware_Preferences.STATUS_WEBSERVICE).equals("true") ) {
             	Intent webserviceHelper = new Intent( context, WebserviceHelper.class );
                 webserviceHelper.setAction( WebserviceHelper.ACTION_AWARE_WEBSERVICE_SYNC_TABLE );
@@ -1281,6 +1284,7 @@ public class Aware extends Service {
         		webserviceHelper.putExtra( WebserviceHelper.EXTRA_FIELDS, TABLES_FIELDS[0] );
         		webserviceHelper.putExtra( WebserviceHelper.EXTRA_CONTENT_URI, CONTEXT_URIS[0].toString() );
         		context.startService(webserviceHelper);
+
             }
 
             //Monitor if the user just connected to Wi-Fi and the client is supposed to sync the data to a study when he does

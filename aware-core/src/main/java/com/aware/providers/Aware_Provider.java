@@ -15,7 +15,7 @@ import android.provider.BaseColumns;
 import android.util.Log;
 
 import com.aware.Aware;
-import com.aware.BuildConfig;
+
 import com.aware.utils.DatabaseHelper;
 
 import java.util.HashMap;

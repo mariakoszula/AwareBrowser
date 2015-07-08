@@ -24,7 +24,7 @@ import java.util.HashMap;
  */
 public class Browser_Provider extends ContentProvider {
     public static String AUTHORITY = "com.monitoringtool.awarebrowser.provider.browserplt";
-    public static final int DATABASE_VERSION = 2;
+    public static final int DATABASE_VERSION = 3;
 
     private static final int BROWSERPLT = 1;
     private static final int BROWSERPLT_ID = 2;

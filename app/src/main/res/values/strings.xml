@@ -39,6 +39,8 @@
     <string name="esm_rerun">ESM was dismissed, will be rerun ONE more time.</string>
     <string name="esm_thanks">Thank you for the answers. Please do not turn the Data connection after you will receive a message.</string>
     <string name="can_turn_off_data">You can now turn off the data connection.</string>
-    <string name="first_install">First time: no ESM questionnaires will be triggered.</string>
+    <string name="first_install">First run, thank you for installing AwareBrows.</string>
     <string name="esm_never_answered">ESM questionnaires never answered</string>
+    <string name="wait_for_aware">Preparing monitoring tool</string>
+    <string name="esm_queue_clean">No ESM questionnaires left in queue</string>
 </resources>

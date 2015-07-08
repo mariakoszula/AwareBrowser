@@ -7,22 +7,20 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.database.sqlite.SQLiteException;
 import android.graphics.Bitmap;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
-import android.view.WindowManager.LayoutParams;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.URLUtil;
 import android.webkit.WebSettings;
@@ -31,18 +29,28 @@ import android.webkit.WebViewClient;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.Toast;
 
 import com.aware.Aware;
 import com.aware.Aware_Preferences;
 
-import static android.view.KeyEvent.keyCodeToString;
-import static android.view.WindowManager.LayoutParams.*;
 
+public class BrowserActivity extends ActionBarActivity {
 
-public class BrowserActivity extends ToolbarActivity {
+    public static final String LOG_TAG = "AwareBrows";
 
+    public static final String ACTION_AWARE_CLOSE_BROWSER = "ACTION_AWARE_CLOSE_BROWSER";
+    public static final String ACTION_AWARE_READY = "ACTION_AWARE_READY";
+
+    public static final String RESEARCH_WEBSITE = "http://www.mariak.webd.pl/study/";
+    public static final boolean MONITORING_DEBUG_FLAG = true;
+
+    public static final String SHARED_PREF_FILE = "mySharedPref";
+    public static SharedPreferences mySharedPref;
+    public static SharedPreferences.Editor editor;
+
+    public static final String KEY_IS_BROWSER_SERVICE_RUNNING = "KEY_ID_BROWSER_SERVICE_RUNNING";
+    public static final String KEY_FIRST_INSTALL = "KEY_FIRST_INSTALL";
 
     private static final String googlePageSearch = "http://www.google.com/search?output=ie&q=";
 
@@ -51,29 +59,25 @@ public class BrowserActivity extends ToolbarActivity {
     private EditText etgivenWebSite;
     private MenuItem itemSearch;
     private ImageButton ibBack;
-    private ScrollView scrollView;
 
     private String defaultSite = "http://www.google.com";
-    private String webSiteToSearch=null;
     private long LoadTimeSystem = 0;
     private long startTimeSystem = 0;
     private long endTimeSystem = 0;
     private boolean javaScriptStatus = true;
-   // private static final int timesToSearch = 1;
-    //private int badURLtimes = 0;
-   // private int pageError = 0;
+
 
     private boolean isAwareReady = false;
     private ProgressDialog progressDialog;
     private final BroadcastReceiver awareReadyListener = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if(MONITORING_DEBUG_FLAG) Log.d(ToolbarActivity.LOG_TAG, "Received awareReady broadcast");
+            if (MONITORING_DEBUG_FLAG)
+                Log.d(LOG_TAG, "Received awareReady broadcast");
             isAwareReady = true;
-            if(progressDialog.isShowing()){
+            if (progressDialog.isShowing()) {
                 progressDialog.dismiss();
             }
-
         }
     };
 
@@ -83,43 +87,85 @@ public class BrowserActivity extends ToolbarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_browser);
-        setIsBrowserActivityVisible(true);
-
+        //setIsBrowserActivityVisible(true);
 
         browserLayout = (LinearLayout) findViewById(R.id.main_browser_layout);
         etgivenWebSite = (EditText) findViewById(R.id.website_name);
         ibBack = (ImageButton) findViewById(R.id.back);
         webPageView = (WebView) findViewById(R.id.webPageView);
-        /*scrollView = (ScrollView) findViewById(R.id.scroll_web_main);*/
+        prepareToolbar();
 
 
-        //Enable Javascript, webView does not allow JS by default
-        WebSettings settings = webPageView.getSettings();
-        settings.setJavaScriptEnabled(javaScriptStatus);
+        if (!isAwareReady) {
+            progressDialog = ProgressDialog.show(this, "Aware", this.getResources().getString(R.string.wait_for_aware), true, false);
+        }
 
-        //Zoom enable
-        settings.setBuiltInZoomControls(true);
-        settings.setSupportZoom(true);
+        //Prapare SharedPreferences
+        mySharedPref = getSharedPreferences(SHARED_PREF_FILE, Context.MODE_PRIVATE);
+        editor = mySharedPref.edit();
+        if (mySharedPref.getBoolean(KEY_FIRST_INSTALL, true)) {
+            if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "First install do not run ESM yet");
 
-        super.prepareToolbar();
-
-
-
-        /*if(MONITORING_DEBUG_FLAG) {*/
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                WebView.setWebContentsDebuggingEnabled(true);
-            }
-/*        }*/
-        if(mySharedPref.getBoolean(KEY_FIRST_INSTALL, true)) {
             Toast.makeText(getApplicationContext(), getApplicationContext().getResources().getString(R.string.first_install), Toast.LENGTH_LONG).show();
         }
 
+        //Enable Javascript and ZOOM
+        WebSettings settings = webPageView.getSettings();
+        settings.setJavaScriptEnabled(javaScriptStatus);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            WebView.setWebContentsDebuggingEnabled(true);
+        }
+        settings.setBuiltInZoomControls(true);
+        settings.setSupportZoom(true);
 
+
+        if (!mySharedPref.getBoolean(KEY_IS_BROWSER_SERVICE_RUNNING, false)) {
+            if (MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "RUN BrowserPlugin");
+            Intent browserService = new Intent(getApplicationContext(), BrowserPlugin.class);
+            getApplicationContext().startService(browserService);
+        }
 
         IntentFilter filterSetAware = new IntentFilter();
-        filterSetAware.addAction(ToolbarActivity.ACTION_AWARE_READY);
-
+        filterSetAware.addAction(ACTION_AWARE_READY);
         registerReceiver(awareReadyListener, filterSetAware);
+
+        searchForWebPage(defaultSite);
+
+    }
+
+
+    public void prepareToolbar() {
+        final Toolbar toolbar = (Toolbar) findViewById(R.id.browser_toolbar);
+        ibBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onBackPressed();
+            }
+        });
+
+        setSupportActionBar(toolbar);
+        toolbar.inflateMenu(R.menu.menu_browser);
+        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.action_about:
+                        if (MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "-----action_about-----");
+                        searchForWebPage(RESEARCH_WEBSITE);
+                        return true;
+                    case R.id.action_search:
+                        if (MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "-----action_search-----");
+                        searchForWebPage(getWebSiteFromEditText());
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+        });
+    }
+
+    private String getWebSiteFromEditText() {
+        return etgivenWebSite.getText().toString();
     }
 
     @Override
@@ -132,9 +178,26 @@ public class BrowserActivity extends ToolbarActivity {
     }
 
 
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        menu.clear();
+        getMenuInflater().inflate(R.menu.menu_browser, menu);
+
+        //Search something using EnterKey
+        etgivenWebSite.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View view, int keyCode, KeyEvent keyEvent) {
+                if (keyEvent.getAction() == KeyEvent.ACTION_DOWN) {
+                    switch (keyCode) {
+                        case KeyEvent.KEYCODE_ENTER:
+                            searchForWebPage(getWebSiteFromEditText());
+                            return true;
+                    }
+
+                }
+                return false;
+            }
+        });
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -147,78 +210,67 @@ public class BrowserActivity extends ToolbarActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "BrowserActivity On Start called");
-        setIsBrowserActivityVisible(true);
+        if (MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "BrowserActivity On Start called");
+       // setIsBrowserActivityVisible(true);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "BrowserActivty On Resume called");
+        if (MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "BrowserActivty On Resume called");
 
-        Intent intent = getIntent();
-        webSiteToSearch = intent.getStringExtra(ToolbarActivity.EXTRA_WEB_SITE);
-
-        String webSite;
-        if (webSiteToSearch != null) webSite = webSiteToSearch;
-        else webSite = defaultSite;
-
-        searchForWebPage(webSite);
-
-        if(!isAwareReady){
-            progressDialog = ProgressDialog.show(this, "Aware", "Loading. Please wait...", true, false);
-        }
+       // Intent intent = getIntent();
+       // webSiteToSearch = intent.getStringExtra(EXTRA_WEB_SITE);
 
     }
 
 
-    @Override
+   /* @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-        if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "On new Intent");
+        if (MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "On new Intent");
         setIntent(intent);
-    }
+    }*/
 
 
     public void searchForWebPage(String webSite) {
         UrlValidator urlToValidate = new UrlValidator(webSite);
-        if(urlToValidate.checkUrl()) {
-                 webViewOnPageFinishOnPageStartMethod(urlToValidate.getWebSite());
-
-        }else{
-                String webSiteNoSpaces =  repaceSpacesInString(webSite);
-                webViewOnPageFinishOnPageStartMethod(googlePageSearch + webSiteNoSpaces);
-
+        if (urlToValidate.checkUrl()) {
+            webViewOnPageFinishOnPageStartMethod(urlToValidate.getWebSite());
+        } else {
+            String webSiteNoSpaces = repaceSpacesInString(webSite);
+            webViewOnPageFinishOnPageStartMethod(googlePageSearch + webSiteNoSpaces);
         }
-
     }
 
     private String repaceSpacesInString(String webSite) {
         return webSite.replaceAll(" ", "+");
     }
 
-    private class UrlValidator{
+    private class UrlValidator {
         private String webSite;
 
         public UrlValidator(String webSite) {
             this.webSite = webSite;
         }
-        public String getWebSite(){
+
+        public String getWebSite() {
             return webSite;
         }
-        public void setWebSite(String newWebSiteValue){
+
+        public void setWebSite(String newWebSiteValue) {
             webSite = newWebSiteValue;
         }
+
         public boolean checkUrl() {
-           if (Patterns.WEB_URL.matcher(webSite).matches()) {
+            if (Patterns.WEB_URL.matcher(webSite).matches()) {
                 if (URLUtil.isHttpsUrl(webSite)) {
                     return true;
                 }
                 if (URLUtil.isHttpUrl(webSite)) {
                     return true;
-                }
-                else{
-                    setWebSite("http://"+webSite);
+                } else {
+                    setWebSite("http://" + webSite);
                     return true;
                 }
             }
@@ -268,23 +320,22 @@ public class BrowserActivity extends ToolbarActivity {
                     endTimeSystem = System.currentTimeMillis();
                     LoadTimeSystem = endTimeSystem - startTimeSystem;
 
-                    if(!mySharedPref.getBoolean(KEY_FIRST_INSTALL, true)) {
                         /*Send data to browser provider*/
-                        ContentValues plt_data = new ContentValues();
-                        plt_data.put(Browser_Provider.Browser_Data.DEVICE_ID, Aware.getSetting(getApplicationContext(), Aware_Preferences.DEVICE_ID));
-                        plt_data.put(Browser_Provider.Browser_Data.TIMESTAMP, System.currentTimeMillis());
-                        plt_data.put(Browser_Provider.Browser_Data.SESSION_ID, Aware.getSetting(getApplicationContext(), Aware_Preferences.SESSION_ID));
-                        plt_data.put(Browser_Provider.Browser_Data.WEB_PAGE, webPageView.getUrl());
-                        plt_data.put(Browser_Provider.Browser_Data.PAGE_LOAD_TIME, LoadTimeSystem);
-                        try {
-                            getBaseContext().getContentResolver().insert(Browser_Provider.Browser_Data.CONTENT_URI, plt_data);
+                    ContentValues plt_data = new ContentValues();
+                    plt_data.put(Browser_Provider.Browser_Data.DEVICE_ID, Aware.getSetting(getApplicationContext(), Aware_Preferences.DEVICE_ID));
+                    plt_data.put(Browser_Provider.Browser_Data.TIMESTAMP, System.currentTimeMillis());
+                    plt_data.put(Browser_Provider.Browser_Data.SESSION_ID, Aware.getSetting(getApplicationContext(), Aware_Preferences.SESSION_ID));
+                    plt_data.put(Browser_Provider.Browser_Data.WEB_PAGE, webPageView.getUrl());
+                    plt_data.put(Browser_Provider.Browser_Data.PAGE_LOAD_TIME, LoadTimeSystem);
+                    try {
+                        getBaseContext().getContentResolver().insert(Browser_Provider.Browser_Data.CONTENT_URI, plt_data);
 
-                        } catch (SQLiteException e) {
-                            if (Aware.DEBUG) Log.d(LOG_TAG, e.getMessage());
-                        }
-
-                        sendBroadcast(new Intent(Aware.ACTION_AWARE_CURRENT_CONTEXT));
+                    } catch (SQLiteException e) {
+                        if (Aware.DEBUG) Log.d(LOG_TAG, e.getMessage());
                     }
+
+                    sendBroadcast(new Intent(Aware.ACTION_AWARE_CURRENT_CONTEXT));
+
                     if (MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, webPageView.getUrl() + " PLT:"
                             + LoadTimeSystem + "ms");
                     etgivenWebSite.setText("");
@@ -315,21 +366,25 @@ public class BrowserActivity extends ToolbarActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        setIsBrowserActivityVisible(false);
-        if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "BrowserActivty On Stop called");
+       // setIsBrowserActivityVisible(false);
+       // if (!isBrowserActivityVisible()) {
+            if (MONITORING_DEBUG_FLAG)
+                Log.d(LOG_TAG, "Browser finish() when InstructionsActivityNotVisible and browserActivity not visible");
 
-        if(!isBrowserActivityVisible()) {
-            if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "Browser finish() when InstructionsActivityNotVisible and browserActivity not visible");
-            finish();
-        }
+        if(MONITORING_DEBUG_FLAG)Log.d(LOG_TAG, "Send ACTION_CLOSE_BROWSER");
+        Intent browserClosed = new Intent();
+        browserClosed.setAction(ACTION_AWARE_CLOSE_BROWSER);
+        sendBroadcast(browserClosed);
+
+        finish();
+        //}
     }
-
 
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "BrowserActivty On Destroy called");
+        if (MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "BrowserActivty terminated");
         unregisterReceiver(awareReadyListener);
     }
 }
