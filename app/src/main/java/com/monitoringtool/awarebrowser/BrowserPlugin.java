@@ -29,10 +29,10 @@ import static com.aware.Aware_Preferences.WEBSERVICE_SERVER;
 public class BrowserPlugin extends Aware_Plugin {
 
     private static final String LOG_TAG_SERVICE = "AB:BrowserPlugin";
-    private static final String DASHBOARD_STUDY_URL = "https://api.awareframework.com/index.php/webservice/index/407/ADKuMzjP3L3C";
+
 
     private static final boolean MONITORING_DEBUG_FLAG = BrowserActivity.MONITORING_DEBUG_FLAG;
-    private static final int webServiceSynchroTimeInMinutes = 10;
+
 
     private static final String SHARED_PREF_FILE = BrowserActivity.SHARED_PREF_FILE;
     private static final String ACTION_AWARE_READY = BrowserActivity.ACTION_AWARE_READY;
@@ -108,14 +108,14 @@ public class BrowserPlugin extends Aware_Plugin {
         }
 
         //Setup application to synchronize with remote Server every webServiceSynchroTimeInMinutes
-      /*  mySharedPref = getSharedPreferences(SHARED_PREF_FILE, Context.MODE_PRIVATE);
-        editor = mySharedPref.edit();
-        if (mySharedPref.getBoolean(KEY_FIRST_INSTALL, true)) {
-            if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG_SERVICE, "Start send data to the remote server every " + String.valueOf(webServiceSynchroTimeInMinutes) + "minutes");
-            Aware.setSetting(getApplicationContext(), STATUS_WEBSERVICE, true);
+       // mySharedPref = getSharedPreferences(SHARED_PREF_FILE, Context.MODE_PRIVATE);
+       // editor = mySharedPref.edit();
+       // if (mySharedPref.getBoolean(KEY_FIRST_INSTALL, true)) {
+          //  if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG_SERVICE, "Start send data to the remote server every " + String.valueOf(webServiceSynchroTimeInMinutes) + "minutes");
+        /*    Aware.setSetting(getApplicationContext(), STATUS_WEBSERVICE, true);
             Aware.setSetting(getApplicationContext(), WEBSERVICE_SERVER, DASHBOARD_STUDY_URL);
-            Aware.setSetting(getApplicationContext(), FREQUENCY_WEBSERVICE, webServiceSynchroTimeInMinutes);
-        }*/
+            Aware.setSetting(getApplicationContext(), FREQUENCY_WEBSERVICE, webServiceSynchroTimeInMinutes);*/
+       // }
 
         sendBroadcast(new Intent(Aware.ACTION_AWARE_REFRESH));
     }
@@ -140,15 +140,7 @@ public class BrowserPlugin extends Aware_Plugin {
             Aware.setSetting(this, STATUS_PROCESSOR, false);
         }
 
-        //Setup application to synchronize with remote Server every webServiceSynchroTimeInMinutes
-        mySharedPref = getSharedPreferences(SHARED_PREF_FILE, Context.MODE_PRIVATE);
-        editor = mySharedPref.edit();
-        if (mySharedPref.getBoolean(KEY_FIRST_INSTALL, true)) {
-            if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG_SERVICE, "Start send data to the remote server every " + String.valueOf(webServiceSynchroTimeInMinutes) + "minutes");
-            Aware.setSetting(getApplicationContext(), STATUS_WEBSERVICE, true);
-            Aware.setSetting(getApplicationContext(), WEBSERVICE_SERVER, DASHBOARD_STUDY_URL);
-            Aware.setSetting(getApplicationContext(), FREQUENCY_WEBSERVICE, webServiceSynchroTimeInMinutes);
-        }
+
         sendBroadcast(new Intent(Aware.ACTION_AWARE_REFRESH));
     }
 

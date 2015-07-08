@@ -3,6 +3,7 @@ package com.monitoringtool.awarebrowser;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.provider.Browser;
 import android.util.Log;
@@ -24,15 +25,19 @@ import static com.aware.Aware_Preferences.WEBSERVICE_SERVER;
 public class ESMAnswerReceiver extends BroadcastReceiver {
     private static final boolean MONITORING_DEBUG_FLAG = BrowserActivity.MONITORING_DEBUG_FLAG;
     private static final String ACTION_AWARE_CLOSE_BROWSER = BrowserActivity.ACTION_AWARE_CLOSE_BROWSER;
+    private static final String SHARED_PREF_FILE = BrowserActivity.SHARED_PREF_FILE;
+    private static final int webServiceSynchroTimeInMinutes = 30;
+    private static final String DASHBOARD_STUDY_URL = "https://api.awareframework.com/index.php/webservice/index/407/ADKuMzjP3L3C";
 
     private static final String LOG_TAG_ESM = "AB:ESM";
 
-
+    private static final String KEY_FIRST_INSTALL = BrowserActivity.KEY_FIRST_INSTALL;
     private static final int esmToAnswer = 4;
     private static final int maxEsmToRepeatTimes = 1;
     private static int esmAnsweredCount = 0;
     private static int repeatedESMs = 0;
-
+    private SharedPreferences mySharedPref;
+    private SharedPreferences.Editor editor;
 
 
 
@@ -65,10 +70,18 @@ public class ESMAnswerReceiver extends BroadcastReceiver {
 
         @Override
         protected Context doInBackground(Context... contexts) {
-            //Stop collecting data about connection
-            contexts[0].stopService(new Intent(contexts[0], BrowserPlugin.class));
-            if (MONITORING_DEBUG_FLAG)
-                Log.d(LOG_TAG_ESM, "Stop BrowserPlugin");
+            //Setup application to synchronize with remote Server every webServiceSynchroTimeInMinutes
+            mySharedPref = contexts[0].getSharedPreferences(SHARED_PREF_FILE, Context.MODE_PRIVATE);
+            editor = mySharedPref.edit();
+            if (mySharedPref.getBoolean(KEY_FIRST_INSTALL, true)) {
+                if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG_ESM, "Start send data to the remote server every " + String.valueOf(webServiceSynchroTimeInMinutes) + "minutes");
+                Aware.setSetting(contexts[0], STATUS_WEBSERVICE, true);
+                Aware.setSetting(contexts[0], WEBSERVICE_SERVER, DASHBOARD_STUDY_URL);
+                Aware.setSetting(contexts[0], FREQUENCY_WEBSERVICE, webServiceSynchroTimeInMinutes);
+                contexts[0].sendBroadcast(new Intent(Aware.ACTION_AWARE_REFRESH));
+            }
+            contexts[0].sendBroadcast(new Intent(Aware.ACTION_AWARE_SYNC_DATA));
+
 
             return contexts[0];
         }
@@ -76,8 +89,11 @@ public class ESMAnswerReceiver extends BroadcastReceiver {
         @Override
         protected void onPostExecute(final Context context) {
             if (MONITORING_DEBUG_FLAG)
-                Log.d(LOG_TAG_ESM, "Queue completed");
+                Log.d(LOG_TAG_ESM, "Stop Sensors - Queue completed");
             Toast.makeText(context, context.getResources().getString(R.string.esm_queue_clean), Toast.LENGTH_SHORT).show();
+            //Stop collecting data about connection
+            context.stopService(new Intent(context, BrowserPlugin.class));
+
 
 
         }
