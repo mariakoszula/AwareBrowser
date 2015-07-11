@@ -1,6 +1,7 @@
 package com.monitoringtool.awarebrowser;
 
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.ContentValues;
@@ -23,6 +24,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.URLUtil;
+import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -43,7 +45,7 @@ public class BrowserActivity extends ActionBarActivity {
     public static final String ACTION_AWARE_READY = "ACTION_AWARE_READY";
 
     public static final String RESEARCH_WEBSITE = "http://www.mariak.webd.pl/study/";
-    public static final boolean MONITORING_DEBUG_FLAG = true;
+    public static final boolean MONITORING_DEBUG_FLAG = false;
 
     public static final String SHARED_PREF_FILE = "mySharedPref";
     public static SharedPreferences mySharedPref;
@@ -82,48 +84,24 @@ public class BrowserActivity extends ActionBarActivity {
     };
 
 
+    @TargetApi(Build.VERSION_CODES.KITKAT)
     @SuppressLint("SetJavaScriptEnabled")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_browser);
-        //setIsBrowserActivityVisible(true);
 
-        browserLayout = (LinearLayout) findViewById(R.id.main_browser_layout);
-        etgivenWebSite = (EditText) findViewById(R.id.website_name);
-        ibBack = (ImageButton) findViewById(R.id.back);
-        webPageView = (WebView) findViewById(R.id.webPageView);
-        prepareToolbar();
+        prepareLayout();
+        prepareWebPageView();
 
-
-        if (!isAwareReady) {
-            progressDialog = ProgressDialog.show(this, "Aware", this.getResources().getString(R.string.wait_for_aware), true, false);
-        }
-
-        //Prapare SharedPreferences
+       // figure out why there is sometimes problem with this
         mySharedPref = getSharedPreferences(SHARED_PREF_FILE, Context.MODE_PRIVATE);
         editor = mySharedPref.edit();
-        if (mySharedPref.getBoolean(KEY_FIRST_INSTALL, true)) {
-            if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "First install do not run ESM yet");
 
-            Toast.makeText(getApplicationContext(), getApplicationContext().getResources().getString(R.string.first_install), Toast.LENGTH_LONG).show();
-        }
+        displayProgressDialogAboutAware();
+        prepareAware();
 
-        //Enable Javascript and ZOOM
-        WebSettings settings = webPageView.getSettings();
-        settings.setJavaScriptEnabled(javaScriptStatus);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            WebView.setWebContentsDebuggingEnabled(true);
-        }
-        settings.setBuiltInZoomControls(true);
-        settings.setSupportZoom(true);
-
-
-        if (!mySharedPref.getBoolean(KEY_IS_BROWSER_SERVICE_RUNNING, false)) {
-            if (MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "RUN BrowserPlugin");
-            Intent browserService = new Intent(getApplicationContext(), BrowserPlugin.class);
-            getApplicationContext().startService(browserService);
-        }
+        firstInstallSharedPref();
 
         IntentFilter filterSetAware = new IntentFilter();
         filterSetAware.addAction(ACTION_AWARE_READY);
@@ -133,7 +111,33 @@ public class BrowserActivity extends ActionBarActivity {
 
     }
 
+    private void prepareAware() {
+        if (!mySharedPref.getBoolean(KEY_IS_BROWSER_SERVICE_RUNNING, false)) {
+            if (MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "RUN BrowserPlugin");
+            Intent browserService = new Intent(getApplicationContext(), BrowserPlugin.class);
+            getApplicationContext().startService(browserService);
+        }
+    }
 
+    private void firstInstallSharedPref() {
+        if (mySharedPref.getBoolean(KEY_FIRST_INSTALL, true)) {
+            if (MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "First install.");
+            Toast.makeText(getApplicationContext(), getApplicationContext().getResources().getString(R.string.first_install), Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void displayProgressDialogAboutAware() {
+        if (!isAwareReady) {
+            progressDialog = ProgressDialog.show(this, "Aware", this.getResources().getString(R.string.wait_for_aware), true, false);
+        }
+    }
+
+    private void prepareLayout() {
+        browserLayout = (LinearLayout) findViewById(R.id.main_browser_layout);
+        etgivenWebSite = (EditText) findViewById(R.id.website_name);
+        ibBack = (ImageButton) findViewById(R.id.back);
+        prepareToolbar();
+    }
     public void prepareToolbar() {
         final Toolbar toolbar = (Toolbar) findViewById(R.id.browser_toolbar);
         ibBack.setOnClickListener(new View.OnClickListener() {
@@ -176,14 +180,28 @@ public class BrowserActivity extends ActionBarActivity {
             super.onBackPressed();
         }
     }
-
+    private void prepareWebPageView() {
+        webPageView = (WebView) findViewById(R.id.webPageView);
+        //Enable Javascript and ZOOM
+        WebSettings settings = webPageView.getSettings();
+        settings.setJavaScriptEnabled(javaScriptStatus);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            WebView.setWebContentsDebuggingEnabled(true);
+          //  settings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.TEXT_AUTOSIZING);
+        }
+        settings.setBuiltInZoomControls(true);
+        settings.setSupportZoom(true);
+        settings.setLoadWithOverviewMode(true);
+        settings.setUseWideViewPort(true);
+        webPageView.getSettings().setRenderPriority(WebSettings.RenderPriority.HIGH);
+        webPageView.getSettings().setCacheMode(WebSettings.LOAD_NO_CACHE);
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         menu.clear();
         getMenuInflater().inflate(R.menu.menu_browser, menu);
 
-        //Search something using EnterKey
         etgivenWebSite.setOnKeyListener(new View.OnKeyListener() {
             @Override
             public boolean onKey(View view, int keyCode, KeyEvent keyEvent) {
@@ -211,7 +229,6 @@ public class BrowserActivity extends ActionBarActivity {
     protected void onStart() {
         super.onStart();
         if (MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "BrowserActivity On Start called");
-       // setIsBrowserActivityVisible(true);
     }
 
     @Override
@@ -219,19 +236,7 @@ public class BrowserActivity extends ActionBarActivity {
         super.onResume();
         if (MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "BrowserActivty On Resume called");
 
-       // Intent intent = getIntent();
-       // webSiteToSearch = intent.getStringExtra(EXTRA_WEB_SITE);
-
     }
-
-
-   /* @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-        if (MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "On new Intent");
-        setIntent(intent);
-    }*/
-
 
     public void searchForWebPage(String webSite) {
         UrlValidator urlToValidate = new UrlValidator(webSite);
@@ -280,7 +285,25 @@ public class BrowserActivity extends ActionBarActivity {
     }
 
     private void webViewOnPageFinishOnPageStartMethod(String webSite) {
-        webPageView.loadUrl(webSite);
+        webPageView.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public void onProgressChanged(WebView view, int newProgress) {
+                etgivenWebSite.setText(getResources().getString(R.string.info_loading) + " " + newProgress + "%");
+                etgivenWebSite.setEnabled(false);
+                ibBack.setEnabled(false);
+                itemSearch.setEnabled(false);
+                if (newProgress == 100) {
+                    if (MONITORING_DEBUG_FLAG)
+                        Log.d(LOG_TAG, "On Progress changed has reached 100%");
+                    etgivenWebSite.setText("");
+                    etgivenWebSite.setEnabled(true);
+                    ibBack.setEnabled(true);
+                    itemSearch.setEnabled(true);
+                }
+                // super.onProgressChanged(view, newProgress);
+            }
+        });
+
         webPageView.setWebViewClient(new WebViewClient() {
             boolean loadingFinished = true;
             boolean redirection = false;
@@ -299,16 +322,9 @@ public class BrowserActivity extends ActionBarActivity {
                 super.onPageStarted(view, url, favicon);
                 startTimeSystem = System.currentTimeMillis();
                 loadingFinished = false;
-
                 InputMethodManager keyboard = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                 keyboard.hideSoftInputFromWindow(browserLayout.getWindowToken(), 0);
-                etgivenWebSite.setText(R.string.info_loading);
-                etgivenWebSite.setEnabled(false);
-                ibBack.setEnabled(false);
-                itemSearch.setEnabled(false);
-
             }
-
 
             @Override
             public void onPageFinished(WebView view, String url) {
@@ -338,10 +354,7 @@ public class BrowserActivity extends ActionBarActivity {
 
                     if (MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, webPageView.getUrl() + " PLT:"
                             + LoadTimeSystem + "ms");
-                    etgivenWebSite.setText("");
-                    etgivenWebSite.setEnabled(true);
-                    ibBack.setEnabled(true);
-                    itemSearch.setEnabled(true);
+
                 } else {
                     redirection = false;
                 }
@@ -356,6 +369,9 @@ public class BrowserActivity extends ActionBarActivity {
 
             }
         });
+
+
+        webPageView.loadUrl(webSite);
     }
 
     @Override
@@ -366,18 +382,15 @@ public class BrowserActivity extends ActionBarActivity {
     @Override
     protected void onStop() {
         super.onStop();
-       // setIsBrowserActivityVisible(false);
-       // if (!isBrowserActivityVisible()) {
             if (MONITORING_DEBUG_FLAG)
                 Log.d(LOG_TAG, "Browser finish() when InstructionsActivityNotVisible and browserActivity not visible");
 
         if(MONITORING_DEBUG_FLAG)Log.d(LOG_TAG, "Send ACTION_CLOSE_BROWSER");
-        Intent browserClosed = new Intent();
+       Intent browserClosed = new Intent();
         browserClosed.setAction(ACTION_AWARE_CLOSE_BROWSER);
         sendBroadcast(browserClosed);
 
         finish();
-        //}
     }
 
 

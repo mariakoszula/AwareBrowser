@@ -63,6 +63,8 @@ public class ESMAnswerReceiver extends BroadcastReceiver {
         } else if (intent.getAction().equals(ESM.ACTION_AWARE_ESM_QUEUE_COMPLETE)) {
             if (MONITORING_DEBUG_FLAG) Log.d(LOG_TAG_ESM, "Queue Complete. All ESM answered");
             new SendDataToTheServerTask().execute(context);
+        }else{
+            context.stopService(new Intent(context, BrowserPlugin.class));
         }
     }
 
