@@ -79,11 +79,21 @@ public class ESM_Queue extends FragmentActivity {
     	@Override
     	public void onReceive(Context context, Intent intent) {
     		if( intent.getAction().equals(ESM.ACTION_AWARE_ESM_ANSWERED) || intent.getAction().equals(ESM.ACTION_AWARE_ESM_DISMISSED) || intent.getAction().equals(ESM.ACTION_AWARE_ESM_EXPIRED) ) {
+                if(intent.getAction().equals(ESM.ACTION_AWARE_ESM_DISMISSED) || intent.getAction().equals(ESM.ACTION_AWARE_ESM_EXPIRED)) {
+                    //Remove all queued ESMs when esm dismissed or expired
+                    if (getQueueSize(context) > 0) {
+                        context.getContentResolver().delete(ESM_Data.CONTENT_URI, ESM_Data.STATUS + "=" + ESM.STATUS_NEW, null);
+                        if(Aware.DEBUG) Log.d(TAG, "ESM queue cleared");
+
+                    }
+                }
+
     			if( getQueueSize(context) > 0 ) {
                     FragmentManager fragmentManager = getSupportFragmentManager();
                     DialogFragment esm = new ESM_UI();
                     esm.show(fragmentManager, TAG);
-    			} 
+    			}
+
     			if( getQueueSize(context) == 0 ) {
     				if(Aware.DEBUG) Log.d(TAG,"ESM Queue is done!");
     	            Intent esm_done = new Intent(ESM.ACTION_AWARE_ESM_QUEUE_COMPLETE);

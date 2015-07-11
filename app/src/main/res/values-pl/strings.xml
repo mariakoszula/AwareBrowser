@@ -44,4 +44,5 @@
     <string name="esm_never_answered">Ankiety nie zostały wypełnione</string>
     <string name="wait_for_aware">Przygotwanie narzędzi monitorujących</string>
     <string name="esm_queue_clean">Koniec ankiety</string>
+    <string name="action_refresh">Odśwież</string>
 </resources>

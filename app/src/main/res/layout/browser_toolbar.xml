@@ -1,28 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.v7.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent" android:layout_height="wrap_content"
-    android:layout_centerVertical="true"
     android:id="@+id/browser_toolbar"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_centerVertical="true"
     android:gravity="start|center_vertical"
     android:minHeight="?attr/actionBarSize"
-    android:theme="@style/Browser.Toolbar"
-    android:popupTheme="@style/Theme.Browser">
+    android:popupTheme="@style/Theme.Browser"
+    android:theme="@style/Browser.Toolbar">
+
     <ImageButton
+        android:id="@+id/back"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/back"
         android:background="@null"
-        android:src="@drawable/ic_action"
-        />
+        android:src="@drawable/ic_action" />
 
 
-        <EditText
+    <EditText
+        android:id="@+id/website_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/website_name"
+        android:inputType="text"
         android:phoneNumber="false"
-        android:inputType="text"          />
+        android:selectAllOnFocus="true" />
 
 
-
-    </android.support.v7.widget.Toolbar>
+</android.support.v7.widget.Toolbar>

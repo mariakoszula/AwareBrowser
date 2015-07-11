@@ -43,4 +43,5 @@
     <string name="esm_never_answered">ESM questionnaires never answered</string>
     <string name="wait_for_aware">Preparing monitoring tool</string>
     <string name="esm_queue_clean">No ESM questionnaires left in queue</string>
+    <string name="action_refresh">Refresh</string>
 </resources>

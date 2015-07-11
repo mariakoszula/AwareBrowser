@@ -36,7 +36,7 @@ public class BrowserPlugin extends Aware_Plugin {
 
     private static final String SHARED_PREF_FILE = BrowserActivity.SHARED_PREF_FILE;
     private static final String ACTION_AWARE_READY = BrowserActivity.ACTION_AWARE_READY;
-    private static final String KEY_FIRST_INSTALL = BrowserActivity.KEY_FIRST_INSTALL;
+
     private static final String KEY_IS_BROWSER_SERVICE_RUNNING = BrowserActivity.KEY_IS_BROWSER_SERVICE_RUNNING;
     private SharedPreferences mySharedPref;
     private SharedPreferences.Editor editor;
@@ -101,22 +101,6 @@ public class BrowserPlugin extends Aware_Plugin {
         //Start ESM Sensor
         Aware.setSetting(getApplicationContext(), Aware_Preferences.STATUS_ESM, true);
 
-        //Start Processor load - only for debugging purpose
-        if(MONITORING_DEBUG_FLAG){
-            Aware.setSetting(getApplicationContext(), STATUS_PROCESSOR, true);
-            Aware.setSetting(getApplicationContext(), FREQUENCY_PROCESSOR, 180);
-        }
-
-        //Setup application to synchronize with remote Server every webServiceSynchroTimeInMinutes
-       // mySharedPref = getSharedPreferences(SHARED_PREF_FILE, Context.MODE_PRIVATE);
-       // editor = mySharedPref.edit();
-       // if (mySharedPref.getBoolean(KEY_FIRST_INSTALL, true)) {
-          //  if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG_SERVICE, "Start send data to the remote server every " + String.valueOf(webServiceSynchroTimeInMinutes) + "minutes");
-        /*    Aware.setSetting(getApplicationContext(), STATUS_WEBSERVICE, true);
-            Aware.setSetting(getApplicationContext(), WEBSERVICE_SERVER, DASHBOARD_STUDY_URL);
-            Aware.setSetting(getApplicationContext(), FREQUENCY_WEBSERVICE, webServiceSynchroTimeInMinutes);*/
-       // }
-
         sendBroadcast(new Intent(Aware.ACTION_AWARE_REFRESH));
     }
 
@@ -134,12 +118,6 @@ public class BrowserPlugin extends Aware_Plugin {
 
         //Stop ESM Sensor
         Aware.setSetting(getApplicationContext(), Aware_Preferences.STATUS_ESM, false);
-
-        //Stop Processor Sensor
-        if (MONITORING_DEBUG_FLAG) {
-            Aware.setSetting(this, STATUS_PROCESSOR, false);
-        }
-
 
         sendBroadcast(new Intent(Aware.ACTION_AWARE_REFRESH));
     }
@@ -170,9 +148,6 @@ public class BrowserPlugin extends Aware_Plugin {
         stopSensors();
         mySharedPref = getSharedPreferences(SHARED_PREF_FILE, Context.MODE_PRIVATE);
         editor = mySharedPref.edit();
-        if(mySharedPref.getBoolean(KEY_FIRST_INSTALL, true)) {
-            editor.putBoolean(KEY_FIRST_INSTALL, false);
-        }
         editor.putBoolean(KEY_IS_BROWSER_SERVICE_RUNNING, false);
         editor.commit();
     }
