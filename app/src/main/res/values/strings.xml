@@ -11,9 +11,9 @@
     <string name="bad_url">Bad URL</string>
     <string name="bad_connection">Check if you have data transmission or WiFi enabled</string>
     <string name="title_rating">Rate the session</string>
-    <string name="esm_rating_instructions">Rate the session based on your satisfaction about page loading time? Rate from 1 (not satisfied) to 5 (very satisfied).</string>
-    <string name="esm_rating_max">very satisfied</string>
-    <string name="esm_rating_min">not satisfied</string>
+    <string name="esm_rating_instructions">How will you rate the session taking into account time of loading the pages? 5=Excellent;4=Good;3=Fair;2=Poor;1=Bad</string>
+    <string name="esm_rating_max">excellent</string>
+    <string name="esm_rating_min">bad</string>
     <string name="title_activity_esm">ESM questionnaire</string>
 
     <string name="hello_world">Hello world!</string>
@@ -26,21 +26,21 @@
     <string name="esm_context_answer2">checking email</string>
     <string name="esm_context_answer3">checking social services</string>
     <string name="esm_context_answer4">entertainment</string>
-    <string name="title_delays_accept">Did the loading time of pages made worse experience?</string>
+    <string name="title_delays_accept">Did the loading time of pages decreased the comfort of usage?</string>
     <string name="esm_delays_accept_instructions" />
     <string name="esm_answer_yes">yes</string>
     <string name="esm_answer_no">no</string>
     <string name="esm_context_answer5">other</string>
-    <string name="title_movement">Choose your state</string>
+    <string name="title_movement">Your mode of transportation:</string>
     <string name="esm_movement_instructions" />
     <string name="esm_movement_answer1">walking</string>
     <string name="esm_movement_answer2">riding</string>
     <string name="esm_movement_answer3">stationary</string>
     <string name="esm_rerun">ESM was dismissed, will be rerun ONE more time.</string>
-    <string name="esm_thanks">Thank you for the answers. Please do not turn the Data connection after you will receive a message.</string>
+    <string name="esm_thanks">Thank you for the answers.</string>
     <string name="can_turn_off_data">You can now turn off the data connection.</string>
     <string name="first_install">First run, thank you for installing AwareBrows.</string>
-    <string name="esm_never_answered">ESM questionnaires never answered</string>
+    <string name="esm_never_answered">Not all ESM questionnaires was answered</string>
     <string name="wait_for_aware">Preparing monitoring tool</string>
     <string name="esm_queue_clean">No ESM questionnaires left in queue</string>
     <string name="action_refresh">Refresh</string>

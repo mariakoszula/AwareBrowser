@@ -11,6 +11,7 @@ import android.widget.Toast;
 
 import com.aware.Aware;
 import com.aware.ESM;
+import com.aware.providers.ESM_Provider;
 
 import static com.aware.Aware_Preferences.FREQUENCY_WEBSERVICE;
 import static com.aware.Aware_Preferences.STATUS_WEBSERVICE;
@@ -46,24 +47,19 @@ public class ESMAnswerReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         mySharedPref = context.getSharedPreferences(SHARED_PREF_FILE, Context.MODE_PRIVATE);
         editor = mySharedPref.edit();
-        if (intent.getAction().equals(ESM.ACTION_AWARE_ESM_EXPIRED)) {
-            if (MONITORING_DEBUG_FLAG)
-                Log.d(LOG_TAG_ESM, "ESM expired send BrowserClosed message again.");
-            sendActionCloseBrowser(context);
-        } else if (intent.getAction().equals(ESM.ACTION_AWARE_ESM_DISMISSED)) {
-            if (MONITORING_DEBUG_FLAG)
-                Log.d(LOG_TAG_ESM, "ESM dismissed. Call BrowserClosed intent again.");
-            sendActionCloseBrowser(context);
+            if(intent.getAction().equals(ESM.ACTION_AWARE_ESM_DISMISSED) || intent.getAction().equals(ESM.ACTION_AWARE_ESM_EXPIRED)) {
+                removeQueuedESM(context);
         } else if (intent.getAction().equals(ESM.ACTION_AWARE_ESM_ANSWERED)) {
             if (MONITORING_DEBUG_FLAG) Log.d(LOG_TAG_ESM, "Yupi! ESM answered.");
             esmAnsweredCount++;
             if (esmAnsweredCount == esmToAnswer) {
                 if (MONITORING_DEBUG_FLAG)
                     Log.d(LOG_TAG_ESM, "All ESM Answered. Catch Queue complete");
+                removeEmptyAnserws(context);
                 Toast.makeText(context, context.getResources().getString(R.string.esm_thanks), Toast.LENGTH_SHORT).show();
             }
         } else if (intent.getAction().equals(ESM.ACTION_AWARE_ESM_QUEUE_COMPLETE)) {
-            if (MONITORING_DEBUG_FLAG) Log.d(LOG_TAG_ESM, "Queue Complete. All ESM answered");
+            if (MONITORING_DEBUG_FLAG) Log.d(LOG_TAG_ESM, "Queue Complete.");
             new SendDataToTheServerTask().execute(context);
         }else{
             if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG_ESM, "No ESM action");
@@ -95,7 +91,7 @@ public class ESMAnswerReceiver extends BroadcastReceiver {
         protected void onPostExecute(final Context context) {
             if (MONITORING_DEBUG_FLAG)
                 Log.d(LOG_TAG_ESM, "Stop Sensors - Queue completed");
-           /* Toast.makeText(context, context.getResources().getString(R.string.esm_queue_clean), Toast.LENGTH_SHORT).show();*/
+
             //Stop collecting data about connection
             if(mySharedPref.getBoolean(KEY_IS_BROWSER_SERVICE_RUNNING, false)) context.stopService(new Intent(context, BrowserPlugin.class));
 
@@ -104,9 +100,7 @@ public class ESMAnswerReceiver extends BroadcastReceiver {
         }
     }
 
-    private void sendActionCloseBrowser(Context context) {
-     //   context.sendBroadcast(new Intent(ESM.ACTION_AWARE_ESM_CLEAN_QUEUE));
-    //    if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG_ESM, "Cleaning the queue");
+    private void removeQueuedESM(Context context) {
 
         if (repeatedESMs < maxEsmToRepeatTimes) {
             Toast.makeText(context, context.getResources().getString(R.string.esm_rerun), Toast.LENGTH_SHORT).show();
@@ -119,5 +113,11 @@ public class ESMAnswerReceiver extends BroadcastReceiver {
             Toast.makeText(context, context.getResources().getString(R.string.esm_never_answered), Toast.LENGTH_SHORT).show();
             if(mySharedPref.getBoolean(KEY_IS_BROWSER_SERVICE_RUNNING, false)) context.stopService(new Intent(context, BrowserPlugin.class));
         }
+    }
+
+    private void removeEmptyAnserws(Context context){
+        context.getContentResolver().delete(ESM_Provider.ESM_Data.CONTENT_URI, ESM_Provider.ESM_Data.STATUS + "=" + ESM.STATUS_DISMISSED, null);
+        context.getContentResolver().delete(ESM_Provider.ESM_Data.CONTENT_URI, ESM_Provider.ESM_Data.STATUS + "=" + ESM.STATUS_EXPIRED, null);
+        if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG_ESM, "ESM remove empty answers");
     }
 }

@@ -93,7 +93,12 @@
             android:writePermission="com.aware.WRITE_CONTEXT_DATA" />
 
 
-
+        <provider
+            android:name="com.aware.plugin.google.activity_recognition.Google_AR_Provider"
+            android:authorities="${applicationId}.provider"
+            android:exported="true"
+            android:readPermission="com.aware.READ_CONTEXT_DATA"
+            android:writePermission="com.aware.WRITE_CONTEXT_DATA" />
 
 
     </application>

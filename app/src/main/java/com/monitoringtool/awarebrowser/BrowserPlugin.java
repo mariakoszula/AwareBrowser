@@ -101,6 +101,10 @@ public class BrowserPlugin extends Aware_Plugin {
         //Start ESM Sensor
         Aware.setSetting(getApplicationContext(), Aware_Preferences.STATUS_ESM, true);
 
+        //Start Google Activity Recognition Plugin
+        Intent activityRecognitionIntent = new Intent(getApplicationContext(), com.aware.plugin.google.activity_recognition.Plugin.class);
+        getApplicationContext().startService(activityRecognitionIntent);
+
         sendBroadcast(new Intent(Aware.ACTION_AWARE_REFRESH));
     }
 
@@ -118,6 +122,9 @@ public class BrowserPlugin extends Aware_Plugin {
 
         //Stop ESM Sensor
         Aware.setSetting(getApplicationContext(), Aware_Preferences.STATUS_ESM, false);
+
+        //Stop Google Activity Recognition
+        getApplicationContext().stopService(new Intent(getApplicationContext(), com.aware.plugin.google.activity_recognition.Plugin.class));
 
         sendBroadcast(new Intent(Aware.ACTION_AWARE_REFRESH));
     }

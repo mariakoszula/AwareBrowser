@@ -19,6 +19,7 @@ import com.aware.Aware;
 import com.aware.Aware_Preferences;
 import com.aware.ESM;
 import com.aware.providers.Aware_Provider;
+import com.aware.providers.ESM_Provider;
 import com.aware.providers.ESM_Provider.ESM_Data;
 
 /**
@@ -81,13 +82,10 @@ public class ESM_Queue extends FragmentActivity {
     		if( intent.getAction().equals(ESM.ACTION_AWARE_ESM_ANSWERED) || intent.getAction().equals(ESM.ACTION_AWARE_ESM_DISMISSED) || intent.getAction().equals(ESM.ACTION_AWARE_ESM_EXPIRED) ) {
                 if(intent.getAction().equals(ESM.ACTION_AWARE_ESM_DISMISSED) || intent.getAction().equals(ESM.ACTION_AWARE_ESM_EXPIRED)) {
                     //Remove all queued ESMs when esm dismissed or expired
-                    if (getQueueSize(context) > 0) {
-                        context.getContentResolver().delete(ESM_Data.CONTENT_URI, ESM_Data.STATUS + "=" + ESM.STATUS_NEW, null);
-                        if(Aware.DEBUG) Log.d(TAG, "ESM queue cleared");
+                    context.getContentResolver().delete(ESM_Provider.ESM_Data.CONTENT_URI, ESM_Provider.ESM_Data.STATUS + "=" + ESM.STATUS_NEW, null);
 
-                    }
+                    if (Aware.DEBUG) Log.d(TAG, "ESM clear queue");
                 }
-
     			if( getQueueSize(context) > 0 ) {
                     FragmentManager fragmentManager = getSupportFragmentManager();
                     DialogFragment esm = new ESM_UI();
