@@ -26,16 +26,16 @@
     <string name="esm_context_answer2">checking email</string>
     <string name="esm_context_answer3">checking social services</string>
     <string name="esm_context_answer4">entertainment</string>
-    <string name="title_delays_accept">Did the loading time of pages decreased the comfort of usage?</string>
+    <string name="title_delays_accept">Are you satisfied with sites loading speed?</string>
     <string name="esm_delays_accept_instructions" />
     <string name="esm_answer_yes">yes</string>
     <string name="esm_answer_no">no</string>
     <string name="esm_context_answer5">other</string>
-    <string name="title_movement">Your mode of transportation:</string>
+    <string name="title_movement">Your mobility level:</string>
     <string name="esm_movement_instructions" />
     <string name="esm_movement_answer1">walking</string>
     <string name="esm_movement_answer2">riding</string>
-    <string name="esm_movement_answer3">stationary</string>
+    <string name="esm_movement_answer3">not moving</string>
     <string name="esm_rerun">ESM was dismissed, will be rerun ONE more time.</string>
     <string name="esm_thanks">Thank you for the answers.</string>
     <string name="can_turn_off_data">You can now turn off the data connection.</string>
@@ -44,4 +44,5 @@
     <string name="wait_for_aware">Preparing monitoring tool</string>
     <string name="esm_queue_clean">No ESM questionnaires left in queue</string>
     <string name="action_refresh">Refresh</string>
+    <string name="aware_not_ready">Questionnaires will not be displayed</string>
 </resources>

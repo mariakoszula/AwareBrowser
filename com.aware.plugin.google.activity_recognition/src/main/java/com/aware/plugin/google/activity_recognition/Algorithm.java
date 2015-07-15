@@ -56,6 +56,8 @@ public class Algorithm extends IntentService {
             ContentValues data = new ContentValues();
             data.put(Google_Activity_Recognition_Data.TIMESTAMP, System.currentTimeMillis());
             data.put(Google_Activity_Recognition_Data.DEVICE_ID, Aware.getSetting(getApplicationContext(), Aware_Preferences.DEVICE_ID));
+            data.put(Google_Activity_Recognition_Data.SESSION_ID, Aware.getSetting(getApplicationContext(), Aware_Preferences.SESSION_ID));
+
             data.put(Google_Activity_Recognition_Data.ACTIVITY_NAME, activity_name);
             data.put(Google_Activity_Recognition_Data.ACTIVITY_TYPE, Plugin.current_activity);
             data.put(Google_Activity_Recognition_Data.CONFIDENCE, Plugin.current_confidence);

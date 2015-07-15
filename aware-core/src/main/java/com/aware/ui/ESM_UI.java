@@ -60,9 +60,13 @@ public class ESM_UI extends DialogFragment {
 	private static int esm_id = 0;
 	private static int esm_type = 0;
 	private static int expires_seconds = 0;
-	
+
+	private boolean esm_not_answered = true;
+	private boolean esm_reruned = false;
+
 	//Checkbox ESM UI to store selected items
 	private static ArrayList<String> selected_options = new ArrayList<String>();
+
 	
 	@Override
 	public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -70,6 +74,7 @@ public class ESM_UI extends DialogFragment {
 		builder = new AlertDialog.Builder(getActivity());
 		inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		inputManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+
 		
 		TAG = Aware.getSetting(getActivity().getApplicationContext(),Aware_Preferences.DEBUG_TAG).length()>0?Aware.getSetting(getActivity().getApplicationContext(), Aware_Preferences.DEBUG_TAG):TAG;
 
@@ -78,6 +83,8 @@ public class ESM_UI extends DialogFragment {
         	esm_id = visible_esm.getInt(visible_esm.getColumnIndex(ESM_Data._ID));
         	
         	//Fixed: set the esm as not new anymore, to avoid displaying the same ESM twice due to changes in orientation
+
+
         	ContentValues update_state = new ContentValues();
         	update_state.put(ESM_Data.STATUS, ESM.STATUS_VISIBLE);
         	getActivity().getContentResolver().update(ESM_Data.CONTENT_URI, update_state, ESM_Data._ID +"="+ esm_id, null);
@@ -146,7 +153,8 @@ public class ESM_UI extends DialogFragment {
 		                    getActivity().sendBroadcast(answer);
 		                    
 		                    if(Aware.DEBUG) Log.d(TAG,"Answer:" + rowData.toString());
-		                    
+
+							esm_not_answered = false;
 		                    current_dialog.dismiss();
 						}
 					});	
@@ -227,7 +235,7 @@ public class ESM_UI extends DialogFragment {
 			                    getActivity().sendBroadcast(answer);
 			                    
 			                    if(Aware.DEBUG) Log.d(TAG,"Answer:" + rowData.toString());
-			                    
+			                    esm_not_answered = false;
 			                    current_dialog.dismiss();
 							}
 						});
@@ -323,7 +331,7 @@ public class ESM_UI extends DialogFragment {
 			                    getActivity().sendBroadcast(answer);
 			                    
 			                    if(Aware.DEBUG) Log.d(TAG,"Answer:" + rowData.toString());
-			                    
+			                    esm_not_answered = false;
 			                    current_dialog.dismiss();
 							}
 						});
@@ -368,7 +376,8 @@ public class ESM_UI extends DialogFragment {
 		                    getActivity().sendBroadcast(answer);
 		                    
 		                    if(Aware.DEBUG) Log.d(TAG,"Answer:" + rowData.toString());
-		                    
+
+							esm_not_answered = false;
 		                    current_dialog.dismiss();
 						}
 					});
@@ -405,7 +414,7 @@ public class ESM_UI extends DialogFragment {
         		                    getActivity().sendBroadcast(answer);
         		                    
         		                    if(Aware.DEBUG) Log.d(TAG,"Answer:" + rowData.toString());
-                                    
+                                    esm_not_answered = false;
                                     current_dialog.dismiss();
                                 }
                             });
@@ -434,22 +443,35 @@ public class ESM_UI extends DialogFragment {
 	@Override
 	public void onCancel(DialogInterface dialog) {
 		super.onCancel(dialog);
-		
+
 		if( expires_seconds > 0 && expire_monitor != null ) expire_monitor.cancel(true);
 		
 		ContentValues rowData = new ContentValues();
         rowData.put(ESM_Data.ANSWER_TIMESTAMP, System.currentTimeMillis());
         rowData.put(ESM_Data.STATUS, ESM.STATUS_DISMISSED);
         sContext.getContentResolver().update(ESM_Data.CONTENT_URI, rowData, ESM_Data._ID + "=" + esm_id, null);
-        
+
         Intent answer = new Intent(ESM.ACTION_AWARE_ESM_DISMISSED);
 		sContext.sendBroadcast(answer);
+		esm_reruned = true;
 	}
 	
 	@Override
 	public void onDismiss(DialogInterface dialog) {
 		super.onDismiss(dialog);
 		if( expires_seconds > 0 && expire_monitor != null ) expire_monitor.cancel(true);
+
+		//To do something when dimissed on HOME button
+
+		if(esm_not_answered && !esm_reruned) {
+			ContentValues rowData = new ContentValues();
+			rowData.put(ESM_Data.ANSWER_TIMESTAMP, System.currentTimeMillis());
+			rowData.put(ESM_Data.STATUS, ESM.STATUS_DISMISSED);
+			sContext.getContentResolver().update(ESM_Data.CONTENT_URI, rowData, ESM_Data._ID + "=" + esm_id, null);
+
+			Intent answer = new Intent(ESM.ACTION_AWARE_ESM_DISMISSED);
+			sContext.sendBroadcast(answer);
+		}
 	}
 	
 	/**
@@ -499,7 +521,8 @@ public class ESM_UI extends DialogFragment {
             
             Intent expired = new Intent(ESM.ACTION_AWARE_ESM_EXPIRED);
         	sContext.sendBroadcast(expired);
-            
+
+			esm_not_answered = true;
             current_dialog.dismiss();
             return null;
         }

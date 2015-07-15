@@ -197,7 +197,7 @@ public class Network extends Aware_Sensor {
                 Intent network = new Intent(ACTION_AWARE_MOBILE_ON);
                 sendBroadcast(network);
 			}
-		};
+		}
 	};
 	
 	/**
@@ -502,11 +502,11 @@ public class Network extends Aware_Sensor {
     	CONTEXT_URIS = new Uri[]{ Network_Data.CONTENT_URI };
         
         IntentFilter filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        //filter.addAction(Intent.ACTION_AIRPLANE_MODE_CHANGED);
         filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
-        filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
-        filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
-        filter.addAction(LocationManager.PROVIDERS_CHANGED_ACTION);
+        //filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
+        //filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+        //filter.addAction(LocationManager.PROVIDERS_CHANGED_ACTION);
         registerReceiver(networkMonitor, filter);
         
         teleManager.listen(phoneListener, PhoneStateListener.LISTEN_SERVICE_STATE);

@@ -11,6 +11,7 @@ import android.database.sqlite.SQLiteException;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
+import android.telephony.CellInfo;
 import android.telephony.CellLocation;
 import android.telephony.NeighboringCellInfo;
 import android.telephony.PhoneStateListener;
@@ -105,6 +106,7 @@ public class Telephony extends Aware_Sensor {
         super.onCreate();
         
         telephonyManager = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
+
         mContext = getApplicationContext();
         
         TAG = Aware.getSetting(getApplicationContext(),Aware_Preferences.DEBUG_TAG).length()>0?Aware.getSetting(getApplicationContext(),Aware_Preferences.DEBUG_TAG):"AWARE::Telephony";
@@ -119,7 +121,8 @@ public class Telephony extends Aware_Sensor {
             CONTEXT_URIS = new Uri[] { Telephony_Data.CONTENT_URI, GSM_Data.CONTENT_URI, GSM_Neighbors_Data.CONTENT_URI, CDMA_Data.CONTENT_URI };
 
 
-        telephonyManager.listen(telephonyState, PhoneStateListener.LISTEN_CELL_LOCATION | PhoneStateListener.LISTEN_SIGNAL_STRENGTHS);
+       if(!DISABLE_ADDITIONAL_TELEPHONY_INFO) telephonyManager.listen(telephonyState, PhoneStateListener.LISTEN_CELL_LOCATION | PhoneStateListener.LISTEN_SIGNAL_STRENGTHS);
+        if(DISABLE_ADDITIONAL_TELEPHONY_INFO) telephonyManager.listen(telephonyState, PhoneStateListener.LISTEN_CELL_INFO);
         
         if(Aware.DEBUG) Log.d(TAG,"Telephony service created!");
     }
@@ -154,22 +157,64 @@ public class Telephony extends Aware_Sensor {
     public static class TelephonyState extends PhoneStateListener {
 
 
+        @Override
+        public void onCellInfoChanged(List<CellInfo> cellInfo) {
+            super.onCellInfoChanged(cellInfo);
+            String device_id = Aware.getSetting(mContext,Aware_Preferences.DEVICE_ID);
+            String session_id = Aware.getSetting(mContext,Aware_Preferences.SESSION_ID);
+
+            long timestamp = System.currentTimeMillis();
+
+            ContentValues rowData = new ContentValues();
+            rowData.put(Telephony_Data.TIMESTAMP, timestamp);
+            rowData.put(Telephony_Data.DEVICE_ID, device_id);
+            rowData.put(Telephony_Data.SESSION_ID, session_id);
+            rowData.put(Telephony_Data.DATA_ENABLED, telephonyManager.getDataState());
+            rowData.put(Telephony_Data.IMEI_MEID_ESN, Encrypter.hashSHA1(telephonyManager.getDeviceId()));
+            rowData.put(Telephony_Data.SOFTWARE_VERSION, telephonyManager.getDeviceSoftwareVersion());
+            rowData.put(Telephony_Data.LINE_NUMBER, Encrypter.hashSHA1(telephonyManager.getLine1Number()));
+            rowData.put(Telephony_Data.NETWORK_COUNTRY_ISO_MCC, telephonyManager.getNetworkCountryIso());
+            rowData.put(Telephony_Data.NETWORK_OPERATOR_CODE, telephonyManager.getNetworkOperator());
+            rowData.put(Telephony_Data.NETWORK_OPERATOR_NAME, telephonyManager.getNetworkOperatorName());
+            rowData.put(Telephony_Data.NETWORK_TYPE, telephonyManager.getNetworkType());
+            rowData.put(Telephony_Data.PHONE_TYPE, telephonyManager.getPhoneType());
+            rowData.put(Telephony_Data.SIM_STATE, telephonyManager.getSimState());
+            rowData.put(Telephony_Data.SIM_OPERATOR_CODE, telephonyManager.getSimOperator());
+            rowData.put(Telephony_Data.SIM_OPERATOR_NAME, telephonyManager.getSimOperatorName());
+            rowData.put(Telephony_Data.SIM_SERIAL, Encrypter.hashSHA1(telephonyManager.getSimSerialNumber()));
+            rowData.put(Telephony_Data.SUBSCRIBER_ID, Encrypter.hashSHA1(telephonyManager.getSubscriberId()));
+
+            try {
+                mContext.getContentResolver().insert(Telephony_Data.CONTENT_URI, rowData);
+
+                Intent newTelephony = new Intent(Telephony.ACTION_AWARE_TELEPHONY);
+                mContext.sendBroadcast(newTelephony);
+
+                if( Aware.DEBUG ) Log.d(TAG, "Telephony:"+ rowData.toString());
+            }catch( SQLiteException e ) {
+                if(Aware.DEBUG) Log.d(TAG,e.getMessage());
+            }catch( SQLException e ) {
+                if(Aware.DEBUG) Log.d(TAG,e.getMessage());
+            }
+        }
 
         @Override
         public void onSignalStrengthsChanged(SignalStrength signalStrength) {
             super.onSignalStrengthsChanged(signalStrength);
+            Log.d("adf", "signalStraenthsChanged");
             lastSignalStrength = signalStrength;
         }
         
         @Override
         public void onCellLocationChanged(CellLocation location) {
             super.onCellLocationChanged(location);
-            
+            Log.d("adf", "CellLocationChanged");
+
             if ( lastSignalStrength == null ) return;
-            
-            String device_id = Aware.getSetting(mContext,Aware_Preferences.DEVICE_ID);
+
+
+                String device_id = Aware.getSetting(mContext,Aware_Preferences.DEVICE_ID);
             String session_id = Aware.getSetting(mContext,Aware_Preferences.SESSION_ID);
-        if(!DISABLE_ADDITIONAL_TELEPHONY_INFO){
             if( location instanceof GsmCellLocation ) {
                 GsmCellLocation loc = (GsmCellLocation) location;
                 
@@ -255,7 +300,6 @@ public class Telephony extends Aware_Sensor {
                     if(Aware.DEBUG) Log.d(TAG,e.getMessage());
                 }
             }
-            }
             long timestamp = System.currentTimeMillis();
             
             ContentValues rowData = new ContentValues();
@@ -290,5 +334,5 @@ public class Telephony extends Aware_Sensor {
                 if(Aware.DEBUG) Log.d(TAG,e.getMessage());
             }
         }
-    }        
+    }
 }

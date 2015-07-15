@@ -45,4 +45,5 @@
     <string name="wait_for_aware">Przygotwanie narzędzi monitorujących</string>
     <string name="esm_queue_clean">Koniec ankiety</string>
     <string name="action_refresh">Odśwież</string>
+    <string name="aware_not_ready">Ankiety nie zostaną wyświetlone</string>
 </resources>

@@ -10,13 +10,16 @@ import android.util.Log;
 
 import com.aware.Aware;
 import com.aware.Aware_Preferences;
+import com.aware.plugin.google.activity_recognition.Settings;
 import com.aware.utils.Aware_Plugin;
 
 
+import java.sql.Time;
 import java.util.UUID;
 
 import static com.aware.Aware_Preferences.DEBUG_FLAG;
 import static com.aware.Aware_Preferences.DEVICE_ID;
+import static com.aware.Aware_Preferences.FREQUENCY_NETWORK_TRAFFIC;
 import static com.aware.Aware_Preferences.FREQUENCY_PROCESSOR;
 import static com.aware.Aware_Preferences.FREQUENCY_WEBSERVICE;
 import static com.aware.Aware_Preferences.STATUS_NETWORK_EVENTS;
@@ -40,6 +43,10 @@ public class BrowserPlugin extends Aware_Plugin {
     private static final String KEY_IS_BROWSER_SERVICE_RUNNING = BrowserActivity.KEY_IS_BROWSER_SERVICE_RUNNING;
     private SharedPreferences mySharedPref;
     private SharedPreferences.Editor editor;
+
+
+    private static final int TimeToCollectTraffic = 120;
+    private static final int TimeToCollectActivity = 180;
 
     @Override
     public void onCreate() {
@@ -94,6 +101,7 @@ public class BrowserPlugin extends Aware_Plugin {
         //Start Network Sensor
         Aware.setSetting(this, STATUS_NETWORK_EVENTS, true);
         Aware.setSetting(this, STATUS_NETWORK_TRAFFIC, true);
+        Aware.setSetting(this, FREQUENCY_NETWORK_TRAFFIC, TimeToCollectTraffic);
 
         //Start Telephony Sensor
         Aware.setSetting(this, STATUS_TELEPHONY, true);
@@ -104,6 +112,8 @@ public class BrowserPlugin extends Aware_Plugin {
         //Start Google Activity Recognition Plugin
         Intent activityRecognitionIntent = new Intent(getApplicationContext(), com.aware.plugin.google.activity_recognition.Plugin.class);
         getApplicationContext().startService(activityRecognitionIntent);
+        Aware.setSetting(getApplicationContext(), Settings.STATUS_PLUGIN_GOOGLE_ACTIVITY_RECOGNITION, true);
+        Aware.setSetting(getApplicationContext(), Settings.FREQUENCY_PLUGIN_GOOGLE_ACTIVITY_RECOGNITION, TimeToCollectActivity);
 
         sendBroadcast(new Intent(Aware.ACTION_AWARE_REFRESH));
     }
@@ -125,6 +135,7 @@ public class BrowserPlugin extends Aware_Plugin {
 
         //Stop Google Activity Recognition
         getApplicationContext().stopService(new Intent(getApplicationContext(), com.aware.plugin.google.activity_recognition.Plugin.class));
+
 
         sendBroadcast(new Intent(Aware.ACTION_AWARE_REFRESH));
     }

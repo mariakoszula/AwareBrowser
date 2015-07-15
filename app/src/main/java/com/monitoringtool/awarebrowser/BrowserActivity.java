@@ -58,7 +58,7 @@ public class BrowserActivity extends ActionBarActivity {
     public static final String ACTION_AWARE_READY = "ACTION_AWARE_READY";
 
     public static final String RESEARCH_WEBSITE = "http://www.mariak.webd.pl/study/";
-    public static final boolean MONITORING_DEBUG_FLAG = true;
+    public static final boolean MONITORING_DEBUG_FLAG = false;
 
     public static final String SHARED_PREF_FILE = "mySharedPref";
     public static SharedPreferences mySharedPref;

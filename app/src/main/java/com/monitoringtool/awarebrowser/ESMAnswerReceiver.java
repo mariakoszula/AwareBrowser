@@ -37,7 +37,7 @@ public class ESMAnswerReceiver extends BroadcastReceiver {
     private static final int esmToAnswer = 4;
     private static final int maxEsmToRepeatTimes = 1;
     private static int esmAnsweredCount = 0;
-    private static int repeatedESMs = 0;
+    private int repeatedESMs = 0;
     private SharedPreferences mySharedPref;
     private SharedPreferences.Editor editor;
 
@@ -45,6 +45,7 @@ public class ESMAnswerReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        if(MONITORING_DEBUG_FLAG) Log.d("ESM counter answer ", String.format("%d", esmAnsweredCount));
         mySharedPref = context.getSharedPreferences(SHARED_PREF_FILE, Context.MODE_PRIVATE);
         editor = mySharedPref.edit();
             if(intent.getAction().equals(ESM.ACTION_AWARE_ESM_DISMISSED) || intent.getAction().equals(ESM.ACTION_AWARE_ESM_EXPIRED)) {
