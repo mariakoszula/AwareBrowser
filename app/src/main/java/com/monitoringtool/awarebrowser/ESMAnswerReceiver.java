@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
-import android.provider.Browser;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -29,8 +28,9 @@ public class ESMAnswerReceiver extends BroadcastReceiver {
     private static final String KEY_WEBSERVICE_IS_NOT_RUNNING = "KEY_WEBSERVICE_IS_NOT_RUNNING";
     private static final String KEY_IS_BROWSER_SERVICE_RUNNING= BrowserActivity.KEY_IS_BROWSER_SERVICE_RUNNING;
     private static final String SHARED_PREF_FILE = BrowserActivity.SHARED_PREF_FILE;
-    private static final int webServiceSynchroTimeInMinutes = 30;
-    private static final String DASHBOARD_STUDY_URL = "https://api.awareframework.com/index.php/webservice/index/407/ADKuMzjP3L3C";
+    private static final int webServiceSynchroTimeInMinutes = 5;
+//    private static final String DASHBOARD_STUDY_URL = "https://api.awareframework.com/index.php/webservice/index/407/ADKuMzjP3L3C";
+    private static final String DASHBOARD_STUDY_URL = "https://api.awareframework.com/index.php/webservice/index/464/oYLfIx1ecrWR";
 
     private static final String LOG_TAG_ESM = "AB:ESM";
 
@@ -56,7 +56,7 @@ public class ESMAnswerReceiver extends BroadcastReceiver {
             if (esmAnsweredCount == esmToAnswer) {
                 if (MONITORING_DEBUG_FLAG)
                     Log.d(LOG_TAG_ESM, "All ESM Answered. Catch Queue complete");
-                removeEmptyAnserws(context);
+                removeEmptyAnswers(context);
                 Toast.makeText(context, context.getResources().getString(R.string.esm_thanks), Toast.LENGTH_SHORT).show();
             }
         } else if (intent.getAction().equals(ESM.ACTION_AWARE_ESM_QUEUE_COMPLETE)) {
@@ -116,7 +116,7 @@ public class ESMAnswerReceiver extends BroadcastReceiver {
         }
     }
 
-    private void removeEmptyAnserws(Context context){
+    private void removeEmptyAnswers(Context context){
         context.getContentResolver().delete(ESM_Provider.ESM_Data.CONTENT_URI, ESM_Provider.ESM_Data.STATUS + "=" + ESM.STATUS_DISMISSED, null);
         context.getContentResolver().delete(ESM_Provider.ESM_Data.CONTENT_URI, ESM_Provider.ESM_Data.STATUS + "=" + ESM.STATUS_EXPIRED, null);
         if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG_ESM, "ESM remove empty answers");

@@ -6,43 +6,46 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+    <!--
+        <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
     <uses-permission android:name="android.permission.VIBRATE"/>
+    -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
+        android:hardwareAccelerated="true"
         android:icon="@drawable/ic_browser"
         android:label="@string/app_name"
         android:theme="@style/Theme.Aware"
-        android:hardwareAccelerated="true"
-        tools:replace="android:icon, android:theme"
-        >
-
-
+        tools:replace="android:icon, android:theme" >
         <activity
-            android:name="BrowserActivity"
+            android:name=".BrowserActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/title_activity_browser"
             android:launchMode="singleTop"
             android:noHistory="true"
             android:theme="@style/Theme.Browser"
-            android:windowSoftInputMode="stateHidden"
-
-            android:configChanges="keyboardHidden|orientation|screenSize">
-            <intent-filter>
+            android:windowSoftInputMode="stateHidden" >
+           <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="http"/>
+            </intent-filter>
         </activity>
 
-        <receiver android:name="BrowserClosedReceiver" >
+        <receiver android:name=".BrowserClosedReceiver" >
             <intent-filter>
                 <action android:name="ACTION_AWARE_CLOSE_BROWSER" />
             </intent-filter>
         </receiver>
-        <receiver android:name="ESMAnswerReceiver" >
+        <receiver android:name=".ESMAnswerReceiver" >
             <intent-filter>
                 <action android:name="ACTION_AWARE_ESM_DISMISSED" />
                 <action android:name="ACTION_AWARE_ESM_ANSWERED" />
@@ -50,9 +53,10 @@
                 <action android:name="ACTION_AWARE_ESM_QUEUE_COMPLETE" />
             </intent-filter>
         </receiver>
+
         <service
-            android:name="BrowserPlugin"
-            android:exported="true">
+            android:name=".BrowserPlugin"
+            android:exported="true" >
         </service>
 
         <provider
@@ -91,16 +95,12 @@
             android:exported="true"
             android:readPermission="com.aware.READ_CONTEXT_DATA"
             android:writePermission="com.aware.WRITE_CONTEXT_DATA" />
-
-
         <provider
             android:name="com.aware.plugin.google.activity_recognition.Google_AR_Provider"
             android:authorities="${applicationId}.provider"
             android:exported="true"
             android:readPermission="com.aware.READ_CONTEXT_DATA"
             android:writePermission="com.aware.WRITE_CONTEXT_DATA" />
-
-
     </application>
 
 </manifest>

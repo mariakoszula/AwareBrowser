@@ -11,7 +11,7 @@
     <string name="bad_url">Bad URL</string>
     <string name="bad_connection">Check if you have data transmission or WiFi enabled</string>
     <string name="title_rating">Rate the session</string>
-    <string name="esm_rating_instructions">How will you rate the session taking into account time of loading the pages? 5=Excellent;4=Good;3=Fair;2=Poor;1=Bad</string>
+    <string name="esm_rating_instructions">How do you rate the quality of this session? 1=Bad;2=Poor;3=Fair;4=Good;5=Excellent</string>
     <string name="esm_rating_max">excellent</string>
     <string name="esm_rating_min">bad</string>
     <string name="title_activity_esm">ESM questionnaire</string>
@@ -26,16 +26,29 @@
     <string name="esm_context_answer2">checking email</string>
     <string name="esm_context_answer3">checking social services</string>
     <string name="esm_context_answer4">entertainment</string>
-    <string name="title_delays_accept">Are you satisfied with sites loading speed?</string>
+    <string name="title_delays_accept">Are you satisfied with a quality of the session?</string>
     <string name="esm_delays_accept_instructions" />
     <string name="esm_answer_yes">yes</string>
     <string name="esm_answer_no">no</string>
     <string name="esm_context_answer5">other</string>
+
     <string name="title_movement">Your mobility level:</string>
     <string name="esm_movement_instructions" />
     <string name="esm_movement_answer1">walking</string>
     <string name="esm_movement_answer2">riding</string>
     <string name="esm_movement_answer3">not moving</string>
+
+    <string name="title_social_context">During this session you were:</string>
+    <string name="esm_social_context_instructions">you can select more than one answer</string>
+    <string name="esm_social_context_answer1">alone</string>
+    <string name="esm_social_context_answer2">with a person or a group of people</string>
+    <string name="esm_social_context_answer3">at home/office/school</string>
+    <string name="esm_social_context_answer4">outdoor</string>
+    <string name="esm_social_context_answer5">in a car/train/bus</string>
+    <string name="esm_social_context_answer6">walking</string>
+    <string name="esm_social_context_answer7">sitting</string>
+
+
     <string name="esm_rerun">ESM was dismissed, will be rerun ONE more time.</string>
     <string name="esm_thanks">Thank you for the answers.</string>
     <string name="can_turn_off_data">You can now turn off the data connection.</string>

@@ -14,6 +14,7 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.database.sqlite.SQLiteException;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -53,12 +54,13 @@ import java.net.URL;
 public class BrowserActivity extends ActionBarActivity {
 
     public static final String LOG_TAG = "AwareBrows";
+    public static final Boolean PROGRESS_INDICATOR_ON = false;
 
     public static final String ACTION_AWARE_CLOSE_BROWSER = "ACTION_AWARE_CLOSE_BROWSER";
     public static final String ACTION_AWARE_READY = "ACTION_AWARE_READY";
 
     public static final String RESEARCH_WEBSITE = "http://www.mariak.webd.pl/study/";
-    public static final boolean MONITORING_DEBUG_FLAG = false;
+    public static final boolean MONITORING_DEBUG_FLAG = true;
 
     public static final String SHARED_PREF_FILE = "mySharedPref";
     public static SharedPreferences mySharedPref;
@@ -104,6 +106,19 @@ public class BrowserActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        URL urlFromIntent;
+        Uri data = this.getIntent().getData();
+        if(data != null) {
+            try {
+                urlFromIntent = new URL(data.getScheme(), data.getHost(), data.getPath());
+                defaultSite = String.valueOf(urlFromIntent);
+                if (MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "Got url " + urlFromIntent);
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+        }
+
         setContentView(R.layout.activity_browser);
 
         prepareLayout();
@@ -327,7 +342,7 @@ public class BrowserActivity extends ActionBarActivity {
                 if (loadingFinishedForChrome && !redirection) {
                     if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "On Progress changed " + newProgress);
 
-                    etgivenWebSite.setText(getResources().getString(R.string.info_loading) + " " + newProgress + "%");
+                    if(PROGRESS_INDICATOR_ON) etgivenWebSite.setText(getResources().getString(R.string.info_loading) + " " + newProgress + "%");
                     if (newProgress == 100) {
                         if (MONITORING_DEBUG_FLAG)
                             Log.d(LOG_TAG, "On Progress changed has reached 100%");

@@ -48,7 +48,7 @@ public class BrowserClosedReceiver extends BroadcastReceiver{
                             "'esm_submit': '" + context.getResources().getString(R.string.esm_button_next) + "'," +
                             "'esm_expiration_threashold': 60," +
                             "'esm_trigger': 'AwareBro answer'" +
-                            "}},";
+                             "}},";
 
 
             final String esmContext =
@@ -75,6 +75,17 @@ public class BrowserClosedReceiver extends BroadcastReceiver{
                     "'esm_trigger': 'AwareBro answer'" +
                     "}},";
 
+        final String esmSocialContext =
+                "{'esm': {" +
+                        "'esm_type': " + ESM.TYPE_ESM_CHECKBOX +"," +
+                        "'esm_title': '" + context.getResources().getString(R.string.title_social_context) + "'," +
+                        "'esm_instructions': '" + context.getResources().getString(R.string.esm_social_context_instructions) + "'," +
+                        "'esm_checkboxes':['"+ context.getResources().getString(R.string.esm_social_context_answer1) +"','"+context.getResources().getString(R.string.esm_social_context_answer2)+"','"+context.getResources().getString(R.string.esm_social_context_answer3)+"','"+context.getResources().getString(R.string.esm_social_context_answer4)+"', '"+context.getResources().getString(R.string.esm_social_context_answer5)+"','"+context.getResources().getString(R.string.esm_social_context_answer6)+"', '"+context.getResources().getString(R.string.esm_social_context_answer7) +"']," +
+                        "'esm_submit': '" + context.getResources().getString(R.string.esm_button_next) + " '," +
+                        "'esm_expiration_threashold': 60," +
+                        "'esm_trigger': 'AwareBro answer'" +
+                        "}},";
+
             final String esmDelaysAcceptance =
                     "{'esm': {" +
                     "'esm_type': " + ESM.TYPE_ESM_QUICK_ANSWERS +"," +
@@ -85,7 +96,7 @@ public class BrowserClosedReceiver extends BroadcastReceiver{
                     "'esm_trigger': 'AwareBro answer'" +
                     "}}]";
 
-            final String esmQuestionnaire = esmRating + esmContext + esmMovement + esmDelaysAcceptance;
+            final String esmQuestionnaire = esmRating + esmContext + esmSocialContext + esmDelaysAcceptance;
 
 
 

@@ -26,8 +26,12 @@ android {
 }
 
 dependencies {
-    compile 'com.android.support:appcompat-v7:+'
-    compile 'com.google.android.gms:play-services:+'
-    compile 'com.android.support:cardview-v7:+'
+//    compile 'com.android.support:appcompat-v7:+'
+//    compile 'com.google.android.gms:play-services:+'
+//    compile 'com.android.support:cardview-v7:+'
+
+    compile 'com.android.support:appcompat-v7:22.2.0'
+    compile 'com.android.support:cardview-v7:22.0.0'
+    compile 'com.google.android.gms:play-services:7.5.0'
     compile project(':aware-core')
 }

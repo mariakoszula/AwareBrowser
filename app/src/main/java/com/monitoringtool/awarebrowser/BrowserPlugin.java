@@ -46,7 +46,7 @@ public class BrowserPlugin extends Aware_Plugin {
 
 
     private static final int TimeToCollectTraffic = 120;
-    private static final int TimeToCollectActivity = 180;
+    private static final int TimeToCollectActivity = 180;//maybe less will be enought analize the data you have
 
     @Override
     public void onCreate() {
