@@ -383,6 +383,7 @@
     <eat-comment/>
     <string name="drawer_close">Closed</string>
     <string name="drawer_open">Opened</string>
+    <string name="media_not_available">The data storage is not available, application will not work. Please unplug the device from computer and try again.</string>
     <!-- From: file:/D:/androidstudio_workspace/AwareBrowser/aware-core/build/intermediates/exploded-aar/com.android.support/mediarouter-v7/22.0.0/res/values/values.xml -->
     <eat-comment/>
     <string name="mr_media_route_button_content_description">Cast</string>

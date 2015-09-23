@@ -363,11 +363,13 @@ public class Plugins_Manager extends Aware_Activity {
 				caInput.close();
 			}
 			
-			KeyStore sKeyStore = KeyStore.getInstance(KeyStore.getDefaultType());
-			InputStream inStream = sContext.getResources().openRawResource(R.raw.awareframework);
-			sKeyStore.load(inStream, "awareframework".toCharArray());
-			inStream.close();
-			
+//			KeyStore sKeyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+//			InputStream inStream = sContext.getResources().openRawResource(R.raw.awareframework);
+//			sKeyStore.load(inStream, "awareframework".toCharArray());
+//			inStream.close();
+
+            KeyStore sKeyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+            sKeyStore.load(null, null); //initialize as empty keystore
 			sKeyStore.setCertificateEntry("ca", ca);
 			
 			String tmfAlgorithm = TrustManagerFactory.getDefaultAlgorithm();

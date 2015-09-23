@@ -2,7 +2,10 @@ package com.monitoringtool.awarebrowser;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
+import android.app.AlarmManager;
 import android.app.AlertDialog;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.ContentValues;
@@ -18,6 +21,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -49,6 +53,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Calendar;
 
 
 public class BrowserActivity extends ActionBarActivity {
@@ -60,7 +65,7 @@ public class BrowserActivity extends ActionBarActivity {
     public static final String ACTION_AWARE_READY = "ACTION_AWARE_READY";
 
     public static final String RESEARCH_WEBSITE = "http://www.mariak.webd.pl/study/";
-    public static final boolean MONITORING_DEBUG_FLAG = true;
+    public static final boolean MONITORING_DEBUG_FLAG = false;
 
     public static final String SHARED_PREF_FILE = "mySharedPref";
     public static SharedPreferences mySharedPref;
@@ -86,19 +91,14 @@ public class BrowserActivity extends ActionBarActivity {
     private boolean redirection = false;
     private boolean loadingFinishedForChrome = true;
 
+    private AlarmManager alarmManager;
+    private PendingIntent dailyNotificationIntent = null;
+    private final int notificationServiceRC = 123321;
+    private static final String EXTRA_KEY_NOTIFICATION="notificationID";
+
     private boolean isAwareReady = false;
     private ProgressDialog progressDialog;
-    private final BroadcastReceiver awareReadyListener = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (MONITORING_DEBUG_FLAG)
-                Log.d(LOG_TAG, "Received awareReady broadcast");
-            isAwareReady = true;
-            if (progressDialog.isShowing()) {
-                progressDialog.dismiss();
-            }
-        }
-    };
+    private BroadcastReceiver awareReadyListener = null;
 
 
     @TargetApi(Build.VERSION_CODES.KITKAT)
@@ -107,36 +107,103 @@ public class BrowserActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        URL urlFromIntent;
-        Uri data = this.getIntent().getData();
-        if(data != null) {
-            try {
-                urlFromIntent = new URL(data.getScheme(), data.getHost(), data.getPath());
-                defaultSite = String.valueOf(urlFromIntent);
-                if (MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "Got url " + urlFromIntent);
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
+        if (isStorageMounted()) {
+            URL urlFromIntent;
+            Uri data = this.getIntent().getData();
+            if (data != null) {
+                try {
+                    urlFromIntent = new URL(data.getScheme(), data.getHost(), data.getPath());
+                    defaultSite = String.valueOf(urlFromIntent);
+                    if (MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "Got url " + urlFromIntent);
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                }
             }
+
+            setContentView(R.layout.activity_browser);
+
+            prepareLayout();
+            prepareWebPageView();
+
+            // figure out why there is sometimes problem with this
+            mySharedPref = getSharedPreferences(SHARED_PREF_FILE, Context.MODE_PRIVATE);
+            editor = mySharedPref.edit();
+
+            displayProgressDialogAboutAware();
+            prepareAware();
+
+            awareReadyListener = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    if (MONITORING_DEBUG_FLAG)
+                        Log.d(LOG_TAG, "Received awareReady broadcast");
+                    isAwareReady = true;
+                    if (progressDialog.isShowing()) {
+                        progressDialog.dismiss();
+                    }
+                }
+            };
+
+            IntentFilter filterSetAware = new IntentFilter();
+            filterSetAware.addAction(ACTION_AWARE_READY);
+            registerReceiver(awareReadyListener, filterSetAware);
+
+            scheduleAlarmNotification();
+            searchForWebPage(defaultSite);
+            dismissNotification();
+        }else{
+            Toast.makeText(getApplicationContext(), getApplicationContext().getResources().getString(R.string.media_not_available), Toast.LENGTH_LONG).show();
+
+            Thread thread = new Thread(){
+                @Override
+                public void run() {
+                    try{
+                        Thread.sleep(3500);
+                        BrowserActivity.this.finish();
+                    }catch(Exception e){
+                        e.printStackTrace();
+                    }
+                }
+            };
+            thread.start();
+            finish();
         }
 
-        setContentView(R.layout.activity_browser);
+    }
 
-        prepareLayout();
-        prepareWebPageView();
 
-       // figure out why there is sometimes problem with this
-        mySharedPref = getSharedPreferences(SHARED_PREF_FILE, Context.MODE_PRIVATE);
-        editor = mySharedPref.edit();
+    private boolean isStorageMounted(){
+        String storageState = Environment.getExternalStorageState();
+        if( MONITORING_DEBUG_FLAG ) Log.d(LOG_TAG,"Storage state " + storageState);
+            if( Environment.MEDIA_MOUNTED.equals(storageState) ) {
+                if( MONITORING_DEBUG_FLAG ) Log.d(LOG_TAG,"Media mounted. Run application.");
+                return true;
+            }
+                if( MONITORING_DEBUG_FLAG ) Log.w(LOG_TAG,"Storage is not mounted... Disconnect the device from computer...");
+                return false;
+        }
 
-        displayProgressDialogAboutAware();
-        prepareAware();
 
-        IntentFilter filterSetAware = new IntentFilter();
-        filterSetAware.addAction(ACTION_AWARE_READY);
-        registerReceiver(awareReadyListener, filterSetAware);
+    private void dismissNotification() {
+        int notificationID = getIntent().getIntExtra(EXTRA_KEY_NOTIFICATION, 0);
+        NotificationManager dailyAlarmManager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
+        dailyAlarmManager.cancel(notificationID);
+    }
 
-        searchForWebPage(defaultSite);
 
+    private void scheduleAlarmNotification() {
+        alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+        Intent alarmIntent = new Intent(this, AlarmReceiver.class);
+        Calendar startAlarmTime = Calendar.getInstance();
+//        startAlarmTime.add(Calendar.DATE, 1);
+        startAlarmTime.set(Calendar.HOUR_OF_DAY, 7);
+        startAlarmTime.set(Calendar.MINUTE, 30);
+        startAlarmTime.set(Calendar.SECOND, 0);
+        if(Calendar.getInstance().after(startAlarmTime)) startAlarmTime.add(Calendar.DATE, 1);
+
+        dailyNotificationIntent = PendingIntent.getBroadcast(getApplicationContext(), notificationServiceRC, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, startAlarmTime.getTimeInMillis(), AlarmManager.INTERVAL_HALF_HOUR, dailyNotificationIntent);
     }
 
     private void prepareAware() {
@@ -347,7 +414,6 @@ public class BrowserActivity extends ActionBarActivity {
                         if (MONITORING_DEBUG_FLAG)
                             Log.d(LOG_TAG, "On Progress changed has reached 100%");
                         itemSearch.setEnabled(true);
-                        etgivenWebSite.setText(webPageView.getUrl());
                         etgivenWebSite.setEnabled(true);
 
                     }
@@ -374,6 +440,7 @@ public class BrowserActivity extends ActionBarActivity {
                 startTimeSystem = System.currentTimeMillis();
                 loadingFinished = false;
                 loadingFinishedForChrome = false;
+                etgivenWebSite.setText(webPageView.getUrl());
             }
 
             @Override
@@ -477,6 +544,6 @@ private void displayQuitDialog(){
         browserClosed.setAction(ACTION_AWARE_CLOSE_BROWSER);
         sendBroadcast(browserClosed);
         if(MONITORING_DEBUG_FLAG)Log.d(LOG_TAG, "Send ACTION_CLOSE_BROWSER");
-        unregisterReceiver(awareReadyListener);
+        if(awareReadyListener != null) unregisterReceiver(awareReadyListener);
     }
 }

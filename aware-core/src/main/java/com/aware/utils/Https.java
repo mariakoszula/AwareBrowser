@@ -27,6 +27,7 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,7 +41,9 @@ import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 import java.util.ArrayList;
 import java.util.zip.GZIPInputStream;
 
@@ -67,13 +70,22 @@ public class Https extends DefaultHttpClient {
 
 	private SSLContext createSSLContext() {
 		try {
-			//Load local trusted keystore
+			/*//Load local trusted keystore
 			KeyStore sKeyStore = KeyStore.getInstance(KeyStore.getDefaultType());
 			InputStream inStream = sContext.getResources().openRawResource(R.raw.awareframework);
 			sKeyStore.load(inStream, "awareframework".toCharArray());
-			inStream.close();
-			
-			AwareTrustManager trustManager = new AwareTrustManager(sKeyStore);
+			inStream.close();*/
+
+			//Load AWARE's SSL public certificate so we can talk with our server
+			CertificateFactory cf = CertificateFactory.getInstance("X.509");
+			InputStream caInput = new BufferedInputStream(sContext.getResources().openRawResource(R.raw.aware));
+			Certificate ca = cf.generateCertificate(caInput);
+			KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+			keyStore.load(null, null); //initialize as empty keystore
+			keyStore.setCertificateEntry("ca", ca); //add our certificate to keystore
+
+
+			AwareTrustManager trustManager = new AwareTrustManager(keyStore);
 			TrustManager[] tms = new TrustManager[]{ trustManager };
 			
 			SSLContext context = SSLContext.getInstance("TLS");
@@ -104,7 +116,7 @@ public class Https extends DefaultHttpClient {
 		}
 		
 		@Override
-		public Socket connectSocket(Socket sock, String host, int port, InetAddress localAddress, int localPort, HttpParams params) throws IOException, UnknownHostException, ConnectTimeoutException {
+		public Socket connectSocket(Socket sock, String host, int port, InetAddress localAddress, int localPort, HttpParams params) throws IOException {
 			if (host == null) {
 	            throw new IllegalArgumentException("Target host may not be null.");
 	        }
@@ -157,7 +169,7 @@ public class Https extends DefaultHttpClient {
 		}
 
 		@Override
-		public Socket createSocket(Socket socket, String host, int port, boolean autoClose) throws IOException, UnknownHostException {
+		public Socket createSocket(Socket socket, String host, int port, boolean autoClose) throws IOException {
 			SSLSocket sslSocket = (SSLSocket) socketFactory.createSocket(socket, host, port, autoClose);
 	        hostnameVerifier.verify(host, sslSocket);
 	        return sslSocket;

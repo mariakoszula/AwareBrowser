@@ -41,6 +41,7 @@ import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout.LayoutParams;
+import android.widget.Toast;
 
 import com.aware.providers.Aware_Provider;
 import com.aware.providers.Aware_Provider.Aware_Device;
@@ -156,7 +157,7 @@ public class Aware extends Service {
     public static final ArrayList<String> AWARE_PLUGIN_DOWNLOAD_PACKAGES = new ArrayList<>();
 
     /*Check if aware had started */
-    public static final String ACTION_AWARE_STARED ="ACTION_AWARE_STARTED";
+    public static final String ACTION_AWARE_STARTED ="ACTION_AWARE_STARTED";
 
     private static AlarmManager alarmManager = null;
     private static PendingIntent repeatingIntent = null;
@@ -365,10 +366,7 @@ public class Aware extends Service {
      */
     public static boolean is_watch(Context c) {
         UiModeManager uiManager = (UiModeManager) c.getSystemService(Context.UI_MODE_SERVICE);
-        if( uiManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_WATCH ) {
-            return true;
-        }
-        return false;
+        return uiManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_WATCH;
     }
     
     @Override
@@ -968,8 +966,7 @@ public class Aware extends Service {
                     } catch (ParseException e) {}
                 }
             }
-            if( updated.size() > 0 ) return true;
-            return false;
+            return updated.size() > 0;
         }
 
         @Override
@@ -1021,12 +1018,9 @@ public class Aware extends Service {
 					filename = latest_framework.getString("filename");
 					version = latest_framework.getInt("version");
 					whats_new = latest_framework.getString("whats_new");
-					
-					if( version > awarePkg.versionCode ) {
-						return true;
-					}
-					return false;
-				} catch (ParseException e) {
+
+                    return version > awarePkg.versionCode;
+                } catch (ParseException e) {
 					e.printStackTrace();
 				} catch (JSONException e) {
 					e.printStackTrace();
@@ -1394,9 +1388,12 @@ public class Aware extends Service {
         public void onReceive(Context context, Intent intent) {
             if( intent.getAction().equals(Intent.ACTION_MEDIA_MOUNTED) ) {
                 if( Aware.DEBUG ) Log.d(TAG,"Resuming AWARE data logging...");
+
             }
             if ( intent.getAction().equals(Intent.ACTION_MEDIA_UNMOUNTED) ) {
                 if( Aware.DEBUG ) Log.w(TAG,"Stopping AWARE data logging until the SDCard is available again...");
+                Toast.makeText(context, context.getResources().getString(R.string.media_not_available), Toast.LENGTH_SHORT).show();
+
             }
             Intent aware = new Intent(context, Aware.class);
             context.startService(aware);

@@ -59,4 +59,6 @@
     <string name="esm_queue_clean">Koniec ankiety</string>
     <string name="action_refresh">Odśwież</string>
     <string name="aware_not_ready">Ankiety nie zostaną wyświetlone</string>
+    <string name="notification_info">prosze pamiętaj o mnie</string>
+    <string name="media_not_available">Brak dostępu do dysku, aplikacja nie będzie działać poprawnie. Odepnij urządzenie od komputera i spróbuj ponownie.</string>
 </resources>

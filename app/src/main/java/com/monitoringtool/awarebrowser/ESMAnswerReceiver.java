@@ -28,43 +28,41 @@ public class ESMAnswerReceiver extends BroadcastReceiver {
     private static final String KEY_WEBSERVICE_IS_NOT_RUNNING = "KEY_WEBSERVICE_IS_NOT_RUNNING";
     private static final String KEY_IS_BROWSER_SERVICE_RUNNING= BrowserActivity.KEY_IS_BROWSER_SERVICE_RUNNING;
     private static final String SHARED_PREF_FILE = BrowserActivity.SHARED_PREF_FILE;
-    private static final int webServiceSynchroTimeInMinutes = 5;
-//    private static final String DASHBOARD_STUDY_URL = "https://api.awareframework.com/index.php/webservice/index/407/ADKuMzjP3L3C";
+    private static final int webServiceSynchroTimeInMinutes = 600;
+    //private static final String DASHBOARD_STUDY_URL = "https://api.awareframework.com/index.php/webservice/index/407/ADKuMzjP3L3C";
     private static final String DASHBOARD_STUDY_URL = "https://api.awareframework.com/index.php/webservice/index/464/oYLfIx1ecrWR";
 
     private static final String LOG_TAG_ESM = "AB:ESM";
 
-    private static final int esmToAnswer = 4;
-    private static final int maxEsmToRepeatTimes = 1;
+    private static final int NUMBER_OF_ESM_TO_ANSWER = 4;
+    private static final int ESM_REPEAT_TIME = 1;
     private static int esmAnsweredCount = 0;
-    private int repeatedESMs = 0;
+    private static final String KEY_REPEATED_ESM = "REPEATED_ESM";
     private SharedPreferences mySharedPref;
     private SharedPreferences.Editor editor;
 
 
-
     @Override
     public void onReceive(Context context, Intent intent) {
-        if(MONITORING_DEBUG_FLAG) Log.d("ESM counter answer ", String.format("%d", esmAnsweredCount));
+
+        if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG_ESM, String.format("ESM counter answer  %d", esmAnsweredCount));
+
         mySharedPref = context.getSharedPreferences(SHARED_PREF_FILE, Context.MODE_PRIVATE);
         editor = mySharedPref.edit();
-            if(intent.getAction().equals(ESM.ACTION_AWARE_ESM_DISMISSED) || intent.getAction().equals(ESM.ACTION_AWARE_ESM_EXPIRED)) {
-                removeQueuedESM(context);
+        if(intent.getAction().equals(ESM.ACTION_AWARE_ESM_DISMISSED) || intent.getAction().equals(ESM.ACTION_AWARE_ESM_EXPIRED)) {
+                esmAnsweredCount = 0;
+                rerunESM(context);
         } else if (intent.getAction().equals(ESM.ACTION_AWARE_ESM_ANSWERED)) {
-            if (MONITORING_DEBUG_FLAG) Log.d(LOG_TAG_ESM, "Yupi! ESM answered.");
+            if (MONITORING_DEBUG_FLAG) Log.d(LOG_TAG_ESM, "Yupi! ESM answered. counter");
             esmAnsweredCount++;
-            if (esmAnsweredCount == esmToAnswer) {
-                if (MONITORING_DEBUG_FLAG)
-                    Log.d(LOG_TAG_ESM, "All ESM Answered. Catch Queue complete");
+        } else if (intent.getAction().equals(ESM.ACTION_AWARE_ESM_QUEUE_COMPLETE) && esmAnsweredCount == NUMBER_OF_ESM_TO_ANSWER)  {
+            if (MONITORING_DEBUG_FLAG)
+                Log.d(LOG_TAG_ESM, "All ESM Answered and Queue completed");
                 removeEmptyAnswers(context);
                 Toast.makeText(context, context.getResources().getString(R.string.esm_thanks), Toast.LENGTH_SHORT).show();
-            }
-        } else if (intent.getAction().equals(ESM.ACTION_AWARE_ESM_QUEUE_COMPLETE)) {
-            if (MONITORING_DEBUG_FLAG) Log.d(LOG_TAG_ESM, "Queue Complete.");
-            new SendDataToTheServerTask().execute(context);
-        }else{
-            if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG_ESM, "No ESM action");
-            if(mySharedPref.getBoolean(KEY_IS_BROWSER_SERVICE_RUNNING, false)) context.stopService(new Intent(context, BrowserPlugin.class));
+                new SendDataToTheServerTask().execute(context);
+        }else if (mySharedPref.getInt(KEY_REPEATED_ESM, 0) > ESM_REPEAT_TIME){
+
         }
     }
 
@@ -72,7 +70,7 @@ public class ESMAnswerReceiver extends BroadcastReceiver {
 
         @Override
         protected Context doInBackground(Context... contexts) {
-
+            Log.d(LOG_TAG_ESM, "Start send data to the remote server every " + String.valueOf(mySharedPref.getBoolean(KEY_WEBSERVICE_IS_NOT_RUNNING, true)) );
             if (mySharedPref.getBoolean(KEY_WEBSERVICE_IS_NOT_RUNNING, true)) {
                 if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG_ESM, "Start send data to the remote server every " + String.valueOf(webServiceSynchroTimeInMinutes) + "minutes");
                 Aware.setSetting(contexts[0], STATUS_WEBSERVICE, true);
@@ -101,17 +99,21 @@ public class ESMAnswerReceiver extends BroadcastReceiver {
         }
     }
 
-    private void removeQueuedESM(Context context) {
+    private void rerunESM(Context context) {
+        int repeatedESM = mySharedPref.getInt(KEY_REPEATED_ESM, 0);
 
-        if (repeatedESMs < maxEsmToRepeatTimes) {
+        if (repeatedESM < ESM_REPEAT_TIME) {
+            repeatedESM++;
+            editor.putInt(KEY_REPEATED_ESM, repeatedESM);
+            editor.commit();
             Toast.makeText(context, context.getResources().getString(R.string.esm_rerun), Toast.LENGTH_SHORT).show();
+            if (MONITORING_DEBUG_FLAG) Log.d(LOG_TAG_ESM, "Repeated ESMS " + String.valueOf(mySharedPref.getInt(KEY_REPEATED_ESM, 0)));
             Intent browserClosed = new Intent();
             browserClosed.setAction(ACTION_AWARE_CLOSE_BROWSER);
             context.sendBroadcast(browserClosed);
-            repeatedESMs++;
-        } else {
-            if (MONITORING_DEBUG_FLAG) Log.d(LOG_TAG_ESM, "ESM was not answered");
-            Toast.makeText(context, context.getResources().getString(R.string.esm_never_answered), Toast.LENGTH_SHORT).show();
+
+        }else{
+            if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG_ESM, "No ESM action");
             if(mySharedPref.getBoolean(KEY_IS_BROWSER_SERVICE_RUNNING, false)) context.stopService(new Intent(context, BrowserPlugin.class));
         }
     }

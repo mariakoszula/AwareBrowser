@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="media_not_available">Brak dostępu do karty, aplikacja nie będzie działać. Odebnij urządzenie od komputera i spróbuj ponownie.</string>
+</resources>

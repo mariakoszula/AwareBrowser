@@ -20,14 +20,10 @@ import java.util.UUID;
 import static com.aware.Aware_Preferences.DEBUG_FLAG;
 import static com.aware.Aware_Preferences.DEVICE_ID;
 import static com.aware.Aware_Preferences.FREQUENCY_NETWORK_TRAFFIC;
-import static com.aware.Aware_Preferences.FREQUENCY_PROCESSOR;
-import static com.aware.Aware_Preferences.FREQUENCY_WEBSERVICE;
 import static com.aware.Aware_Preferences.STATUS_NETWORK_EVENTS;
 import static com.aware.Aware_Preferences.STATUS_NETWORK_TRAFFIC;
-import static com.aware.Aware_Preferences.STATUS_PROCESSOR;
 import static com.aware.Aware_Preferences.STATUS_TELEPHONY;
-import static com.aware.Aware_Preferences.STATUS_WEBSERVICE;
-import static com.aware.Aware_Preferences.WEBSERVICE_SERVER;
+
 
 public class BrowserPlugin extends Aware_Plugin {
 
@@ -45,7 +41,7 @@ public class BrowserPlugin extends Aware_Plugin {
     private SharedPreferences.Editor editor;
 
 
-    private static final int TimeToCollectTraffic = 120;
+    private static final int TimeToCollectTraffic = 180;
     private static final int TimeToCollectActivity = 180;//maybe less will be enought analize the data you have
 
     @Override
@@ -99,7 +95,7 @@ public class BrowserPlugin extends Aware_Plugin {
 
         //Activate Aware Sensors
         //Start Network Sensor
-        Aware.setSetting(this, STATUS_NETWORK_EVENTS, true);
+        //Aware.setSetting(this, STATUS_NETWORK_EVENTS, true);
         Aware.setSetting(this, STATUS_NETWORK_TRAFFIC, true);
         Aware.setSetting(this, FREQUENCY_NETWORK_TRAFFIC, TimeToCollectTraffic);
 

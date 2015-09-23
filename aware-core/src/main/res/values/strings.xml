@@ -23,4 +23,5 @@
     <string name="aware_activate_accessibility">Activate AWARE in Accessibility Services.</string>
     <string name="aware_team">Team</string>
     <string name="aware_qrcode">QRCode</string>
+    <string name="media_not_available">The data storage is not available, application will not work. Please unplug the device from computer and try again.</string>
 </resources>

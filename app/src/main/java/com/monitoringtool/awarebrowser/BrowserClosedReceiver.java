@@ -32,6 +32,7 @@ public class BrowserClosedReceiver extends BroadcastReceiver{
 
     public static final String SHARED_PREF_FILE = BrowserActivity.SHARED_PREF_FILE;
     public static final String KEY_IS_BROWSER_SERVICE_RUNNING = BrowserActivity.KEY_IS_BROWSER_SERVICE_RUNNING;
+
     @Override
         public void onReceive(Context context, Intent intent) {
             if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG_ESM_CREATE, "Receiver stop Browser Broadcast.");
