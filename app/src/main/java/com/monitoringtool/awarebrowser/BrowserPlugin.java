@@ -14,7 +14,6 @@ import com.aware.plugin.google.activity_recognition.Settings;
 import com.aware.utils.Aware_Plugin;
 
 
-import java.sql.Time;
 import java.util.UUID;
 
 import static com.aware.Aware_Preferences.DEBUG_FLAG;
@@ -36,13 +35,13 @@ public class BrowserPlugin extends Aware_Plugin {
     private static final String SHARED_PREF_FILE = BrowserActivity.SHARED_PREF_FILE;
     private static final String ACTION_AWARE_READY = BrowserActivity.ACTION_AWARE_READY;
 
-    private static final String KEY_IS_BROWSER_SERVICE_RUNNING = BrowserActivity.KEY_IS_BROWSER_SERVICE_RUNNING;
+    private static final String KEY_IS_BROWSER_RUNNING = BrowserActivity.KEY_IS_BROWSER_RUNNING;
     private SharedPreferences mySharedPref;
     private SharedPreferences.Editor editor;
 
 
-    private static final int TimeToCollectTraffic = 180;
-    private static final int TimeToCollectActivity = 180;//maybe less will be enought analize the data you have
+    private static final int TimeToCollectTraffic = 60;
+    private static final int TimeToCollectActivity = 60;
 
     @Override
     public void onCreate() {
@@ -76,10 +75,16 @@ public class BrowserPlugin extends Aware_Plugin {
 
         @Override
         protected void onPostExecute(Void aLong) {
-            if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG_SERVICE, "On Post Exectue Aware started");
+            if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG_SERVICE, "On Post Execute set KEY_IS_BROWSER_RUNNING to true && action_aware_ready");
+            mySharedPref = getSharedPreferences(SHARED_PREF_FILE, Context.MODE_PRIVATE);
+            editor = mySharedPref.edit();
+            editor.putBoolean(KEY_IS_BROWSER_RUNNING, true);
+            editor.commit();
             Intent sendAwareReady = new Intent();
             sendAwareReady.setAction(ACTION_AWARE_READY);
             sendBroadcast(sendAwareReady);
+
+
         }
     }
 
@@ -95,7 +100,6 @@ public class BrowserPlugin extends Aware_Plugin {
 
         //Activate Aware Sensors
         //Start Network Sensor
-        //Aware.setSetting(this, STATUS_NETWORK_EVENTS, true);
         Aware.setSetting(this, STATUS_NETWORK_TRAFFIC, true);
         Aware.setSetting(this, FREQUENCY_NETWORK_TRAFFIC, TimeToCollectTraffic);
 
@@ -132,18 +136,12 @@ public class BrowserPlugin extends Aware_Plugin {
         //Stop Google Activity Recognition
         getApplicationContext().stopService(new Intent(getApplicationContext(), com.aware.plugin.google.activity_recognition.Plugin.class));
 
-
         sendBroadcast(new Intent(Aware.ACTION_AWARE_REFRESH));
     }
 
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (MONITORING_DEBUG_FLAG) Log.d(LOG_TAG_SERVICE, "Start Service");
-        mySharedPref = getSharedPreferences(SHARED_PREF_FILE, Context.MODE_PRIVATE);
-        editor = mySharedPref.edit();
-        editor.putBoolean(KEY_IS_BROWSER_SERVICE_RUNNING, true);
-        editor.commit();
 
         if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG_SERVICE, "Aware device id: " + Aware.getSetting(getApplicationContext(), DEVICE_ID));
        return super.onStartCommand(intent, flags, startId);
@@ -158,12 +156,10 @@ public class BrowserPlugin extends Aware_Plugin {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG_SERVICE, "Browser_service terminated");
+        if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG_SERVICE, "Browser_service terminated" + String.valueOf(getApplicationContext().getPackageName()));
         stopSensors();
-        mySharedPref = getSharedPreferences(SHARED_PREF_FILE, Context.MODE_PRIVATE);
-        editor = mySharedPref.edit();
-        editor.putBoolean(KEY_IS_BROWSER_SERVICE_RUNNING, false);
-        editor.commit();
+        Aware.stopPlugin(this, getApplicationContext().getPackageName());
+
     }
 
 

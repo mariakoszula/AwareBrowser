@@ -1,24 +1,13 @@
 package com.monitoringtool.awarebrowser;
 
-import android.app.Activity;
-import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.database.Cursor;
-import android.os.Bundle;
-import android.os.IBinder;
 import android.util.Log;
 import android.widget.Toast;
-import android.widget.Toolbar;
 
-import com.aware.Aware;
-import com.aware.Aware_Preferences;
 import com.aware.ESM;
-import com.aware.providers.ESM_Provider;
-import com.google.android.gms.maps.model.TileOverlay;
 
 /**
  * Created by Maria on 2015-06-29.
@@ -31,7 +20,8 @@ public class BrowserClosedReceiver extends BroadcastReceiver{
     private static final String ACTION_AWARE_CLOSE_BROWSER = BrowserActivity.ACTION_AWARE_CLOSE_BROWSER;
 
     public static final String SHARED_PREF_FILE = BrowserActivity.SHARED_PREF_FILE;
-    public static final String KEY_IS_BROWSER_SERVICE_RUNNING = BrowserActivity.KEY_IS_BROWSER_SERVICE_RUNNING;
+    public static final String KEY_IS_BROWSER_RUNNING = BrowserActivity.KEY_IS_BROWSER_RUNNING;
+    public static final String KEY_ESM_EVALUTATION_RUNNING = "KEY_ESM_EVALUTATION_RUNNING";
 
     @Override
         public void onReceive(Context context, Intent intent) {
@@ -105,14 +95,28 @@ public class BrowserClosedReceiver extends BroadcastReceiver{
             SharedPreferences mySharedPref = context.getSharedPreferences(SHARED_PREF_FILE, Context.MODE_PRIVATE);
 
         if(action.equals(ACTION_AWARE_CLOSE_BROWSER)) {
-                if(mySharedPref.getBoolean(KEY_IS_BROWSER_SERVICE_RUNNING, false)) {
-                    Intent esm = new Intent(ESM.ACTION_AWARE_QUEUE_ESM);
-                    esm.putExtra(ESM.EXTRA_ESM, esmQuestionnaire);
-                    context.sendBroadcast(esm);
-                    Toast.makeText(context, context.getResources().getString(R.string.info_loading_esm), Toast.LENGTH_SHORT).show();
-                }else{
+            if(mySharedPref.getBoolean(KEY_IS_BROWSER_RUNNING, false)){
+                Intent esm = new Intent(ESM.ACTION_AWARE_QUEUE_ESM);
+                esm.putExtra(ESM.EXTRA_ESM, esmQuestionnaire);
+                context.sendBroadcast(esm);
+                Toast.makeText(context, context.getResources().getString(R.string.info_loading_esm), Toast.LENGTH_SHORT).show();
+                if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG_ESM_CREATE, "KEY_IS_BROWSER_RUNNING is true. Stop Aware Key.");
+                SharedPreferences.Editor editor = mySharedPref.edit();
+                editor.putBoolean(KEY_IS_BROWSER_RUNNING, false);
+                editor.commit();
+            }
+            else if(mySharedPref.getBoolean(KEY_ESM_EVALUTATION_RUNNING, false)){
+                Intent esm = new Intent(ESM.ACTION_AWARE_QUEUE_ESM);
+                esm.putExtra(ESM.EXTRA_ESM, esmQuestionnaire);
+                context.sendBroadcast(esm);
+
+
+            }else{
                     Toast.makeText(context, context.getResources().getString(R.string.aware_not_ready), Toast.LENGTH_SHORT).show();
+                    context.stopService(new Intent(context, BrowserPlugin.class));
                 }
             }
         }
-    }
+
+
+}

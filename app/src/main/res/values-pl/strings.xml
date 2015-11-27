@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Narzędzie monitorujące AwareBrowser</string>
+    <string name="app_name">AwareBrowser</string>
     <string name="action_about">O badaniu</string>
     <string name="title_activity_browser">AwareBrows</string>
     <string name="title_activity_about">O badaniu</string>
@@ -61,4 +61,5 @@
     <string name="aware_not_ready">Ankiety nie zostaną wyświetlone</string>
     <string name="notification_info">prosze pamiętaj o mnie</string>
     <string name="media_not_available">Brak dostępu do dysku, aplikacja nie będzie działać poprawnie. Odepnij urządzenie od komputera i spróbuj ponownie.</string>
+    <string name="end_of_study_notification">Okres testowy dobiegł końca, dziękujemy za pomoc. Możesz już odinstalować aplikację.</string>
 </resources>

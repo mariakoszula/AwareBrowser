@@ -3,14 +3,12 @@ package com.monitoringtool.awarebrowser;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.AlarmManager;
-import android.app.AlertDialog;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -18,7 +16,6 @@ import android.content.res.Configuration;
 import android.database.sqlite.SQLiteException;
 import android.graphics.Bitmap;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -30,7 +27,6 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.URLUtil;
 import android.webkit.WebChromeClient;
@@ -45,21 +41,15 @@ import android.widget.Toast;
 import com.aware.Aware;
 import com.aware.Aware_Preferences;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Calendar;
+import java.util.Random;
 
 
 public class BrowserActivity extends ActionBarActivity {
 
     public static final String LOG_TAG = "AwareBrows";
-    public static final Boolean PROGRESS_INDICATOR_ON = false;
 
     public static final String ACTION_AWARE_CLOSE_BROWSER = "ACTION_AWARE_CLOSE_BROWSER";
     public static final String ACTION_AWARE_READY = "ACTION_AWARE_READY";
@@ -68,10 +58,11 @@ public class BrowserActivity extends ActionBarActivity {
     public static final boolean MONITORING_DEBUG_FLAG = false;
 
     public static final String SHARED_PREF_FILE = "mySharedPref";
+    private static final int DAYS_AFTER_STUDY_ENDS = 2;
     public static SharedPreferences mySharedPref;
     public static SharedPreferences.Editor editor;
 
-    public static final String KEY_IS_BROWSER_SERVICE_RUNNING = "KEY_ID_BROWSER_SERVICE_RUNNING";
+    public static final String KEY_IS_BROWSER_RUNNING = "KEY_IS_BROWSER_RUNNING";
 
     private static final String googlePageSearch = "http://www.google.com/search?output=ie&q=";
 
@@ -91,15 +82,21 @@ public class BrowserActivity extends ActionBarActivity {
     private boolean redirection = false;
     private boolean loadingFinishedForChrome = true;
 
-    private AlarmManager alarmManager;
     private PendingIntent dailyNotificationIntent = null;
+    private PendingIntent endNotificationStudy = null;
     private final int notificationServiceRC = 123321;
+    private final int endOfStudyNotificationServiceRC = 421543;
     private static final String EXTRA_KEY_NOTIFICATION="notificationID";
 
     private boolean isAwareReady = false;
     private ProgressDialog progressDialog;
     private BroadcastReceiver awareReadyListener = null;
 
+    private final int MIN_HOUR = 8;
+    private final int MAX_HOUR = 21;
+    private final int MIN_MINUTES  = 0;
+    private final int MAX_MINUTES = 59;
+    private AlarmManager alarmManager = null;
 
     @TargetApi(Build.VERSION_CODES.KITKAT)
     @SuppressLint("SetJavaScriptEnabled")
@@ -120,12 +117,12 @@ public class BrowserActivity extends ActionBarActivity {
                 }
             }
 
+            if (MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "on create called");
             setContentView(R.layout.activity_browser);
 
             prepareLayout();
             prepareWebPageView();
 
-            // figure out why there is sometimes problem with this
             mySharedPref = getSharedPreferences(SHARED_PREF_FILE, Context.MODE_PRIVATE);
             editor = mySharedPref.edit();
 
@@ -148,7 +145,9 @@ public class BrowserActivity extends ActionBarActivity {
             filterSetAware.addAction(ACTION_AWARE_READY);
             registerReceiver(awareReadyListener, filterSetAware);
 
+            alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
             scheduleAlarmNotification();
+            scheduleEndStudyNotification();
             searchForWebPage(defaultSite);
             dismissNotification();
         }else{
@@ -192,22 +191,39 @@ public class BrowserActivity extends ActionBarActivity {
 
 
     private void scheduleAlarmNotification() {
-        alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
         Intent alarmIntent = new Intent(this, AlarmReceiver.class);
         Calendar startAlarmTime = Calendar.getInstance();
-//        startAlarmTime.add(Calendar.DATE, 1);
-        startAlarmTime.set(Calendar.HOUR_OF_DAY, 7);
-        startAlarmTime.set(Calendar.MINUTE, 30);
+
+        Random random = new Random();
+        int hour = random.nextInt(MAX_HOUR - MIN_HOUR + 1) + MIN_HOUR;
+        int minutes = random.nextInt(MAX_MINUTES - MIN_MINUTES + 1) + MIN_MINUTES;
+
+        if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "Alarm should be shown at " + hour + ":" + minutes);
+
+        startAlarmTime.set(Calendar.HOUR_OF_DAY, hour);
+        startAlarmTime.set(Calendar.MINUTE, minutes);
         startAlarmTime.set(Calendar.SECOND, 0);
-        if(Calendar.getInstance().after(startAlarmTime)) startAlarmTime.add(Calendar.DATE, 1);
+        startAlarmTime.add(Calendar.DATE, 1);
 
         dailyNotificationIntent = PendingIntent.getBroadcast(getApplicationContext(), notificationServiceRC, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, startAlarmTime.getTimeInMillis(), AlarmManager.INTERVAL_HALF_HOUR, dailyNotificationIntent);
+        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, startAlarmTime.getTimeInMillis(), AlarmManager.INTERVAL_DAY, dailyNotificationIntent);
+    }
+
+    private void scheduleEndStudyNotification() {
+        Intent endAlarmIntent = new Intent(this, EndOfStudyAlarmReceiver.class);
+        Calendar startTime = Calendar.getInstance();
+        long time_in_millis = startTime.getTimeInMillis() + (DAYS_AFTER_STUDY_ENDS * 24 * 60 * 60 * 1000);
+
+        endNotificationStudy = PendingIntent.getBroadcast(getApplicationContext(), endOfStudyNotificationServiceRC, endAlarmIntent, 0);
+
+        alarmManager.set(AlarmManager.RTC_WAKEUP, time_in_millis, endNotificationStudy);
+        if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "Study ends alarm scheduled for miliseconds: " + time_in_millis);
     }
 
     private void prepareAware() {
-        if (!mySharedPref.getBoolean(KEY_IS_BROWSER_SERVICE_RUNNING, false)) {
+        if (MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "Is Aware runnig: " + String.valueOf(mySharedPref.getBoolean(KEY_IS_BROWSER_RUNNING, false)));
+        if (!mySharedPref.getBoolean(KEY_IS_BROWSER_RUNNING, false)) {
             if (MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "RUN BrowserPlugin");
             Intent browserService = new Intent(getApplicationContext(), BrowserPlugin.class);
             getApplicationContext().startService(browserService);
@@ -216,7 +232,7 @@ public class BrowserActivity extends ActionBarActivity {
 
 
     private void displayProgressDialogAboutAware() {
-        if (!isAwareReady && !mySharedPref.getBoolean(KEY_IS_BROWSER_SERVICE_RUNNING, false)) {
+        if (!isAwareReady && !mySharedPref.getBoolean(KEY_IS_BROWSER_RUNNING, false)) {
             progressDialog = ProgressDialog.show(this, "Aware", this.getResources().getString(R.string.wait_for_aware), true, false);
         }
     }
@@ -336,6 +352,7 @@ public class BrowserActivity extends ActionBarActivity {
     protected void onStart() {
         super.onStart();
         if (MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "BrowserActivity On Start called");
+
     }
 
     @Override
@@ -351,13 +368,13 @@ public class BrowserActivity extends ActionBarActivity {
         if (urlToValidate.checkUrl()) {
             webViewOnPageFinishOnPageStartMethod(urlToValidate.getWebSite());
         } else {
-            String webSiteNoSpaces = repaceSpacesInString(webSite);
+            String webSiteNoSpaces = replaceSpacesInString(webSite);
             webViewOnPageFinishOnPageStartMethod(googlePageSearch + webSiteNoSpaces);
 
         }
     }
 
-    private String repaceSpacesInString(String webSite) {
+    private String replaceSpacesInString(String webSite) {
         return webSite.replaceAll(" ", "+");
     }
 
@@ -397,50 +414,24 @@ public class BrowserActivity extends ActionBarActivity {
 
     private void webViewOnPageFinishOnPageStartMethod(final String webSite){
 
-        webPageView.setWebChromeClient(new WebChromeClient() {
-            @Override
-            public void onProgressChanged(WebView view, int newProgress) {
-                if (!redirection) {
-                    loadingFinishedForChrome = true;
-                }
-
-                etgivenWebSite.setEnabled(false);
-                itemSearch.setEnabled(false);
-                if (loadingFinishedForChrome && !redirection) {
-                    if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "On Progress changed " + newProgress);
-
-                    if(PROGRESS_INDICATOR_ON) etgivenWebSite.setText(getResources().getString(R.string.info_loading) + " " + newProgress + "%");
-                    if (newProgress == 100) {
-                        if (MONITORING_DEBUG_FLAG)
-                            Log.d(LOG_TAG, "On Progress changed has reached 100%");
-                        itemSearch.setEnabled(true);
-                        etgivenWebSite.setEnabled(true);
-
-                    }
-
-                }
-            }
-        });
-
         webPageView.setWebViewClient(new WebViewClient() {
+
+
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 if (MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "Redirect..." + view.getUrl());
                 if (!loadingFinished)
                     redirection = true;
-                loadingFinished = false;
-                loadingFinishedForChrome = false;
-                webPageView.loadUrl(url);
-
-                return true;
+                    loadingFinished = false;
+                    webPageView.loadUrl(url);
+                    return true;
             }
 
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
                 startTimeSystem = System.currentTimeMillis();
+                etgivenWebSite.setText(view.getUrl());
                 loadingFinished = false;
-                loadingFinishedForChrome = false;
-                etgivenWebSite.setText(webPageView.getUrl());
             }
 
             @Override
@@ -473,7 +464,7 @@ public class BrowserActivity extends ActionBarActivity {
                     if (MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, webPageView.getUrl() + " PLT:"
                             + LoadTimeSystem + "ms");
 
-
+                    etgivenWebSite.setText(view.getUrl());
                 } else {
                     redirection = false;
                 }
@@ -507,39 +498,16 @@ public class BrowserActivity extends ActionBarActivity {
     @Override
     protected void onStop() {
         super.onStop();
-            if (MONITORING_DEBUG_FLAG)
-                Log.d(LOG_TAG, "Browser Activity on Stoped");
-        //displayQuitDialog();
-
-
+        if (MONITORING_DEBUG_FLAG)
+            Log.d(LOG_TAG, "Browser Activity on Stopped");
     }
 
 
-private void displayQuitDialog(){
-        DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                switch (which){
-                    case DialogInterface.BUTTON_POSITIVE:
-                        finish();
-                        break;
-
-                    case DialogInterface.BUTTON_NEGATIVE:
-                        //No button clicked
-                        break;
-                }
-            }
-        };
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(getApplicationContext());
-        builder.setMessage("Do you want to end borwsing session?").setPositiveButton("Yes", dialogClickListener)
-                .setNegativeButton("No", dialogClickListener).show();
-    }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "BrowserActivty terminated");
+        if (MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "BrowserActivty destroyed");
         Intent browserClosed = new Intent();
         browserClosed.setAction(ACTION_AWARE_CLOSE_BROWSER);
         sendBroadcast(browserClosed);

@@ -3,9 +3,6 @@
     package="com.aware" >
 
     <uses-sdk android:minSdkVersion="10" />
-
-    <uses-feature android:name="android.hardware.camera" />
-    <uses-feature android:name="android.hardware.camera.autofocus" />
     <!-- FOR PLUGINS/APPS COMMENT STARTS HERE -->
     <!--
 <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
@@ -40,7 +37,10 @@
         android:label="Write to AWARE&apos;s Context data"
         android:protectionLevel="normal" >
     </permission>
-
+    <!--
+ <uses-feature android:name="android.hardware.camera" />
+    <uses-feature android:name="android.hardware.camera.autofocus" />
+    -->
     <application
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"

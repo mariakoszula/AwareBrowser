@@ -26,9 +26,8 @@ public class ESMAnswerReceiver extends BroadcastReceiver {
     private static final boolean MONITORING_DEBUG_FLAG = BrowserActivity.MONITORING_DEBUG_FLAG;
     private static final String ACTION_AWARE_CLOSE_BROWSER = BrowserActivity.ACTION_AWARE_CLOSE_BROWSER;
     private static final String KEY_WEBSERVICE_IS_NOT_RUNNING = "KEY_WEBSERVICE_IS_NOT_RUNNING";
-    private static final String KEY_IS_BROWSER_SERVICE_RUNNING= BrowserActivity.KEY_IS_BROWSER_SERVICE_RUNNING;
     private static final String SHARED_PREF_FILE = BrowserActivity.SHARED_PREF_FILE;
-    private static final int webServiceSynchroTimeInMinutes = 600;
+    private static final int webServiceSynchroTimeInMinutes = 60;
     //private static final String DASHBOARD_STUDY_URL = "https://api.awareframework.com/index.php/webservice/index/407/ADKuMzjP3L3C";
     private static final String DASHBOARD_STUDY_URL = "https://api.awareframework.com/index.php/webservice/index/464/oYLfIx1ecrWR";
 
@@ -40,6 +39,7 @@ public class ESMAnswerReceiver extends BroadcastReceiver {
     private static final String KEY_REPEATED_ESM = "REPEATED_ESM";
     private SharedPreferences mySharedPref;
     private SharedPreferences.Editor editor;
+    public static final String KEY_ESM_EVALUTATION_RUNNING = BrowserClosedReceiver.KEY_ESM_EVALUTATION_RUNNING;
 
 
     @Override
@@ -49,6 +49,9 @@ public class ESMAnswerReceiver extends BroadcastReceiver {
 
         mySharedPref = context.getSharedPreferences(SHARED_PREF_FILE, Context.MODE_PRIVATE);
         editor = mySharedPref.edit();
+        SharedPreferences.Editor editor = mySharedPref.edit();
+        editor.putBoolean(KEY_ESM_EVALUTATION_RUNNING, true);
+        editor.commit();
         if(intent.getAction().equals(ESM.ACTION_AWARE_ESM_DISMISSED) || intent.getAction().equals(ESM.ACTION_AWARE_ESM_EXPIRED)) {
                 esmAnsweredCount = 0;
                 rerunESM(context);
@@ -60,9 +63,14 @@ public class ESMAnswerReceiver extends BroadcastReceiver {
                 Log.d(LOG_TAG_ESM, "All ESM Answered and Queue completed");
                 removeEmptyAnswers(context);
                 Toast.makeText(context, context.getResources().getString(R.string.esm_thanks), Toast.LENGTH_SHORT).show();
+                editor.putInt(KEY_REPEATED_ESM, 0);
+                editor.commit();
                 new SendDataToTheServerTask().execute(context);
         }else if (mySharedPref.getInt(KEY_REPEATED_ESM, 0) > ESM_REPEAT_TIME){
-
+            editor.putInt(KEY_REPEATED_ESM, 0);
+            editor.commit();
+            editor.putBoolean(KEY_ESM_EVALUTATION_RUNNING, false);
+            editor.commit();
         }
     }
 
@@ -88,11 +96,13 @@ public class ESMAnswerReceiver extends BroadcastReceiver {
 
         @Override
         protected void onPostExecute(final Context context) {
+            editor.putBoolean(KEY_ESM_EVALUTATION_RUNNING, false);
+            editor.commit();
             if (MONITORING_DEBUG_FLAG)
                 Log.d(LOG_TAG_ESM, "Stop Sensors - Queue completed");
 
             //Stop collecting data about connection
-            if(mySharedPref.getBoolean(KEY_IS_BROWSER_SERVICE_RUNNING, false)) context.stopService(new Intent(context, BrowserPlugin.class));
+            context.stopService(new Intent(context, BrowserPlugin.class));
 
 
 
@@ -103,18 +113,19 @@ public class ESMAnswerReceiver extends BroadcastReceiver {
         int repeatedESM = mySharedPref.getInt(KEY_REPEATED_ESM, 0);
 
         if (repeatedESM < ESM_REPEAT_TIME) {
+            Intent browserClosed = new Intent();
+            browserClosed.setAction(ACTION_AWARE_CLOSE_BROWSER);
+            context.sendBroadcast(browserClosed);
             repeatedESM++;
             editor.putInt(KEY_REPEATED_ESM, repeatedESM);
             editor.commit();
             Toast.makeText(context, context.getResources().getString(R.string.esm_rerun), Toast.LENGTH_SHORT).show();
             if (MONITORING_DEBUG_FLAG) Log.d(LOG_TAG_ESM, "Repeated ESMS " + String.valueOf(mySharedPref.getInt(KEY_REPEATED_ESM, 0)));
-            Intent browserClosed = new Intent();
-            browserClosed.setAction(ACTION_AWARE_CLOSE_BROWSER);
-            context.sendBroadcast(browserClosed);
-
         }else{
             if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG_ESM, "No ESM action");
-            if(mySharedPref.getBoolean(KEY_IS_BROWSER_SERVICE_RUNNING, false)) context.stopService(new Intent(context, BrowserPlugin.class));
+            context.stopService(new Intent(context, BrowserPlugin.class));
+            editor.putInt(KEY_REPEATED_ESM, 0);
+            editor.commit();
         }
     }
 
