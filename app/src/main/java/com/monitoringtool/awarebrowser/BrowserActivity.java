@@ -58,7 +58,7 @@ public class BrowserActivity extends ActionBarActivity {
     public static final boolean MONITORING_DEBUG_FLAG = false;
 
     public static final String SHARED_PREF_FILE = "mySharedPref";
-    private static final int DAYS_AFTER_STUDY_ENDS = 2;
+    private static final int DAYS_AFTER_STUDY_ENDS = 14;
     public static SharedPreferences mySharedPref;
     public static SharedPreferences.Editor editor;
 
@@ -203,9 +203,11 @@ public class BrowserActivity extends ActionBarActivity {
         startAlarmTime.set(Calendar.HOUR_OF_DAY, hour);
         startAlarmTime.set(Calendar.MINUTE, minutes);
         startAlarmTime.set(Calendar.SECOND, 0);
-        startAlarmTime.add(Calendar.DATE, 1);
+        if(startAlarmTime.before(Calendar.getInstance())){
+            startAlarmTime.add(Calendar.DATE, 1);
+        }
 
-        dailyNotificationIntent = PendingIntent.getBroadcast(getApplicationContext(), notificationServiceRC, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        dailyNotificationIntent = PendingIntent.getBroadcast(getApplicationContext(), notificationServiceRC, alarmIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
         alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, startAlarmTime.getTimeInMillis(), AlarmManager.INTERVAL_DAY, dailyNotificationIntent);
     }
@@ -430,43 +432,52 @@ public class BrowserActivity extends ActionBarActivity {
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
                 startTimeSystem = System.currentTimeMillis();
-                etgivenWebSite.setText(view.getUrl());
-                loadingFinished = false;
+                String webPageName = view.getUrl();
+                if (webPageName != null && !webPageName.contains("about:blank")) {
+                    etgivenWebSite.setText(webPageName);
+                    loadingFinished = false;
+                }
             }
 
             @Override
             public void onPageFinished(WebView view, String url) {
-                if (!redirection) {
-                    loadingFinished = true;
-                }
-
-                if (loadingFinished && !redirection) {
-                    endTimeSystem = System.currentTimeMillis();
-                    LoadTimeSystem = endTimeSystem - startTimeSystem;
+                if("about:blank".equals(url) && view.getTag()!=null){
+                    view.loadUrl(view.getTag().toString());
+                }else {
+                    view.setTag(url);
+                    if (!redirection) {
+                        loadingFinished = true;
+                    }
+                    if (loadingFinished && !redirection) {
+                        endTimeSystem = System.currentTimeMillis();
+                        LoadTimeSystem = endTimeSystem - startTimeSystem;
 
                         /*Send data to browser provider*/
-                    ContentValues plt_data = new ContentValues();
-                    plt_data.put(Browser_Provider.Browser_Data.DEVICE_ID, Aware.getSetting(getApplicationContext(), Aware_Preferences.DEVICE_ID));
-                    plt_data.put(Browser_Provider.Browser_Data.TIMESTAMP, System.currentTimeMillis());
-                    plt_data.put(Browser_Provider.Browser_Data.SESSION_ID, Aware.getSetting(getApplicationContext(), Aware_Preferences.SESSION_ID));
-                    plt_data.put(Browser_Provider.Browser_Data.WEB_PAGE, webPageView.getUrl());
-                    plt_data.put(Browser_Provider.Browser_Data.PAGE_LOAD_TIME, LoadTimeSystem);
-                    try {
-                        getBaseContext().getContentResolver().insert(Browser_Provider.Browser_Data.CONTENT_URI, plt_data);
+                        ContentValues plt_data = new ContentValues();
+                        plt_data.put(Browser_Provider.Browser_Data.DEVICE_ID, Aware.getSetting(getApplicationContext(), Aware_Preferences.DEVICE_ID));
+                        plt_data.put(Browser_Provider.Browser_Data.TIMESTAMP, System.currentTimeMillis());
+                        plt_data.put(Browser_Provider.Browser_Data.SESSION_ID, Aware.getSetting(getApplicationContext(), Aware_Preferences.SESSION_ID));
+                        plt_data.put(Browser_Provider.Browser_Data.WEB_PAGE, webPageView.getUrl());
+                        plt_data.put(Browser_Provider.Browser_Data.PAGE_LOAD_TIME, LoadTimeSystem);
+                        try {
+                            getBaseContext().getContentResolver().insert(Browser_Provider.Browser_Data.CONTENT_URI, plt_data);
 
-                    } catch (SQLiteException e) {
-                        if (Aware.DEBUG) Log.d(LOG_TAG, e.getMessage());
+                        } catch (SQLiteException e) {
+                            if (Aware.DEBUG) Log.d(LOG_TAG, e.getMessage());
+                        }
+
+                        sendBroadcast(new Intent(Aware.ACTION_AWARE_CURRENT_CONTEXT));
+
+
+                        if (MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, webPageView.getUrl() + " PLT:"
+                                + LoadTimeSystem + "ms");
+
+                        String webPageName = view.getUrl();
+                        if( webPageName != null && !webPageName.contains("about:blank") )
+                            etgivenWebSite.setText(webPageName);
+                    } else {
+                        redirection = false;
                     }
-
-                    sendBroadcast(new Intent(Aware.ACTION_AWARE_CURRENT_CONTEXT));
-
-
-                    if (MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, webPageView.getUrl() + " PLT:"
-                            + LoadTimeSystem + "ms");
-
-                    etgivenWebSite.setText(view.getUrl());
-                } else {
-                    redirection = false;
                 }
 
             }

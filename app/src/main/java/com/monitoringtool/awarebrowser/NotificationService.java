@@ -13,7 +13,7 @@ public class NotificationService extends Service {
     private NotificationManager notificationManager;
     private PendingIntent pendingIntent;
     private static final int browserRequestCode = 9090;
-    private static final String EXTRA_KEY_NOTIFICATION="notificationID";
+    private static final String EXTRA_KEY_NOTIFICATION="notificationID_reminder";
     public NotificationService() {
     }
 
