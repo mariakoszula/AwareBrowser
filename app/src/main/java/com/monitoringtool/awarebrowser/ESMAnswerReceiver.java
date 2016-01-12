@@ -27,7 +27,7 @@ public class ESMAnswerReceiver extends BroadcastReceiver {
     private static final String ACTION_AWARE_CLOSE_BROWSER = BrowserActivity.ACTION_AWARE_CLOSE_BROWSER;
     private static final String KEY_WEBSERVICE_IS_NOT_RUNNING = "KEY_WEBSERVICE_IS_NOT_RUNNING";
     private static final String SHARED_PREF_FILE = BrowserActivity.SHARED_PREF_FILE;
-    private static final int webServiceSynchroTimeInMinutes = 720;
+    private static final int webServiceSynchroTimeInMinutes = 5;
     private static final String DASHBOARD_STUDY_URL = "https://api.awareframework.com/index.php/webservice/index/407/ADKuMzjP3L3C";
 //    private static final String DASHBOARD_STUDY_URL = "https://api.awareframework.com/index.php/webservice/index/464/oYLfIx1ecrWR";
 

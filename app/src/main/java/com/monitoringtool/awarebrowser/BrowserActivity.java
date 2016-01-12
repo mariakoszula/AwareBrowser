@@ -55,10 +55,11 @@ public class BrowserActivity extends ActionBarActivity {
     public static final String ACTION_AWARE_READY = "ACTION_AWARE_READY";
 
     public static final String RESEARCH_WEBSITE = "http://www.mariak.webd.pl/study/";
-    public static final boolean MONITORING_DEBUG_FLAG = false;
+    public static final boolean MONITORING_DEBUG_FLAG = true;
 
     public static final String SHARED_PREF_FILE = "mySharedPref";
     private static final int DAYS_AFTER_STUDY_ENDS = 14;
+    public static final String KEY_END_ALARM_SET = "KEY_END_ALARM_SET";
     public static SharedPreferences mySharedPref;
     public static SharedPreferences.Editor editor;
 
@@ -96,7 +97,6 @@ public class BrowserActivity extends ActionBarActivity {
     private final int MAX_HOUR = 21;
     private final int MIN_MINUTES  = 0;
     private final int MAX_MINUTES = 59;
-    private AlarmManager alarmManager = null;
 
     @TargetApi(Build.VERSION_CODES.KITKAT)
     @SuppressLint("SetJavaScriptEnabled")
@@ -117,7 +117,6 @@ public class BrowserActivity extends ActionBarActivity {
                 }
             }
 
-            if (MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "on create called");
             setContentView(R.layout.activity_browser);
 
             prepareLayout();
@@ -145,9 +144,12 @@ public class BrowserActivity extends ActionBarActivity {
             filterSetAware.addAction(ACTION_AWARE_READY);
             registerReceiver(awareReadyListener, filterSetAware);
 
-            alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
             scheduleAlarmNotification();
-            scheduleEndStudyNotification();
+            if(!mySharedPref.getBoolean(KEY_END_ALARM_SET, false)) {
+                scheduleEndStudyNotification();
+                editor.putBoolean(KEY_END_ALARM_SET, true);
+                editor.commit();
+            }
             searchForWebPage(defaultSite);
             dismissNotification();
         }else{
@@ -192,6 +194,7 @@ public class BrowserActivity extends ActionBarActivity {
 
     private void scheduleAlarmNotification() {
         Intent alarmIntent = new Intent(this, AlarmReceiver.class);
+        AlarmManager  alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
         Calendar startAlarmTime = Calendar.getInstance();
 
         Random random = new Random();
@@ -207,19 +210,20 @@ public class BrowserActivity extends ActionBarActivity {
             startAlarmTime.add(Calendar.DATE, 1);
         }
 
-        dailyNotificationIntent = PendingIntent.getBroadcast(getApplicationContext(), notificationServiceRC, alarmIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+        dailyNotificationIntent = PendingIntent.getBroadcast(getApplicationContext(), notificationServiceRC, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, startAlarmTime.getTimeInMillis(), AlarmManager.INTERVAL_DAY, dailyNotificationIntent);
+        alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, startAlarmTime.getTimeInMillis(), AlarmManager.INTERVAL_DAY, dailyNotificationIntent);
     }
 
     private void scheduleEndStudyNotification() {
         Intent endAlarmIntent = new Intent(this, EndOfStudyAlarmReceiver.class);
+        AlarmManager  endAlarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
         Calendar startTime = Calendar.getInstance();
         long time_in_millis = startTime.getTimeInMillis() + (DAYS_AFTER_STUDY_ENDS * 24 * 60 * 60 * 1000);
 
-        endNotificationStudy = PendingIntent.getBroadcast(getApplicationContext(), endOfStudyNotificationServiceRC, endAlarmIntent, 0);
+        endNotificationStudy = PendingIntent.getBroadcast(getApplicationContext(), endOfStudyNotificationServiceRC, endAlarmIntent, PendingIntent.FLAG_ONE_SHOT);
 
-        alarmManager.set(AlarmManager.RTC_WAKEUP, time_in_millis, endNotificationStudy);
+        endAlarmManager.set(AlarmManager.RTC_WAKEUP, time_in_millis, endNotificationStudy);
         if(MONITORING_DEBUG_FLAG) Log.d(LOG_TAG, "Study ends alarm scheduled for miliseconds: " + time_in_millis);
     }
 
