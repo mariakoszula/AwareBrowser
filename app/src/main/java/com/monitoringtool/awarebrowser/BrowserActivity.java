@@ -159,7 +159,7 @@ public class BrowserActivity extends ActionBarActivity {
                 @Override
                 public void run() {
                     try{
-                        Thread.sleep(3500);
+                        Thread.sleep(2000);
                         BrowserActivity.this.finish();
                     }catch(Exception e){
                         e.printStackTrace();
